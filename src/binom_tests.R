@@ -1,0 +1,109 @@
+library(magrittr)
+library(foreach)
+library(doParallel)
+
+cl <- makeForkCluster(4)
+registerDoParallel(cl)
+#source functions
+source("src/funcs.R")
+
+new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
+              "child_content_author", "referrer", "ip_addr", "id", "long", "lat", 
+              "browser", "os")
+
+
+formstack.master <- readr::read_csv('/Users/Connor/Documents/GitHub/GoogleAnalyticsSegmentation/data/formstack/formstack_master.csv') %>%
+  dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
+  purrr::map_if(is.character, stringr::str_trim) %>%
+  data.frame() %>%
+  dplyr::filter(ip_addr != "^(146\\.243\\.\\d{1,3}|170\\.63\\.\\d{1,3}|170\\.154\\.\\d{1,3}|65\\.217\\.255\\.\\d{1,3}|4.36.198.102|65.118.148.102|204.166.193.130|204.130.104.10)",
+                info_found %in% c("Yes", "No"),
+                referrer != "http://<!--") %>%
+  dplyr::mutate(info_found = droplevels(info_found),
+                referrer = droplevels(referrer),
+         time_of_day = createTimeBucket(lubridate::hour(submit_time)))
+
+#### RESPONSE SUMMARIES ####
+# summaries of responses including proportion affirmative, and standard error (binomial)
+
+# group by site
+response.summary.site <- formstack.master %>%
+  dplyr::filter(!is.na(site)) %>%
+  dplyr::group_by(site) %>%
+  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
+                   n_negative = sum(info_found == "No", na.rm = T),
+                   n_total_responses = n()) %>%
+  dplyr::filter(n_total_responses > 50) %>%
+  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
+                prop_affirmative_se = sqrt(prop_affirmative * (1 - prop_affirmative) / n_total_responses)) 
+
+# group by page
+response.summary.page <- formstack.master %>%
+  dplyr::filter(!is.na(referrer)) %>%
+  dplyr::group_by(referrer) %>%
+  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
+                   n_negative = sum(info_found == "No", na.rm = T),
+                   n_total_responses = n()) %>%
+  dplyr::filter(n_total_responses > 50) %>%
+  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
+                prop_affirmative_se = sqrt(prop_affirmative * (1 - prop_affirmative) / n_total_responses)) 
+
+
+#### BINOMIAL EXACT TESTS ####
+response.binom.site <- foreach(interest.site = iter(response.summary.site$site), 
+                           .packages = c("magrittr", "dplyr"),
+                           .combine = 'rbind'
+                           ) %dopar% {
+  interest.pop = response.summary.site[response.summary.site$site == interest.site, ] # get metrics for pop of interest
+  control.pop = formstack.master[formstack.master$site != interest.site, ] %>%
+    dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
+                                         n_negative = sum(info_found == "No", na.rm = T),
+                                         n_total_responses = n()) %>%
+    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
+    binom.test(x = interest.pop$n_affirmative, n = interest.pop$n_total_responses, 
+               p = control.pop$prop_affirmative, alternative = "two.sided", conf.level = .975) %>% 
+      broom::tidy() %>%
+      dplyr::mutate(site = interest.site, control.pop.mean = control.pop$prop_affirmative)
+}
+
+# change this so that comparison is done between pages in the same site NOT ALL PAGES 
+response.binom.page <- foreach(interest.page = iter(response.summary.page$referrer), 
+                               .packages = c("magrittr", "dplyr"),
+                               .combine = 'rbind'
+                               ) %dopar% {
+  interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ] # get metrics for pop of interest
+  control.pop = formstack.master[formstack.master$referrer != interest.page, ] %>%
+    dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
+                     n_negative = sum(info_found == "No", na.rm = T),
+                     n_total_responses = n()) %>%
+    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
+    binom.test(x = interest.pop$n_affirmative, n = interest.pop$n_total_responses, 
+               p = control.pop$prop_affirmative, alternative = "two.sided", conf.level = .975) %>% 
+      broom::tidy() %>%
+      dplyr::mutate(site = interest.page, control.pop.mean = control.pop$prop_affirmative)
+}
+
+# stop the cluster 
+stopCluster(cl)
+gc()
+
+# pull out the significant results lel (p < .05) 
+response.binom.site.signif <- response.binom.site %>%
+  dplyr::filter(p.value < .05) %>% 
+  dplyr::select(site, p.value, estimate, conf.low, conf.high, control.pop.mean)
+
+site.signif.greater <- response.binom.site.signif %>%
+  dplyr::filter(ifelse(estimate > control.pop.mean, T, F))
+
+site.signif.less <- response.binom.site.signif %>%
+  dplyr::filter(ifelse(estimate < control.pop.mean, T, F))
+
+response.binom.page.signif <- response.binom.page %>%
+  dplyr::filter(p.value < .05) %>% 
+  dplyr::select(site, p.value, estimate, conf.low, conf.high, control.pop.mean)
+
+page.signif.greater <- response.binom.page.signif %>%
+  dplyr::filter(ifelse(estimate > control.pop.mean, T, F))
+
+page.signif.less <- response.binom.page.signif %>%
+  dplyr::filter(ifelse(estimate < control.pop.mean, T, F))

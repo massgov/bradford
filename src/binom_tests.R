@@ -2,8 +2,6 @@ library(magrittr)
 library(foreach)
 library(doParallel)
 
-cl <- makeForkCluster(4)
-registerDoParallel(cl)
 #source functions
 source("src/funcs.R")
 
@@ -62,6 +60,9 @@ response.summary.page <- formstack.master %>%
 
 
 #### BINOMIAL EXACT TESTS ####
+cl <- makeForkCluster(4)
+registerDoParallel(cl)
+
 # orgs
 response.binom.site <- foreach(interest.site = iter(response.summary.site$site), 
                            .packages = c("magrittr", "dplyr"),
@@ -73,8 +74,11 @@ response.binom.site <- foreach(interest.site = iter(response.summary.site$site),
                                          n_negative = sum(info_found == "No", na.rm = T),
                                          n_total_responses = n()) %>%
     dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
-    binom.test(x = interest.pop$n_affirmative, n = interest.pop$n_total_responses, 
-               p = control.pop$prop_affirmative, alternative = "two.sided", conf.level = CONF.LEVEL) %>% 
+    binom.test(x = interest.pop$n_affirmative, 
+               n = interest.pop$n_total_responses, 
+               p = control.pop$prop_affirmative, 
+               alternative = "two.sided", 
+               conf.level = CONF.LEVEL) %>% 
       broom::tidy() %>%
       dplyr::mutate(site = interest.site, control.pop.mean = control.pop$prop_affirmative)
 }
@@ -96,8 +100,11 @@ response.binom.page <- foreach(interest.page = iter(response.summary.page$referr
                      n_negative = sum(info_found == "No", na.rm = T),
                      n_total_responses = n()) %>%
     dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
-    binom.test(x = interest.pop$n_affirmative, n = interest.pop$n_total_responses, 
-               p = control.pop$prop_affirmative, alternative = "two.sided", conf.level = CONF.LEVEL) %>% 
+    binom.test(x = interest.pop$n_affirmative, 
+               n = interest.pop$n_total_responses, 
+               p = control.pop$prop_affirmative, 
+               alternative = "two.sided", 
+               conf.level = CONF.LEVEL) %>% 
       broom::tidy() %>%
       dplyr::mutate(site = interest.page, control.pop.mean = control.pop$prop_affirmative)
 }

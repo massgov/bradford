@@ -14,7 +14,7 @@ createTimeBucket <- function(x) {
     warning("the supplied vector contains values falling outside of 0-23, NAs will be returned")
   }
   factor(
-    ifelse(x < 6 & x > 0, "Early AM", 
+    ifelse(x < 6 & x >= 0, "Early AM", 
            ifelse(x > 5 & x < 12, "AM",
                   ifelse(x > 11 & x < 18, "Afternoon", 
                          ifelse(x > 17  & x < 9, "Evening", 

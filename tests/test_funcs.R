@@ -18,3 +18,10 @@ test_that("createTimeBucket returns NAs for values falling beyond 0-23", {
   expect_identical(createTimeBucket(x = c(1,2,-1,50)), factor(c("Early AM", "Early AM", NA, NA)))
 })
 
+test_that("createTimeBucket returns the expected values given an input",{
+  expect_equivalent(createTimeBucket(x = c(0,1,2,3,4)), factor(c(rep("Early AM", 5))))
+  expect_equivalent(createTimeBucket(x = c(5,6,7,8,9,10)), factor(c(rep("AM", 6))))
+  expect_equivalent(createTimeBucket(x = c(11,12,13,14,15,16)), factor(c(rep("Afternoon", 7))))
+  expect_equivalent(createTimeBucket(x = c(17,18,19,20)), factor(c(rep("Evening", 4))))
+  expect_equivalent(createTimeBucket(x = c(21, 22, 23)), factor(c(rep("Late Night", 3))))
+})

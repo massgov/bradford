@@ -8,7 +8,7 @@ new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_auth
               "browser", "os")
 
 #### IMPORT DATA ####
-formstack.master <- readr::read_csv('/Users/Connor/Documents/GitHub/GoogleAnalyticsSegmentation/data/formstack/formstack_master.csv') %>%
+formstack.master <- readr::read_csv('data/formstack/formstack_master.csv') %>%
   dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
   purrr::map_if(is.character, stringr::str_trim) %>%
   data.frame() %>%

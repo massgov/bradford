@@ -6,15 +6,16 @@ library(doParallel)
 source("src/funcs.R")
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
-              "child_content_author", "referrer", "ip_addr", "id", "long", "lat", 
+              "child_content_author", "referrer", "ip_addr", "id", "long", "lat",
               "browser", "os")
 
 MIN.RESPONSES <- 50
 CONF.LEVEL <- .975  # two-tailed
 P.CUTOFF <- .05
+POWER.CUTOFF <- .8
 
 #### IMPORT DATA ####
-formstack.master <- readr::read_csv('/Users/Connor/Documents/GitHub/GoogleAnalyticsSegmentation/data/formstack/formstack_master.csv') %>%
+formstack.master <- readr::read_csv('data/formstack/formstack_master.csv') %>%
   dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
   purrr::map_if(is.character, stringr::str_trim) %>%
   data.frame() %>%
@@ -58,35 +59,46 @@ response.summary.page <- formstack.master %>%
   purrr::map_if(is.factor, as.character) %>%  # This is a shitty hack around for "Error in { : task 1 failed - "level sets of factors are different""
   data.frame(stringsAsFactors = F)
 
-
 #### BINOMIAL EXACT TESTS ####
 cl <- makeForkCluster(4)
 registerDoParallel(cl)
 
 # orgs
-response.binom.site <- foreach(interest.site = iter(response.summary.site$site), 
+response.binom.site <- foreach(interest.site = iter(response.summary.site$site),
                            .packages = c("magrittr", "dplyr"),
                            .combine = 'rbind'
                            ) %dopar% {
   interest.pop = response.summary.site[response.summary.site$site == interest.site, ] # get metrics for pop of interest
-  control.pop = formstack.master[formstack.master$site != interest.site, ] %>%
+  control.pop = formstack.master[formstack.master$site != interest.site, ] %>%  # create control population
     dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
                                          n_negative = sum(info_found == "No", na.rm = T),
                                          n_total_responses = n()) %>%
-    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
-    binom.test(x = interest.pop$n_affirmative, 
-               n = interest.pop$n_total_responses, 
-               p = control.pop$prop_affirmative, 
-               alternative = "two.sided", 
-               conf.level = CONF.LEVEL) %>% 
+    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
+                  effect_size = abs(prop_affirmative - interest.pop$prop_affirmative))
+  power.pop = pwr::pwr.2p2n.test(h = control.pop$effect_size,
+                       sig.level = P.CUTOFF,
+                       n1 = NULL,
+                       n2 = control.pop$n_total_responses,
+                       power = POWER.CUTOFF,
+                       alternative = "two.sided")
+  if (interest.pop$n_total_responses < power.pop$n1) {
+    results = NULL
+  } else {
+    results = binom.test(x = interest.pop$n_affirmative,
+               n = interest.pop$n_total_responses,
+               p = control.pop$prop_affirmative,
+               alternative = "two.sided",
+               conf.level = CONF.LEVEL) %>%
       broom::tidy() %>%
       dplyr::mutate(site = interest.site, control.pop.mean = control.pop$prop_affirmative)
+  }
+  return(results)
 }
 
-# pages 
-response.binom.page <- foreach(interest.page = iter(response.summary.page$referrer), 
+# pages
+response.binom.page <- foreach(interest.page = iter(response.summary.page$referrer),
                                .packages = c("magrittr", "dplyr"),
-                               .combine = 'rbind', 
+                               .combine = 'rbind',
                                .errorhandling = "remove"
                                ) %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]  # get metrics for pop of interest
@@ -99,23 +111,35 @@ response.binom.page <- foreach(interest.page = iter(response.summary.page$referr
     dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
                      n_negative = sum(info_found == "No", na.rm = T),
                      n_total_responses = n()) %>%
-    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses)
-    binom.test(x = interest.pop$n_affirmative, 
-               n = interest.pop$n_total_responses, 
-               p = control.pop$prop_affirmative, 
-               alternative = "two.sided", 
-               conf.level = CONF.LEVEL) %>% 
+    dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
+                  effect_size = abs(prop_affirmative - interest.pop$prop_affirmative))
+  power.pop = pwr::pwr.2p2n.test(h = control.pop$effect_size,
+                                 sig.level = P.CUTOFF,
+                                 n1 = NULL,
+                                 n2 = control.pop$n_total_responses,
+                                 power = POWER.CUTOFF,
+                                 alternative = "two.sided")
+  if (interest.pop$n_total_responses < power.pop$n1) {
+    results = NULL
+  } else {
+    results = binom.test(x = interest.pop$n_affirmative,
+               n = interest.pop$n_total_responses,
+               p = control.pop$prop_affirmative,
+               alternative = "two.sided",
+               conf.level = CONF.LEVEL) %>%
       broom::tidy() %>%
       dplyr::mutate(site = interest.page, control.pop.mean = control.pop$prop_affirmative)
+  }
+    return(results)
 }
 
-# stop the cluster 
+# stop the cluster
 stopCluster(cl)
 gc()
 
-# pull out the significant results lel (p < .05) 
+# pull out the significant results lel (p < .05)
 response.binom.site.signif <- response.binom.site %>%
-  dplyr::filter(p.value < P.CUTOFF) %>% 
+  dplyr::filter(p.value < P.CUTOFF) %>%
   dplyr::select(site, p.value, estimate, conf.low, conf.high, control.pop.mean)
 
 site.signif.greater <- response.binom.site.signif %>%
@@ -125,7 +149,7 @@ site.signif.less <- response.binom.site.signif %>%
   dplyr::filter(ifelse(estimate < control.pop.mean, T, F))
 
 response.binom.page.signif <- response.binom.page %>%
-  dplyr::filter(p.value < P.CUTOFF) %>% 
+  dplyr::filter(p.value < P.CUTOFF) %>%
   dplyr::select(site, p.value, estimate, conf.low, conf.high, control.pop.mean)
 
 page.signif.greater <- response.binom.page.signif %>%
@@ -134,4 +158,8 @@ page.signif.greater <- response.binom.page.signif %>%
 page.signif.less <- response.binom.page.signif %>%
   dplyr::filter(ifelse(estimate < control.pop.mean, T, F))
 
+#### SAVE THE DATA ####
+rm(formstack.master, response.summary.page, response.summary.site, cl, CONF.LEVEL, createTimeBucket,
+   MIN.RESPONSES, POWER.CUTOFF, P.CUTOFF)
 
+lapply(ls(), function(x) saveRDS(get(x), paste0("data/", x, ".RDS")))

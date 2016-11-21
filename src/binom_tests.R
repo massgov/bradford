@@ -162,4 +162,4 @@ page.signif.less <- response.binom.page.signif %>%
 rm(formstack.master, response.summary.page, response.summary.site, cl, CONF.LEVEL, createTimeBucket,
    MIN.RESPONSES, POWER.CUTOFF, P.CUTOFF)
 
-lapply(ls(), function(x) saveRDS(get(x), paste0("data/", x, ".RDS")))
+purrr::map(ls(), function(x) saveRDS(get(x), file = paste0("data/", x, ".RDS")))

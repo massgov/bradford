@@ -124,7 +124,7 @@ site.breakouts.monthly <- site.summary.monthly %>%
   dplyr::mutate(site = droplevels(site),
                 timestamp = as.POSIXct(timestamp)) %>%
   split(.$site) %>%
-  lapply(function(x) x[c("count", "timestamp")]) %>%
+  purrr::map(function(x) x[c("count", "timestamp")]) %>%
   purrr::map(function(x) BreakoutDetection::breakout(Z = x, min.size = 3, method = "multi", plot = T))
 
 site.breakouts.weekly <- site.summary.weekly %>% 
@@ -134,8 +134,10 @@ site.breakouts.weekly <- site.summary.weekly %>%
   dplyr::mutate(site = droplevels(site),
                 timestamp = as.POSIXct(timestamp)) %>%
   split(.$site) %>%
-  lapply(function(x) x[c("count", "timestamp")]) %>%
+  purrr::map(function(x) x[c("count", "timestamp")]) %>%
   purrr::map(function(x) BreakoutDetection::breakout(Z = x, min.size = 4, method = "amoc", plot = T))
   
- 
-  
+rm(formstack.master)
+
+#### SAVE DATA ####
+purrr::map(ls(), function(x) saveRDS(get(x), file = paste0("data/", x, ".RDS")))

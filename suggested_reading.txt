@@ -1,0 +1,15 @@
+The following will represent the necessary literature for a thorough understanding of the methods employed in the Bradford project:
+
+http://www.obscureanalytics.com/2012/07/04/to-the-basics-bayesian-inference-on-a-binomial-proportion/
+http://ai.stanford.edu/people/ronnyk/2009controlledExperimentsOnTheWebSurvey.pdf
+https://www.r-bloggers.com/an-introduction-to-change-points-packages-ecp-and-breakoutdetection/
+https://blog.twitter.com/2016/power-minimal-detectable-effect-and-bucket-size-estimation-in-ab-tests
+https://blog.twitter.com/2015/detecting-and-avoiding-bucket-imbalance-in-ab-tests
+https://blog.twitter.com/2016/implications-of-use-of-multiple-controls-in-an-ab-test
+https://blog.twitter.com/2015/detecting-and-avoiding-bucket-imbalance-in-ab-tests
+http://www.nrcse.washington.edu/research/struts/chapter2.pdf
+
+Books that you can borrow from Connor McKay if you have more questions/are interested in these methods more
+
+Applied Bayesian Statistics
+The Elements of Statistical Learning

@@ -61,8 +61,7 @@ response.summary.page <- formstack.master %>%
 cl <- makeForkCluster(4)
 registerDoParallel(cl)
 
-response.bayes.site <- foreach(interest.site = iter(response.summary.site$site),
-                               .packages = c("magrittr", "dplyr")) %dopar% {
+response.bayes.site <- foreach(interest.site = iter(response.summary.site$site)) %dopar% {
   interest.pop = response.summary.site[response.summary.site$site == interest.site, ]
   posterior = beta.posterior(interest.pop,  prior.mean = PRIOR.MEAN, 
                              prior.n = PRIOR.N.SITE, 
@@ -72,13 +71,15 @@ response.bayes.site <- foreach(interest.site = iter(response.summary.site$site),
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
+  cred.int = emdbook::ncredint(pvec = posterior$x, npost = posterior$y, 
+                    level = .95, tol = 0.01, verbose = FALSE)
   list("site" = interest.site,
        "posterior" = posterior,
-       "posterior_mean" = posterior.mean)
+       "posterior_mean" = posterior.mean,
+       "credible_interval" = cred.int)
 }
 
-response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer),
-                               .packages = c("magrittr", "dplyr")) %dopar% {
+response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer)) %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]
   posterior = beta.posterior(interest.pop,  prior.mean = PRIOR.MEAN, 
                              prior.n = PRIOR.N.SITE, 
@@ -88,9 +89,12 @@ response.bayes.page <- foreach(interest.page = iter(response.summary.page$referr
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
+  cred.int = emdbook::ncredint(pvec = posterior$x, npost = posterior$y, 
+                               level = .95, tol = 0.01, verbose = FALSE)
   list("page" = interest.page,
        "posterior" = posterior,
-       "posterior_mean" = posterior.mean)
+       "posterior_mean" = posterior.mean,
+       "credible_interval" = cred.int)
 }
 
 # stop the cluster

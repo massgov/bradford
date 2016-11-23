@@ -106,7 +106,7 @@ rm(formstack.master, response.summary.page, response.summary.site, cl, PRIOR.MEA
    PRIOR.N.SITE, beta.posterior, beta.posterior.mean, createTimeBucket)
 
 saveRDS(response.bayes.site, "data/response.bayes.site.RDS")
-saveRDS(response.bayes.page, "data/response.bayes.page")
+saveRDS(response.bayes.page, "data/response.bayes.page.RDS")
 
 rm(list = ls())
 gc()

@@ -1,6 +1,8 @@
 ---
 title: "Formstack Page Analysis - Proposed Methodology"
-output: html_notebook
+output:
+  html_notebook: default
+  html_document: default
 date: "November 23, 2016"
 ---
 
@@ -48,13 +50,13 @@ new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_auth
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat", 
               "browser", "os")
 
-formstack.master <- readr::read_csv('/Users/Connor/Documents/GitHub/GoogleAnalyticsSegmentation/code/dashboard/src/data/formstack/formstack_master.csv') %>%
+formstack.master <- readr::read_csv('/Users/Connor/Documents/GitHub/bradford/data/formstack/formstack_master.csv') %>%
   dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
   purrr::map_if(is.character, stringr::str_trim) %>%
   data.frame() %>%
   dplyr::filter(ip_addr != "^(146\\.243\\.\\d{1,3}|170\\.63\\.\\d{1,3}|170\\.154\\.\\d{1,3}|65\\.217\\.255\\.\\d{1,3}|4.36.198.102|65.118.148.102|204.166.193.130|204.130.104.10)",
                 info_found %in% c("Yes", "No")) %>%
-  mutate(info_found = droplevels(info_found))
+  dplyr::mutate(info_found = droplevels(info_found))
 ```
 
 ```{r}
@@ -83,6 +85,7 @@ meaning **our derived posterior distribution is proportional to the product of o
 
 In order to begin any bayesian inference for binomially distributed data we must specify a prior. This should be done in one of three ways 1) in conjunction with a subject matter expert who can provide an expected $\theta$ and some feedback on the range of values which are likely 2) using what is called an "uninformative prior" which states that all outcomes are equally likely (in the case of a beta distribution $B(\alpha, \beta)$ this takes the values of $\alpha = 1$ $\beta = 1$) or 3) fit an empirical likelihood modelled on data available. 
 
+
 ```{r}
 betaplot <- function(a,b){
 theta = seq(0,1,0.005)
@@ -98,21 +101,20 @@ return(p)}
 betaplot(1,1)
 ```
 
+For this analysis framework we will leverage the beta distribution, both because it is conjugate with respect to the binomial distribution and becuase it models our prior beliefs about $\theta$ in a straightforward manner and without any mathematical gymnastics (we simply need to specify $\alpha$ and $\beta$ a priori). The beta distribution is defined as such:
+$$
+p(\theta) = \theta^{\alpha-1}(1-\theta)^{\beta-1}
+$$
+
+This should look familiar as it is quite close to the definition of the binomial distribution above! Again, conjugacy simply means that the product of two functionally identical distributions results in a posterior of the same functional form so: 
+
+$$ 
+\theta^{\alpha-1}(1-\theta)^{\beta-1} * \binom{N}{Y}\theta^Y(1-\theta)^{(N-Y)} = \theta^{(Y+\alpha-1)}(1-\theta)^{(N-Y+\beta-1)}
+$$
+Looking at the result of the above it is clear that we get a beta distribution back as a result of this product. 
+
 This is an extremely flexible framework that works well with small data where initial summarization may paint a misleading picture. For example, estimating a baseball players batting average is straightforward for someone who has played for many years but for a new player a straight average may paint a very misleading picture. In this example it is more sound to integrate our knowledge of the expected value and distribution of a metric instead of forging ahead as normal and reporting something like a 1.0 or 0.0 as a players average. 
 
-
-#### Further Examples 
-Given the probability mass function above it is therefore evident that:
-
-$$
-p(y_i) = \theta^{y_i}(1-\theta)^{(1-{y_i})}
-$$
-and 
-
-$$
-p(Y)=\prod^N_{i=1}\theta^{y_i}(1-\theta)^{(1-y_{i})}
-$$
-because the probability of a number of independent events occuring together is the product of all of their individual probabilities!
 
 
 

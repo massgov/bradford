@@ -50,7 +50,7 @@ response.summary.page <- formstack.master %>%
   dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
                    n_negative = sum(info_found == "No", na.rm = T),
                    n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 1)
+  dplyr::filter(n_total_responses > 1) %>%
   dplyr::mutate(referrer = droplevels(referrer)) %>%
   purrr::map_if(is.factor, as.character) %>%  # This is a shitty hack around for "Error in { : task 1 failed - "level sets of factors are different""
   data.frame(stringsAsFactors = F)

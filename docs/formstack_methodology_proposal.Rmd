@@ -45,6 +45,8 @@ The following is the "head" of the formstack data set, which was created by merg
 ```{r}
 library(magrittr)
 library(ggplot2)
+library(foreach)
+library(doParallel)
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat", 
@@ -111,21 +113,110 @@ This should look familiar as it is quite close to the definition of the binomial
 $$ 
 \theta^{\alpha-1}(1-\theta)^{\beta-1} * \binom{N}{Y}\theta^Y(1-\theta)^{(N-Y)} = \theta^{(Y+\alpha-1)}(1-\theta)^{(N-Y+\beta-1)}
 $$
-Looking at the result of the above it is clear that we get a beta distribution back as a result of this product. 
+Looking at the result of the above it is clear that we get a beta distribution back as a result of this product. With this posterior we can report the mean, standard deviations, and calculate [bayesian credible intervals](https://en.wikipedia.org/wiki/Credible_interval).
 
 This is an extremely flexible framework that works well with small data where initial summarization may paint a misleading picture. For example, estimating a baseball players batting average is straightforward for someone who has played for many years but for a new player a straight average may paint a very misleading picture. In this example it is more sound to integrate our knowledge of the expected value and distribution of a metric instead of forging ahead as normal and reporting something like a 1.0 or 0.0 as a players average. 
 
+### How we Will Apply
 
+This section will walk through our treatment of Formstack response data within a bayesian framework. 
+First and foremost we must specify the parameters of our prior distribution
 
+```{r}
+PRIOR.MEAN <- .8
+PRIOR.N.SITE <- 1000
+PRIOR.N.PAGE <- 10
+```
+Once we have `formstack.master` in the global environment, per the code in the Creating Base Data section of this document, we can begin creating summarization data frames which will be used to calculate our posteriors for each entry in this summary object. Currently, we are grouping by site (this will be replaced by funnels) and individual pages.
 
+```{r}
+response.summary.site <- formstack.master %>%
+  dplyr::filter(!is.na(site)) %>%
+  dplyr::group_by(site) %>%
+  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
+                   n_negative = sum(info_found == "No", na.rm = T),
+                   n_total_responses = n()) %>%
+  dplyr::mutate(site = droplevels(site)) %>%
+  purrr::map_if(is.factor, as.character) %>% 
+  data.frame(stringsAsFactors = F)
+```
 
+Taking a look at the head of this summary file
 
+```{r}
+head(response.summary.site)
+```
 
+There are two functions we have defined ourselves which we will use to compute the posterior and it's mean.
 
+```{r}
+betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
+  # calculates an approximate beta posterior given the mean and n of a beta prior as well as 
+  # the n and n sucesses from a binomial 
+  # Args: 
+  #   df = a data frame which contains vectors of sample  sizes and number of successful trials
+  #   prior.mean = mean of the prior distribution 
+  #   prior.n = support for the prior
+  #   sample.n = n observations in the treatment population
+  #   affirm.n = n successes in treatment population
+  # Returns: a data frame which approximates the posterior distribution 
+  a = df[[affirm.n]] + (prior.n * prior.mean) - 1
+  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+  domain = seq(0, 1, 0.005)
+  val = dbeta(domain, a, b)
+  data.frame("domain" = domain, "prob_dens" = val)
+}
+```
 
+```{r}
+betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
+  # calculates the mean of the beta posterior given the mean and n of a beta prior as well as 
+  # the n and n sucesses from a binomial 
+  # Args:
+  #   df = a data frame which contains vectors of sample  sizes and number of successful trials
+  #   prior.mean = mean of the prior distribution 
+  #   prior.n = support for the prior
+  #   sample.n = n observations in the treatment population
+  #   affirm.n = n successes in treatment population
+  # Returns: a float, the mean of the posterior 
+  a = df[[affirm.n]] + (prior.n * prior.mean) - 1
+  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+  a / (a + b)
+}
+```
 
+We will call these functions as part of two foreach jobs, one for each of our summary data frames. 
 
+```{r}
+cl <- makeForkCluster(4)
+registerDoParallel(cl)
 
+response.bayes.site <- foreach(interest.site = iter(response.summary.site$site)) %dopar% {
+  interest.pop = response.summary.site[response.summary.site$site == interest.site, ]
+  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
+                             prior.n = PRIOR.N.SITE, 
+                             sample.n = "n_total_responses", 
+                             affirm.n = "n_affirmative")
+  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
+                                       prior.n = PRIOR.N.SITE, 
+                                       sample.n = "n_total_responses", 
+                                       affirm.n = "n_affirmative")
+  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 
+                    level = .95, tol = 0.01, verbose = FALSE)
+  list("site" = interest.site,
+       "posterior" = posterior,
+       "posterior_mean" = posterior.mean,
+       "credible_interval" = cred.int)
+}
 
+# stop the cluster
+stopCluster(cl)
+gc()
+```
 
+The above job steps through each row vector in the passed data frame and uses our prior parameters to calculate our posterior, the posterior mean, as well as it's credible interval.
 
+```{r}
+response.bayes.site[4]
+```
+ 

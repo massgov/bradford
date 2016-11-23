@@ -29,9 +29,16 @@ createTimeBucket <- function(x) {
 
 # Bayesian funcs
 # perhaps create a calculateAlpha/calculateBeta function for lines 34-35 and 42-43
-beta.posterior <- function(df, prior.mean, prior.n, sample.n, affirm.n) {
+beta.posterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
   # calculates an approximate beta posterior given the mean and n of a beta prior as well as 
   # the n and n sucesses from a binomial 
+  # Args: 
+  #   df = a data frame which contains vectors of sample  sizes and number of successful trials
+  #   prior.mean = mean of the prior distribution 
+  #   prior.n = support for the prior
+  #   sample.n = n observations in the treatment population
+  #   affirm.n = n successes in treatment population
+  # Returns: a data frame which approximates the posterior distribution 
   a = df[[affirm.n]] + (prior.n * prior.mean) - 1
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   domain = seq(0, 1, 0.005)
@@ -42,6 +49,13 @@ beta.posterior <- function(df, prior.mean, prior.n, sample.n, affirm.n) {
 beta.posterior.mean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
   # calculates the mean of the beta posterior given the mean and n of a beta prior as well as 
   # the n and n sucesses from a binomial 
+  # Args:
+  #   df = a data frame which contains vectors of sample  sizes and number of successful trials
+  #   prior.mean = mean of the prior distribution 
+  #   prior.n = support for the prior
+  #   sample.n = n observations in the treatment population
+  #   affirm.n = n successes in treatment population
+  # Returns: a float, the mean of the posterior 
   a = df[[affirm.n]] + (prior.n * prior.mean) - 1
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   a / (a + b)

@@ -70,7 +70,7 @@ response.bayes.site <- foreach(interest.site = iter(response.summary.site$site))
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
-  cred.int = emdbook::ncredint(pvec = posterior$x, npost = posterior$y, 
+  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_mass, 
                     level = .95, tol = 0.01, verbose = FALSE)
   list("site" = interest.site,
        "posterior" = posterior,
@@ -88,7 +88,7 @@ response.bayes.page <- foreach(interest.page = iter(response.summary.page$referr
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
-  cred.int = emdbook::ncredint(pvec = posterior$x, npost = posterior$y, 
+  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_mass, 
                                level = .95, tol = 0.01, verbose = FALSE)
   list("page" = interest.page,
        "posterior" = posterior,

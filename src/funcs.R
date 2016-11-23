@@ -43,7 +43,7 @@ betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "")
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   domain = seq(0, 1, 0.005)
   val = dbeta(domain, a, b)
-  data.frame("domain" = domain, "prob_mass" = val)
+  data.frame("domain" = domain, "prob_dens" = val)
 }
 
 betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {

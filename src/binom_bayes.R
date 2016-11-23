@@ -25,8 +25,7 @@ formstack.master <- readr::read_csv('data/formstack/formstack_master.csv') %>%
                 info_found %in% c("Yes", "No"),
                 referrer != "http://<!--") %>%
   dplyr::mutate(info_found = droplevels(info_found),
-                referrer = droplevels(referrer),
-                time_of_day = createTimeBucket(lubridate::hour(submit_time)))
+                referrer = droplevels(referrer))
 
 rm(new.cols)
 

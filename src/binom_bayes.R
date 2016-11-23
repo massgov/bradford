@@ -63,11 +63,11 @@ registerDoParallel(cl)
 
 response.bayes.site <- foreach(interest.site = iter(response.summary.site$site)) %dopar% {
   interest.pop = response.summary.site[response.summary.site$site == interest.site, ]
-  posterior = beta.posterior(interest.pop,  prior.mean = PRIOR.MEAN, 
+  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
                              prior.n = PRIOR.N.SITE, 
                              sample.n = "n_total_responses", 
                              affirm.n = "n_affirmative")
-  posterior.mean = beta.posterior.mean(interest.pop, prior.mean = PRIOR.MEAN, 
+  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
@@ -81,11 +81,11 @@ response.bayes.site <- foreach(interest.site = iter(response.summary.site$site))
 
 response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer)) %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]
-  posterior = beta.posterior(interest.pop,  prior.mean = PRIOR.MEAN, 
+  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
                              prior.n = PRIOR.N.SITE, 
                              sample.n = "n_total_responses", 
                              affirm.n = "n_affirmative")
-  posterior.mean = beta.posterior.mean(interest.pop, prior.mean = PRIOR.MEAN, 
+  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
                                        prior.n = PRIOR.N.SITE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")

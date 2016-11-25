@@ -1,5 +1,5 @@
 ---
-title: "Formstack Page Analysis - Proposed Methodology"
+title: "Formstack Page Analysis - Proposed Methodology for Bayesian Framework"
 output:
   html_notebook: default
   html_document: default
@@ -92,15 +92,23 @@ In order to begin any bayesian inference for binomially distributed data we must
 betaplot <- function(a,b){
 theta = seq(0,1,0.005)
 p_theta = dbeta(theta, a, b)
-p <- qplot(theta, p_theta, geom='line')
-p <- p + theme_bw()
-p <- p + ylab(expression(paste('p(',theta,')', sep = '')))
-p <- p + xlab(expression(theta))
+p <- qplot(theta, p_theta, geom = 'line') +
+  theme_bw() +
+  ylab(expression(paste('p(',theta,')', sep = ''))) +
+  xlab(expression(theta))
 return(p)}
 ```
 
 ```{r}
-betaplot(1,1)
+betaplot(1,1) +
+  ggtitle("Uninformative Prior")
+```
+
+Our current prior is the following, which has a mean of .8
+
+```{r}
+betaplot(8, 2) +
+  ggtitle(expression(paste(beta, "(", alpha, "=8,", beta, "=2",")")))
 ```
 
 For this analysis framework we will leverage the beta distribution, both because it is conjugate with respect to the binomial distribution and becuase it models our prior beliefs about $\theta$ in a straightforward manner and without any mathematical gymnastics (we simply need to specify $\alpha$ and $\beta$ a priori). The beta distribution is defined as such:
@@ -166,9 +174,7 @@ betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "")
   val = dbeta(domain, a, b)
   data.frame("domain" = domain, "prob_dens" = val)
 }
-```
 
-```{r}
 betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
   # calculates the mean of the beta posterior given the mean and n of a beta prior as well as 
   # the n and n sucesses from a binomial 

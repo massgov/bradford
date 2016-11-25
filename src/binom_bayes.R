@@ -39,9 +39,7 @@ response.summary.site <- formstack.master %>%
   dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
                    n_negative = sum(info_found == "No", na.rm = T),
                    n_total_responses = n()) %>%
-  dplyr::mutate(site = droplevels(site)) %>%
-  purrr::map_if(is.factor, as.character) %>%  # This is a shitty hack around for "Error in { : task 1 failed - "level sets of factors are different""
-  data.frame(stringsAsFactors = F)
+  dplyr::mutate(site = droplevels(site)) 
 
 # group by page
 response.summary.page <- formstack.master %>%
@@ -51,9 +49,7 @@ response.summary.page <- formstack.master %>%
                    n_negative = sum(info_found == "No", na.rm = T),
                    n_total_responses = n()) %>%
   dplyr::filter(n_total_responses > 1) %>%
-  dplyr::mutate(referrer = droplevels(referrer)) %>%
-  purrr::map_if(is.factor, as.character) %>%  # This is a shitty hack around for "Error in { : task 1 failed - "level sets of factors are different""
-  data.frame(stringsAsFactors = F)
+  dplyr::mutate(referrer = droplevels(referrer))
 
 
 #### BAYESIAN MODELLING ####
@@ -78,14 +74,15 @@ response.bayes.site <- foreach(interest.site = iter(response.summary.site$site))
        "credible_interval" = cred.int)
 }
 
-response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer)) %dopar% {
+response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer), 
+                               .errorhandling = "remove") %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]
   posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
-                             prior.n = PRIOR.N.SITE, 
+                             prior.n = PRIOR.N.PAGE, 
                              sample.n = "n_total_responses", 
                              affirm.n = "n_affirmative")
   posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
-                                       prior.n = PRIOR.N.SITE, 
+                                       prior.n = PRIOR.N.PAGE, 
                                        sample.n = "n_total_responses", 
                                        affirm.n = "n_affirmative")
   cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 

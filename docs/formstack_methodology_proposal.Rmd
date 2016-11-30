@@ -24,7 +24,8 @@ If a user selects "No" then they are presented with the following:
 
 <br>
 
-<center><div style="width:450px; height=600px">
+<center>
+<div style="width:450px; height=600px">
 ![](/Users/Connor/Desktop/formstack_no.png)
 </div>
 </center>
@@ -66,10 +67,7 @@ head(formstack.master)
 ```
 
 ## Sitewide improvements
-The key question Formstack data will assist with is "are the changes made to the new mass.gov an improvement relative to the old site?" This question is answerable with the proposed framework and data, given a few other conditions are met. First, a consistent mapping between old and new content must be created, this will done in the form of page redirects. Second, the feedback module should remain as consistent as possible in the switch between old and new because if, for example, a change in position would increase the average number of people answering in the affirmative we would not want to mix up the effects of that repositioning and the new content itself. There is a situation where point 2 is not as much of an issue, which is getting someone at the leadership level (preferrably Harlan) to estimate a prior distribution for the response rate and modelling the feedback as bayesian inference. 
-
-
-
+The key question Formstack data will assist with is "are the changes made to the new mass.gov an improvement relative to the old site?" This question is answerable with the proposed framework and data, given a few other conditions are met. First, a consistent mapping between old and new content must be created, this will done in the form of page redirects. Second, the feedback module should remain as consistent as possible in the switch between old and new because if, for example, a change in position would increase the average number of people answering in the affirmative we would not want to mix up the effects of that repositioning and the new content itself.
 
 ### Bayesian Inference
 
@@ -125,7 +123,7 @@ Looking at the result of the above it is clear that we get a beta distribution b
 
 This is an extremely flexible framework that works well with small data where initial summarization may paint a misleading picture. For example, estimating a baseball players batting average is straightforward for someone who has played for many years but for a new player a straight average may paint a very misleading picture. In this example it is more sound to integrate our knowledge of the expected value and distribution of a metric instead of forging ahead as normal and reporting something like a 1.0 or 0.0 as a players average. 
 
-### How we Will Apply
+### How We Will Apply
 
 This section will walk through our treatment of Formstack response data within a bayesian framework. 
 First and foremost we must specify the parameters of our prior distribution

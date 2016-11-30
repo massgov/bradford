@@ -8,6 +8,7 @@ https://blog.twitter.com/2015/detecting-and-avoiding-bucket-imbalance-in-ab-test
 https://blog.twitter.com/2016/implications-of-use-of-multiple-controls-in-an-ab-test
 https://blog.twitter.com/2015/detecting-and-avoiding-bucket-imbalance-in-ab-tests
 http://www.nrcse.washington.edu/research/struts/chapter2.pdf
+https://cran.r-project.org/web/packages/glmnet/vignettes/glmnet_beta.html
 
 Books that you can borrow from Connor McKay if you have more questions/are interested in these methods more
 

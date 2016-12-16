@@ -1,5 +1,4 @@
 # Functions for the analysis of formstack data
-
 createTimeBucket <- function(x) {
   # takes a vector of hours in the range of 0-23 and creates categorical time of day factor vector
   # Args: x = a numeric vector taking on values 0-23 

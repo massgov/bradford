@@ -3,6 +3,7 @@ library(testthat)
 
 source("~/Documents/GitHub/bradford/src/funcs.R")
 
+context("createTimeBucket")
 test_that("createTimeBucket Errors out on incorrect input", {
   expect_error(createTimeBucket(x = "abc"))
   expect_error(createTimeBucket(x = factor("abc")))
@@ -25,3 +26,17 @@ test_that("createTimeBucket returns the expected values given an input",{
   expect_equivalent(createTimeBucket(x = c(17,18,19,20)), factor(c(rep("Evening", 4))))
   expect_equivalent(createTimeBucket(x = c(21, 22, 23)), factor(c(rep("Late Night", 3))))
 })
+
+context("Bayesian Functions")
+test_that("betaPosterior outputs the correct vector", {
+  x <- readRDS(file = "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_post_df.RDS")
+  expect_equal_to_reference(betaPosterior(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"), 
+                            "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_posterior.RDS")
+})
+
+test_that("betaPosteriorMean outputs the correct scalar", {
+  x <- readRDS(file = "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_post_df.RDS")
+  expect_equal_to_reference(betaPosteriorMean(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"), 
+                            "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_posterior_mean.RDS")
+})
+

@@ -3,6 +3,11 @@ library(RGoogleAnalytics)
 library(ggplot2)
 library(plotly)
 
+# TODO: 1. investigate source of NA values after joins. 
+#          Seems like some sessions have nothing associated with them except their session ID. These
+#          may be bounces.
+
+
 ga.metrics.events <- c("ga:uniqueEvents")
 
 ga.dims.events <- c("ga:pagePath", "ga:dimension1", "ga:dimension4", "ga:eventCategory",
@@ -70,11 +75,11 @@ ga.master <- ga.master.sessions %>%
                 nodeID = dimension3,
                 clientID = dimension4) %>%
   dplyr::ungroup() %>%
-  .[complete.cases(.),]
+  .[complete.cases(.),]  # remove records with NA
 
 #### MODEL ####
 conversion.logistic <- ga.master %>% 
-  dplyr::select(timeOnPage, medium:conversion, - browserSize) %>%
+  dplyr::select(timeOnPage, medium:conversion, -browserSize) %>%
   useful::build.x(conversion ~ . - 1, data = ., contrasts = F) %>%  # no intercept because we are not using reference levels
   cbind(conversion = ga.master$conversion) %>%
   data.frame(.) %>%

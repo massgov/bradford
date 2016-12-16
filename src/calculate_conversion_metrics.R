@@ -62,7 +62,7 @@ ga.master.user <- RGoogleAnalytics::Init(start.date = start.date,
 #### MUNGING ####
 ga.conversions <- ga.master.events %>%
   dplyr::group_by(dimension1) %>%
-  dplyr::summarise(conversion = ifelse("Conversion" %in% eventCategory == T, T, F))
+  dplyr::summarise(no_conversion = ifelse("Conversion" %in% eventCategory == F, 1, 0))
 
 ga.master <- ga.master.sessions %>%
   dplyr::group_by(dimension1) %>%  # group by session ID
@@ -79,12 +79,20 @@ ga.master <- ga.master.sessions %>%
 
 #### MODEL ####
 conversion.logistic <- ga.master %>% 
-  dplyr::select(timeOnPage, medium:conversion, -browserSize) %>%
-  useful::build.x(conversion ~ . - 1, data = ., contrasts = F) %>%  # no intercept because we are not using reference levels
-  cbind(conversion = ga.master$conversion) %>%
+  dplyr::select(timeOnPage, medium:no_conversion, -browserSize) %>%
+  purrr::map_if(is.character, as.factor) %>%
+  data.frame() %>%
+  dplyr::mutate(
+    medium = relevel(medium, "(none)"),
+    deviceCategory = relevel(deviceCategory, "desktop"),
+    operatingSystem = relevel(operatingSystem, "Windows"),
+    browser = relevel(browser, "Chrome")) %>%
+  useful::build.x(no_conversion ~ ., data = .) %>%  
+  cbind(no_conversion = ga.master$no_conversion) %>%
   data.frame(.) %>%
-  glm(data = ., conversion ~ . - 1, family = binomial(link = "logit")) # again, no intercept
-  
+  dplyr::select(-X.Intercept.) %>%
+  glm(data = ., no_conversion ~ . - 1, family = binomial(link = "logit")) 
+
 conversion.metrics <- conversion.logistic %>%  
   broom::tidy() %>%  # convert to df 
   dplyr::mutate(odds_ratio = exp(estimate),  # Odds ratio aka gradient
@@ -92,5 +100,5 @@ conversion.metrics <- conversion.logistic %>%
          odds_ratio_se = sqrt(odds_ratio ^ 2 * var_diag)) %>% # Odds-ratio adjusted 
   dplyr::filter(p.value < .05)
   
-#### SAVE DATA ####
+ #### SAVE DATA ####
 saveRDS(conversion.metrics, "data/conversion_metrics.RDS")

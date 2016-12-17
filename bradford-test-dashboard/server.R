@@ -27,7 +27,7 @@ shinyServer(function(input, output) {
     
     dat <- data.frame(site.summary.frames[[as.numeric(input$funnel.slot.number)]]) %>%
       dplyr::filter(site == input$funnel.name)
-    breakouts <- site.breakout.frames[[as.numeric(input$funnel.slot.number)]]$loc %>%  # positions of the breakouts 
+    breakouts <- site.breakout.frames[[as.numeric(input$funnel.slot.number)]][[input$funnel.name]]$loc %>%  # positions of the breakouts 
       site.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]  # subset the date vector
     plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
                             x = "timestamp", y = "prop_affirmative")

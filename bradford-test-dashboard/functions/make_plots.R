@@ -1,5 +1,5 @@
 makeBreakoutPlot <- function(dat, breakouts, x, y) {
-  limits <- aes(ymax = grand_mean + grand_mean_se, ymin = grand_mean - grand_mean_se)
+  limits <- aes(ymax = prop_affirmative + prop_affirmative_se, ymin = prop_affirmative - prop_affirmative_se)
   if (length(breakouts) > 0) {
     plt <- ggplot(dat, aes_string(x = x, y = y)) +
       geom_line(group = 1) +

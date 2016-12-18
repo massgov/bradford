@@ -8,8 +8,10 @@ DATA.DIR <- "~/Documents/GitHub/bradford/data/"
 source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/read_data.R")
 source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/make_plots.R")
 
-
+options(scipen = 10000000)
 #### READ IN DATA ####
+formstack.master <- readRDS(paste0(DATA.DIR, "formstack_master.RDS"))
+
 global.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.summary", 
                                       gsub.pattern = ".RDS")
 

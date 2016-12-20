@@ -39,7 +39,7 @@ shinyServer(function(input, output) {
     print(ggplotly(plt))  
   })
   
-  output$formstack.volume.plot.global.bar <- renderPlotly({
+  output$formstack.volume.plot.home.bar <- renderPlotly({
     time.unit <- c("day", "month", "week")
     plt <- formstack.master %>% 
       dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
@@ -64,6 +64,22 @@ shinyServer(function(input, output) {
                             x = "timestamp", y = "prop_affirmative")
     print(ggplotly(plt)) # print the output of ggplotly
   }) 
+  
+  output$formstack.volume.plot.global.bar <- renderPlotly({
+    time.unit <- c("day", "month", "week")
+    plt <- formstack.master %>% 
+      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
+                                                      unit = time.unit[[as.numeric(input$global.slot.number)]])) %>%
+      dplyr::group_by(timestamp) %>%
+      dplyr::count() %>%
+      ggplot(aes(x = timestamp, y = n)) +
+      geom_bar(stat = "identity", fill = "steelblue") +
+      theme_bw() +
+      ggtitle("Global Response Count - Formstack") +
+      xlab("") +
+      ylab("")
+    print(ggplotly(plt))  
+  })
   
   output$formstack.volume.plot.funnels <- renderPlotly({
     plt <- formstack.master %>% 
@@ -133,6 +149,23 @@ shinyServer(function(input, output) {
                             x = "timestamp", y = "prop_affirmative")
     print(ggplotly(plt)) # print the output of ggplotly
   }) 
+  
+  output$formstack.volume.plot.funnel.bar <- renderPlotly({
+    time.unit <- c("month", "week")
+    plt <- formstack.master %>% 
+      dplyr::filter(site == input$funnel.name) %>%
+      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
+                                                      unit = time.unit[[as.numeric(input$funnel.slot.number)]])) %>%
+      dplyr::group_by(timestamp) %>%
+      dplyr::count() %>%
+      ggplot(aes(x = timestamp, y = n)) +
+      geom_bar(stat = "identity", fill = "steelblue") +
+      theme_bw() +
+      ggtitle("Global Response Count - Formstack") +
+      xlab("") +
+      ylab("")
+    print(ggplotly(plt))  
+  })
   
   output$formstack.volume.plot.funnel.endpoints <- renderPlotly({
     plt <- formstack.master  %>% 

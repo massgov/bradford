@@ -3,10 +3,10 @@ library(magrittr)
 library(ggplot2)
 library(plotly)
 
-DATA.DIR <- "~/Documents/GitHub/bradford/data/"
+DATA.DIR <- "/srv/shiny-server/bradford/data/"
 
-source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/read_data.R")
-source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/make_plots.R")
+source("/srv/shiny-server/bradford/bradford-test-dashboard/functions/read_data.R")
+source("/srv/shiny-server/bradford/bradford-test-dashboard/functions/make_plots.R")
 
 options(scipen = 10000000)
 #### READ IN DATA ####
@@ -25,3 +25,5 @@ site.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.break
                                      gsub.pattern = ".RDS")
 
 conversion.metrics <- readRDS(paste0(DATA.DIR, "conversion_metrics.RDS"))
+
+#ga.master.sessions <- readRDS(paste0(DATA.DIR, "ga_master_sessions.RDS"))

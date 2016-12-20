@@ -10,7 +10,7 @@ shinyUI(navbarPage(
                                 c("Daily" = 1,
                                   "Weekly" = 3,
                                   "Monthly" = 2), 
-                                selected = 2),
+                                selected = 3),
              splitLayout(cellWidths = c("50%", "50%"),
                                 plotlyOutput("odds.plot"),
                                 # put a plot re: conversions over time here
@@ -18,7 +18,7 @@ shinyUI(navbarPage(
                                 ),
              splitLayout(cellWidths = c("50%", "50%"),
                          plotlyOutput("formstack.volume.plot.global.area"),
-                         plotlyOutput("formstack.volume.plot.global.bar")
+                         plotlyOutput("formstack.volume.plot.home.bar")
                     )
              )
            ),
@@ -26,6 +26,24 @@ shinyUI(navbarPage(
              tabPanel("Info"),
              "----",
              "",
+             tabPanel("Global", 
+                      fluidRow(  
+                        selectInput("global.slot.number", "Time Frame:", 
+                                    c("Daily" = 1,
+                                      "Weekly" = 3,
+                                      "Monthly" = 2), 
+                                    selected = 2),
+                        plotlyOutput("formstack.response.plot.global"),
+                        plotlyOutput("formstack.volume.plot.global.bar"),
+                        splitLayout(cellWidths = c("50%", "30%", "18%"),
+                                    plotlyOutput("formstack.volume.plot.funnels"),
+                                    plotlyOutput("formstack.os.plot.overall"),
+                                    plotlyOutput("formstack.affirmative.plot.overall")
+                        ),
+                        br(),
+                        dataTableOutput("formstack.master")
+                      )
+             ),
              tabPanel("Funnels", 
                       fluidRow(
                         splitLayout(cellWidths = c("50%", "50%"),
@@ -40,6 +58,7 @@ shinyUI(navbarPage(
                                         "Education" = "edu"), selected = "anf")
                           ),
                         plotlyOutput("formstack.response.plot.funnels"),
+                        plotlyOutput("formstack.volume.plot.funnel.bar"),
                         splitLayout(cellWidths = c("50%", "30%", "18%"),
                                     plotlyOutput("formstack.volume.plot.funnel.endpoints"),
                                     plotlyOutput("formstack.os.plot.funnel"),
@@ -48,24 +67,7 @@ shinyUI(navbarPage(
                         br(),
                         dataTableOutput("formstack.table.funnel")
                       )),
-             tabPanel("Endpoints"),
-             tabPanel("Global", 
-                      fluidRow(  
-                        selectInput("global.slot.number", "Time Frame:", 
-                                    c("Daily" = 1,
-                                      "Weekly" = 3,
-                                      "Monthly" = 2), 
-                                    selected = 2),
-                        plotlyOutput("formstack.response.plot.global"),
-                        splitLayout(cellWidths = c("50%", "30%", "18%"),
-                          plotlyOutput("formstack.volume.plot.funnels"),
-                          plotlyOutput("formstack.os.plot.overall"),
-                          plotlyOutput("formstack.affirmative.plot.overall")
-                        ),
-                        br(),
-                        dataTableOutput("formstack.master")
-                )
-          )
+             tabPanel("Endpoints")
       )
   )
 )

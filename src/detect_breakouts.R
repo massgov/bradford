@@ -2,6 +2,7 @@ library(magrittr)
 
 #source functions
 source("src/funcs.R")
+source("src/functions/detect_breakout_funcs.R")
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat", 
@@ -25,76 +26,29 @@ rm(new.cols)
 global.summary.monthly <- formstack.master %>%
   dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "month"))) %>%
   dplyr::group_by(site, timestamp) %>%
-  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
-                   n_negative = sum(info_found == "No", na.rm = T),
-                   n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 50) %>%
-  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
-                prop_affirmative_se = sqrt(prop_affirmative 
-                                           * (1 - prop_affirmative) 
-                                           / n_total_responses)) %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(timestamp) %>%
-  dplyr::summarise(prop_affirmative_se =  sum(prop_affirmative_se * n_total_responses) / sum(n_total_responses),
-                   prop_affirmative = sum(prop_affirmative * n_total_responses) / sum(n_total_responses))
+  makeSummaryDf(global = T)
 
 global.summary.weekly <- formstack.master %>%
   dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "week"))) %>%
   dplyr::group_by(site, timestamp) %>%
-  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
-                   n_negative = sum(info_found == "No", na.rm = T),
-                   n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 50) %>%
-  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
-                prop_affirmative_se = sqrt(prop_affirmative 
-                                           * (1 - prop_affirmative) 
-                                           / n_total_responses)) %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(timestamp) %>%
-  dplyr::summarise(prop_affirmative_se =  sum(prop_affirmative_se * n_total_responses) 
-                   / sum(n_total_responses),
-                   prop_affirmative = sum(prop_affirmative * n_total_responses) / sum(n_total_responses))
-
-global.summary.daily <- formstack.master %>%
-  dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "day"))) %>%
-  dplyr::group_by(site, timestamp) %>%
-  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
-                   n_negative = sum(info_found == "No", na.rm = T),
-                   n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 50) %>%
-  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
-                prop_affirmative_se = sqrt(prop_affirmative 
-                                           * (1 - prop_affirmative) 
-                                           / n_total_responses)) %>%
-  dplyr::ungroup() %>%
-  dplyr::group_by(timestamp) %>%
-  dplyr::summarise(prop_affirmative_se =  sum(prop_affirmative_se * n_total_responses) / sum(n_total_responses),
-                   prop_affirmative = sum(prop_affirmative * n_total_responses) / sum(n_total_responses)) 
+  makeSummaryDf(global = T)
 
 # create a list where each slot is a data frame specific to a dept summarised by month 
 site.summary.monthly <- formstack.master %>%
   dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "month"))) %>%
   dplyr::group_by(site, timestamp) %>%
-  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
-                   n_negative = sum(info_found == "No", na.rm = T),
-                   n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 50) %>%
-  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
-                prop_affirmative_se = sqrt(prop_affirmative 
-                                           * (1 - prop_affirmative) 
-                                           / n_total_responses))
+  makeSummaryDf(global = F)
 
 site.summary.weekly <- formstack.master %>%
   dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "week"))) %>%
   dplyr::group_by(site, timestamp) %>%
-  dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
-                   n_negative = sum(info_found == "No", na.rm = T),
-                   n_total_responses = n()) %>%
-  dplyr::filter(n_total_responses > 50) %>%
-  dplyr::mutate(prop_affirmative = n_affirmative / n_total_responses,
-                prop_affirmative_se = sqrt(prop_affirmative 
-                                           * (1 - prop_affirmative) 
-                                           / n_total_responses))
+  makeSummaryDf(global = F)
+
+# create a list where each slot is a data frame specific to an endpoint summarised by month 
+referrer.summary.monthly <- formstack.master %>%
+  dplyr::mutate(timestamp = lubridate::ymd(lubridate::floor_date(submit_time, unit = "month"))) %>%
+  dplyr::group_by(referrer, timestamp) %>%
+  makeSummaryDf(global = F)
 
 #### DETECT BREAKOUTS ####
 global.breakouts.monthly <- global.summary.monthly %>%
@@ -102,19 +56,13 @@ global.breakouts.monthly <- global.summary.monthly %>%
   dplyr::rename(count = prop_affirmative,
                 timestamp = timestamp) %>%
   dplyr::mutate(timestamp = as.POSIXct(timestamp)) %>%
-  BreakoutDetection::breakout(min.size = 5, method = "multi", plot = T)
+  BreakoutDetection::breakout(min.size = 3, method = "multi", plot = T)
 
 global.breakouts.weekly <- global.summary.weekly %>%
   dplyr::select(prop_affirmative, timestamp) %>%
   dplyr::rename(count = prop_affirmative) %>%
   dplyr::mutate(timestamp = as.POSIXct(timestamp)) %>%
-  BreakoutDetection::breakout(min.size = 6, method = "multi", plot = T)
-
-global.breakouts.daily <- global.summary.daily %>%
-  dplyr::select(prop_affirmative, timestamp) %>%
-  dplyr::rename(count = prop_affirmative,
-                timestamp = timestamp) %>%
-  BreakoutDetection::breakout(min.size = 3, method = "amoc", plot = T)
+  BreakoutDetection::breakout(min.size = 12, method = "multi", plot = T)
 
 site.breakouts.monthly <- site.summary.monthly %>% 
   dplyr::select(prop_affirmative, timestamp, site) %>%
@@ -135,8 +83,20 @@ site.breakouts.weekly <- site.summary.weekly %>%
                 timestamp = as.POSIXct(timestamp)) %>%
   split(.$site) %>%
   purrr::map(function(x) x[c("count", "timestamp")]) %>%
-  purrr::map(function(x) BreakoutDetection::breakout(Z = x, min.size = 4, method = "amoc", plot = T))
-  
+  purrr::map(function(x) BreakoutDetection::breakout(Z = x, min.size = 12, method = "multi", plot = T))
+
+# referrers only monthly for now to avoid inconsistent sample intervals
+referrer.breakouts.monthly <- referrer.summary.monthly %>% 
+  dplyr::select(prop_affirmative, timestamp, referrer) %>%
+  dplyr::rename(count = prop_affirmative,
+                timestamp = timestamp) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(referrer = droplevels(referrer),
+                timestamp = as.POSIXct(timestamp)) %>%
+  split(.$referrer) %>%
+  purrr::map(function(x) x[c("count", "timestamp")]) %>%
+  purrr::map(function(x) BreakoutDetection::breakout(Z = x, min.size = 3, method = "multi", plot = T))
+
 rm(formstack.master)
 
 #### SAVE DATA ####

@@ -10,11 +10,10 @@ shinyUI(navbarPage(
                "global.slot.number.home",
                "Time Frame:",
                c(
-                 "Daily" = 1,
-                 "Weekly" = 3,
-                 "Monthly" = 2
-               ),
-               selected = 3
+                 "Weekly" = 2,
+                 "Monthly" = 1
+                 ),
+               selected = 2
              ),
              splitLayout(
                cellWidths = c("50%", "50%"),
@@ -40,9 +39,10 @@ shinyUI(navbarPage(
                  selected = 2
                ),
                selectInput(
-                 "exec.name",
+                 "exec.funnel.name",
                  "Funnel:",
                  c(
+                   "All" = "show.all",
                    "Admin and Finance" = "anf",
                    "Courts" = "courts",
                    "Dept of Revenue" = "dor",
@@ -65,32 +65,7 @@ shinyUI(navbarPage(
     "----",
     "",
     tabPanel(
-      "Global",
-      fluidRow(
-        selectInput(
-          "global.slot.number",
-          "Time Frame:",
-          c(
-            "Daily" = 1,
-            "Weekly" = 3,
-            "Monthly" = 2
-          ),
-          selected = 2
-        ),
-        plotlyOutput("formstack.response.plot.global"),
-        plotlyOutput("formstack.volume.plot.global.bar"),
-        splitLayout(
-          cellWidths = c("50%", "30%", "18%"),
-          plotlyOutput("formstack.volume.plot.funnels"),
-          plotlyOutput("formstack.os.plot.overall"),
-          plotlyOutput("formstack.affirmative.plot.overall")
-        ),
-        br(),
-        dataTableOutput("formstack.master")
-      )
-    ),
-    tabPanel(
-      "Funnels",
+      "User Satisfaction - Funnels",
       fluidRow(
         splitLayout(
           cellWidths = c("50%", "50%"),
@@ -126,7 +101,7 @@ shinyUI(navbarPage(
       )
     ),
     tabPanel(
-      "Endpoints",
+      "User Satisfaction - Endpoints",
       fluidRow(
         selectInput(
           "endpoint.name",

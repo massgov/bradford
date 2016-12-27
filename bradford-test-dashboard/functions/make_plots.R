@@ -1,5 +1,5 @@
 #### PLOTS ####
-makeBreakoutPlot <- function(dat, breakouts, x, y) {
+makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
   limits <- aes(ymax = prop_affirmative + prop_affirmative_se, 
                 ymin = prop_affirmative - prop_affirmative_se)
   if (length(breakouts) > 0) {
@@ -9,6 +9,7 @@ makeBreakoutPlot <- function(dat, breakouts, x, y) {
       geom_errorbar(limits) +
       theme_bw() +
       xlab("") +
+      ggtitle(plot.title) +
       ylab("Proportion Finding Desired Content") + 
       scale_x_date()
     return(plt)
@@ -17,6 +18,7 @@ makeBreakoutPlot <- function(dat, breakouts, x, y) {
       geom_line(group = 1) +
       geom_errorbar(limits) +
       theme_bw() +
+      ggtitle(plot.title) +
       xlab("") +
       ylab("Proportion Finding Desired Content")
     return(plt)

@@ -45,6 +45,76 @@ shinyServer(function(input, output) {
     print(ggplotly(plt))
   })
   
+  #### USER SATISFACTION ####
+  output$formstack.response.plot.exec <- renderPlotly({
+    dat <- data.frame(site.summary.frames[[as.numeric(input$exec.slot.number)]]) %>%
+      dplyr::filter(site == input$exec.name)
+    breakouts <- site.breakout.frames[[as.numeric(input$exec.slot.number)]][[input$exec.name]]$loc %>%  # positions of the breakouts 
+      site.summary.frames[[as.numeric(input$exec.slot.number)]]$timestamp[.]  # subset the date vector
+    plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
+                            x = "timestamp", y = "prop_affirmative", 
+                            plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
+    print(ggplotly(plt)) # print the output of ggplotly
+  }) 
+  
+  output$formstack.volume.plot.exec.endpoints <- renderPlotly({
+    plt <- formstack.master  %>% 
+      dplyr::filter(site == input$exec.name) %>%
+      dplyr::group_by(content_author) %>%  # can also be enpoint (should be?)
+      dplyr::summarise(n = n(),
+                       Yes = round((sum(info_found == "Yes") / n) * 100, 2),
+                       No = sum(info_found == "No") / n) %>%
+      dplyr::arrange(desc(Yes)) %>%
+      dplyr::slice(1:10) %>%
+      ggplot(aes(x = reorder(content_author, Yes), y = Yes)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      xlab("") +
+      ylab("% of Users Satisfied") +
+      ggtitle("User Satisfaction Across Content Group - Top 10") +
+      theme_bw()
+    print(ggplotly(plt))
+  })
+  
+  output$formstack.os.plot.exec <- renderPlotly({
+    plt <- formstack.master %>%
+      dplyr::filter(site == input$exec.name) %>%
+      dplyr::group_by(os) %>%
+      dplyr::summarise(n = n(),
+                       Yes = round((sum(info_found == "Yes") / n) * 100, 2),
+                       No = sum(info_found == "No") / n) %>%
+      dplyr::arrange(desc(Yes)) %>%
+      dplyr::slice(1:10) %>%
+      ggplot(aes(x = reorder(os, Yes), y = Yes)) +
+      geom_bar(stat = "identity") +
+      ggtitle("User Satisfaction Across OS - Top 10") +
+      xlab("") +
+      coord_flip() +
+      ylab("% of Users Satisfied") +
+      theme_bw()
+    print(ggplotly(plt))
+  })  
+  
+  output$formstack.affirmative.plot.exec <- renderPlotly({
+    plt <- formstack.master %>% 
+      dplyr::filter(site == input$exec.name) %>%
+      dplyr::group_by(info_found) %>%
+      dplyr::count() %>%
+      makeAffirmativeBarPlot(x = "info_found", y = "n", 
+                             plot.title = "Satisfied and Unsatisfied Users")
+    print(ggplotly(plt))
+  })
+  
+  output$formstack.table.exec <- renderDataTable(formstack.master %>%
+                                                     dplyr::filter(site == input$exec.name) %>%
+                                                     dplyr::select(-c(site, child_content_author, 
+                                                                      ip_addr:lat, time_of_day)),
+                                                   options = list(
+                                                     pageLength = 5,
+                                                     autoWidth = TRUE,
+                                                     dom = 'tp'))
+  
+  
   #### FORMSTACK - GLOBAL ####
   output$formstack.response.plot.global <- renderPlotly({
     dat <- data.frame(global.summary.frames[[as.numeric(input$global.slot.number)]])

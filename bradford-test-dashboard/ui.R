@@ -28,8 +28,39 @@ shinyUI(navbarPage(
                plotlyOutput("formstack.volume.plot.home.bar")
              )
            )),
+  tabPanel("User Satisfaction",
+           fluidRow(
+             splitLayout(
+               cellWidths = c("50%", "50%"),
+               selectInput(
+                 "exec.slot.number",
+                 "Time Frame:",
+                 c("Weekly" = 2,
+                   "Monthly" = 1),
+                 selected = 2
+               ),
+               selectInput(
+                 "exec.name",
+                 "Funnel:",
+                 c(
+                   "Admin and Finance" = "anf",
+                   "Courts" = "courts",
+                   "Dept of Revenue" = "dor",
+                   "Education" = "edu"
+                 ),
+                 selected = "anf"
+               )
+             ),
+             plotlyOutput("formstack.response.plot.exec"),
+             splitLayout(
+               cellWidths = c("50%", "30%", "18%"),
+               plotlyOutput("formstack.volume.plot.exec.endpoints"),
+               plotlyOutput("formstack.os.plot.exec"),
+               plotlyOutput("formstack.affirmative.plot.exec")
+             )
+           )),
   navbarMenu(
-    "Formstack Responses",
+    "Analyst",
     tabPanel("Info"),
     "----",
     "",

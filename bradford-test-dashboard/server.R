@@ -29,14 +29,9 @@ shinyServer(function(input, output) {
                                                       unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
       dplyr::group_by(timestamp, site) %>%
       dplyr::count() %>%
-      ggplot(aes(x = timestamp, y = n, fill = site)) +
-      geom_area() +
-      theme_bw() +
-      theme(legend.position = "none") +
-      ggtitle("Site Response Count - Formstack") +
-      xlab("") +
-      ylab("")
-    print(ggplotly(plt))  
+     makeVolumeAreaPlot(x = "timestamp", y = "n", fill = "site",
+                        plot.title = "Funnel Response Count - Formstack")
+    print(ggplotly(plt))
   })
   
   output$formstack.volume.plot.home.bar <- renderPlotly({
@@ -46,13 +41,8 @@ shinyServer(function(input, output) {
                                                       unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::count() %>%
-      ggplot(aes(x = timestamp, y = n)) +
-      geom_bar(stat = "identity", fill = "steelblue") +
-      theme_bw() +
-      ggtitle("Global Response Count - Formstack") +
-      xlab("") +
-      ylab("")
-    print(ggplotly(plt))  
+      makeVolumeBarPlot(x = "timestamp", y = "n", plot.title = "Global Reponse Count - Formstack")
+    print(ggplotly(plt))
   })
   
   #### FORMSTACK - GLOBAL ####
@@ -72,12 +62,7 @@ shinyServer(function(input, output) {
                                                       unit = time.unit[[as.numeric(input$global.slot.number)]])) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::count() %>%
-      ggplot(aes(x = timestamp, y = n)) +
-      geom_bar(stat = "identity", fill = "steelblue") +
-      theme_bw() +
-      ggtitle("Global Response Count - Formstack") +
-      xlab("") +
-      ylab("")
+      makeVolumeBarPlot(x = "timestamp", y = "n", ylab = "Response Count")
     print(ggplotly(plt))  
   })
   
@@ -93,10 +78,9 @@ shinyServer(function(input, output) {
       geom_bar(stat = "identity") +
       coord_flip() +
       scale_fill_continuous(name = "% Found <br>Content") +
-      #guides(fill = F) +
       xlab("") +
       ylab("") +
-      ggtitle("Response Count") +
+      ggtitle("") +
       theme_bw()
     print(ggplotly(plt))
   })
@@ -105,12 +89,7 @@ shinyServer(function(input, output) {
     plt <- formstack.master %>% 
       dplyr::group_by(info_found) %>%
       dplyr::count() %>%
-      ggplot(aes(x = info_found, y = n)) +
-      geom_bar(stat = "identity") +
-      xlab("") +
-      ggtitle("Information Found?") +
-      ylab("") +
-      theme_bw()
+      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?")
     print(ggplotly(plt))
   })  
   
@@ -158,12 +137,7 @@ shinyServer(function(input, output) {
                                                       unit = time.unit[[as.numeric(input$funnel.slot.number)]])) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::count() %>%
-      ggplot(aes(x = timestamp, y = n)) +
-      geom_bar(stat = "identity", fill = "steelblue") +
-      theme_bw() +
-      ggtitle("Global Response Count - Formstack") +
-      xlab("") +
-      ylab("")
+      makeVolumeBarPlot(x = "timestamp", y = "n", ylab = "Response Count")
     print(ggplotly(plt))  
   })
   
@@ -183,7 +157,7 @@ shinyServer(function(input, output) {
       #guides(fill = F) +
       xlab("") +
       ylab("") +
-      ggtitle("Response Count") +
+      ggtitle("Endpoint Response Count") +
       theme_bw()
     print(ggplotly(plt))
   })
@@ -210,12 +184,7 @@ shinyServer(function(input, output) {
       dplyr::filter(site == input$funnel.name) %>%
       dplyr::group_by(info_found) %>%
       dplyr::count() %>%
-      ggplot(aes(x = info_found, y = n)) +
-      geom_bar(stat = "identity") +
-      xlab("") +
-      ggtitle("Information Found?") +
-      ylab("") +
-      theme_bw()
+      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?")
     print(ggplotly(plt))
   })
   
@@ -227,4 +196,62 @@ shinyServer(function(input, output) {
                                                pageLength = 5,
                                                autoWidth = TRUE,
                                                dom = 'tp'))
+  
+  #### FORMSTACK - ENDPOINTS ####
+  output$formstack.response.plot.endpoints <- renderPlotly({
+    dat <- data.frame(referrer.summary.monthly) %>%
+      dplyr::filter(referrer == input$endpoint.name)
+    breakouts <- referrer.breakouts.monthly[[input$endpoint.name]]$loc %>%  # positions of the breakouts 
+      referrer.summary.monthly$timestamp[.]  # subset the date vector
+    plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
+                            x = "timestamp", y = "prop_affirmative")
+    print(ggplotly(plt)) # print the output of ggplotly
+  }) 
+  
+  output$formstack.volume.plot.endpoint.bar <- renderPlotly({
+    plt <- formstack.master %>% 
+      dplyr::filter(referrer == input$endpoint.name) %>%
+      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
+                                                      unit = "month")) %>%
+      dplyr::group_by(timestamp) %>%
+      dplyr::count() %>%
+      makeVolumeBarPlot(x = "timestamp", y = "n", ylab = "Response Count")
+    print(ggplotly(plt))  
+  })
+  
+  
+  output$formstack.os.plot.endpoint <- renderPlotly({
+    plt <- formstack.master %>%
+      dplyr::filter(referrer == input$endpoint.name) %>%
+      dplyr::group_by(os) %>%
+      dplyr::count() %>%
+      dplyr::arrange(desc(n)) %>%
+      dplyr::slice(1:10) %>%
+      ggplot(aes(x = reorder(os, n), y = n)) +
+      geom_bar(stat = "identity") +
+      ggtitle("OS, Top 10") +
+      xlab("") +
+      coord_flip() +
+      ylab("") +
+      theme_bw()
+    print(ggplotly(plt))
+  })  
+  
+  output$formstack.affirmative.plot.endpoint <- renderPlotly({
+    plt <- formstack.master %>% 
+      dplyr::filter(referrer == input$endpoint.name) %>%
+      dplyr::group_by(info_found) %>%
+      dplyr::count() %>%
+      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?")
+    print(ggplotly(plt))
+  })
+  
+  output$formstack.table.endpoint <- renderDataTable(formstack.master %>%
+                                                     dplyr::filter(referrer == input$endpoint.name) %>%
+                                                     dplyr::select(-c(site, referrer, child_content_author, 
+                                                                      ip_addr:lat, time_of_day)),
+                                                   options = list(
+                                                     pageLength = 5,
+                                                     autoWidth = TRUE,
+                                                     dom = 'tp'))
 })

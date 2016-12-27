@@ -18,7 +18,8 @@ shinyServer(function(input, output) {
     breakouts <- global.breakout.frames[[as.numeric(input$global.slot.number.home)]]$loc %>%  # positions of the breakouts 
       global.summary.frames[[as.numeric(input$global.slot.number.home)]]$timestamp[.]  # subset the date vector
     plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
-                            x = "timestamp", y = "prop_affirmative")
+                            x = "timestamp", y = "prop_affirmative",
+                            plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
     print(ggplotly(plt)) # print the output of ggplotly
   })
   
@@ -144,6 +145,114 @@ shinyServer(function(input, output) {
     print(ggplotly(plt))
   })
   
+  #### CONVERSIONS ####
+  # conversion rate over time
+  output$conversion.timeseries.plot <- renderPlotly({
+    ga.conversions %>%
+      dplyr::mutate(timestamp = lubridate::floor_date(
+        lubridate::ymd_hms(hitTimestamp), unit = input$conversion.time.window
+      )) %>%
+      dplyr::group_by(timestamp) %>%
+      dplyr::summarise(n = n(),
+                       conversion = sum(conversion == "Conversion"),
+                       percent_convert = round((conversion / n) * 100), 2) %>%  # round to 2 decimal places
+      ggplot(aes(x = timestamp, y = percent_convert)) +
+      geom_line(group = 1) +
+      geom_point() +
+      theme_bw() +
+      xlab("") +
+      ylab("") +
+      ggtitle("Percent of Sessions Converting")
+  })
+
+  # conversion percentages by key categorical variables
+  
+  output$conversion.device.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::select(deviceCategory, conversion) %>%
+      dplyr::group_by(deviceCategory) %>%
+      dplyr::summarise(n = n(),
+                       conversion = sum(conversion == "Conversion"),
+                       percent_convert = round((conversion / n) * 100), 2) %>% 
+      ggplot(aes(x = deviceCategory, y = percent_convert)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      ggtitle("Conversions by Device Category") +
+      xlab("") +
+      ylab("Percent of Sessions Converting")
+  })
+  
+  output$conversion.os.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::select(operatingSystem, conversion) %>%
+      dplyr::group_by(operatingSystem) %>%
+      dplyr::summarise(n = n(),
+                       conversion = sum(conversion == "Conversion"),
+                       percent_convert = round((conversion / n) * 100), 2) %>% 
+      ggplot(aes(x = operatingSystem, y = percent_convert)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      theme_bw() +
+      ggtitle("Conversions by Operating System") +
+      xlab("") +
+      ylab("")
+  })
+  
+  output$conversion.browser.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::select(browser, conversion) %>%
+      dplyr::group_by(browser) %>%
+      dplyr::summarise(n = n(),
+                       conversion = sum(conversion == "Conversion"),
+                       percent_convert = round((conversion / n) * 100), 2) %>% 
+      ggplot(aes(x = browser, y = percent_convert)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      theme_bw() +
+      ggtitle("Conversions by Browser") +
+      xlab("") +
+      ylab("")
+  })
+  
+  # session volume by key categorical variables
+  output$volume.device.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::group_by(deviceCategory) %>%
+      dplyr::count() %>% 
+      ggplot(aes(x = deviceCategory, y = n)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      ggtitle("Sessions by Device Category") +
+      xlab("") +
+      ylab("Count")
+  })
+  
+  output$volume.os.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::group_by(operatingSystem) %>%
+      dplyr::count() %>% 
+      ggplot(aes(x = operatingSystem, y = n)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      theme_bw() +
+      ggtitle("Sessions by Operating System") +
+      xlab("") +
+      ylab("")
+  })
+  
+  output$volume.browser.plot <- renderPlotly({
+    ga.conversions %>% 
+      dplyr::group_by(browser) %>%
+      dplyr::count() %>% 
+      ggplot(aes(x = browser, y = n)) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      theme_bw() +
+      ggtitle("Sessions by Browser") +
+      xlab("") +
+      ylab("")
+  })
+  
   #### ANALYST - USER SATISFACTION FUNNELS ####
   output$formstack.response.plot.funnels <- renderPlotly({
     dat <- data.frame(site.summary.frames[[as.numeric(input$funnel.slot.number)]]) %>%
@@ -192,14 +301,17 @@ shinyServer(function(input, output) {
     plt <- formstack.master %>%
       dplyr::filter(site == input$funnel.name) %>%
       dplyr::group_by(os) %>%
-      dplyr::count() %>%
+      dplyr::summarise(n = n(),
+                       Yes = (sum(info_found == "Yes") / n) * 100,
+                       No = sum(info_found == "No") / n) %>%
       dplyr::arrange(desc(n)) %>%
       dplyr::slice(1:10) %>%
-      ggplot(aes(x = reorder(os, n), y = n)) +
+      ggplot(aes(x = reorder(os, n), y = n, fill = Yes)) +
       geom_bar(stat = "identity") +
       ggtitle("OS, Top 10") +
       xlab("") +
       coord_flip() +
+      scale_fill_continuous(name = "% Found <br>Content") +
       ylab("") +
       theme_bw()
     print(ggplotly(plt))

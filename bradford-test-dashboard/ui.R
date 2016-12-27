@@ -48,7 +48,7 @@ shinyUI(navbarPage(
                    "Dept of Revenue" = "dor",
                    "Education" = "edu"
                  ),
-                 selected = "anf"
+                 selected = "show.all"
                )
              ),
              plotlyOutput("formstack.response.plot.exec"),
@@ -59,6 +59,34 @@ shinyUI(navbarPage(
                plotlyOutput("formstack.affirmative.plot.exec")
              )
            )),
+  tabPanel("Conversions",
+    fluidRow(
+      splitLayout(
+        cellWidths = c("50%", "50%"),
+        selectInput(
+          "conversion.time.window",
+          "Time Frame:",
+          c("Daily" = "day",
+            "Weekly" = "week",
+            "Monthly" = "month"
+            )
+        )
+      ),
+      plotlyOutput("conversion.timeseries.plot"),
+      splitLayout(
+        cellWidths = c("50%", "30%", "18%"),
+        plotlyOutput("conversion.device.plot"),
+        plotlyOutput("conversion.os.plot"),
+        plotlyOutput("conversion.browser.plot")
+      ),
+      splitLayout(
+        cellWidths = c("50%", "30%", "18%"),
+        plotlyOutput("volume.device.plot"),
+        plotlyOutput("volume.os.plot"),
+        plotlyOutput("volume.browser.plot")
+      )
+    )
+  ),
   navbarMenu(
     "Analyst",
     tabPanel("Info"),

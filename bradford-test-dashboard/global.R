@@ -10,6 +10,7 @@ source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/make_plots
 
 options(scipen = 10000000)
 #### READ IN DATA ####
+# User Satisfaction
 formstack.master <- readRDS(paste0(DATA.DIR, "formstack_master.RDS"))
 
 referrer.breakouts.monthly <- readRDS(paste0(DATA.DIR, "referrer.breakouts.monthly.RDS"))
@@ -28,4 +29,7 @@ global.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.b
 site.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.breakouts",
                                      gsub.pattern = ".RDS")
 
-conversion.metrics <- readRDS(paste0(DATA.DIR, "conversion_metrics.RDS"))
+# Converions
+ga.conversions <- readRDS(paste0(DATA.DIR, "ga_master_conversions.RDS"))
+
+conversion.metrics <- readRDS(paste0(DATA.DIR, "no_conversion_metrics.RDS"))

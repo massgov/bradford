@@ -254,7 +254,7 @@ shinyServer(function(input, output) {
       ylab("")
   })
   
-  #### ANALYST - USER SATISFACTION FUNNELS ####
+  #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({
     
     if (input$funnel.name == "show.all") {
@@ -386,63 +386,6 @@ shinyServer(function(input, output) {
     options = list(
       pageLength = 5,
       autoWidth = TRUE,
-      dom = 'tp'))
-  
-  #### FORMSTACK - ENDPOINTS ####
-  output$formstack.response.plot.endpoints <- renderPlotly({
-    dat <- data.frame(referrer.summary.monthly) %>%
-      dplyr::filter(referrer == input$endpoint.name)
-    breakouts <- referrer.breakouts.monthly[[input$endpoint.name]]$loc %>%  # positions of the breakouts 
-      referrer.summary.monthly$timestamp[.]  # subset the date vector
-    plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
-                            x = "timestamp", y = "prop_affirmative")
-    print(ggplotly(plt)) # print the output of ggplotly
-  }) 
-  
-  output$formstack.volume.plot.endpoint.bar <- renderPlotly({
-    plt <- formstack.master %>% 
-      dplyr::filter(referrer == input$endpoint.name) %>%
-      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
-                                                      unit = "month")) %>%
-      dplyr::group_by(timestamp) %>%
-      dplyr::count() %>%
-      makeVolumeBarPlot(x = "timestamp", y = "n", ylab = "Response Count")
-    print(ggplotly(plt))  
+      dom = 'tp')
+    )
   })
-  
-  
-  output$formstack.os.plot.endpoint <- renderPlotly({
-    plt <- formstack.master %>%
-      dplyr::filter(referrer == input$endpoint.name) %>%
-      dplyr::group_by(os) %>%
-      dplyr::count() %>%
-      dplyr::arrange(desc(n)) %>%
-      dplyr::slice(1:10) %>%
-      ggplot(aes(x = reorder(os, n), y = n)) +
-      geom_bar(stat = "identity") +
-      ggtitle("OS, Top 10") +
-      xlab("") +
-      coord_flip() +
-      ylab("") +
-      theme_bw()
-    print(ggplotly(plt))
-  })  
-  
-  output$formstack.affirmative.plot.endpoint <- renderPlotly({
-    plt <- formstack.master %>% 
-      dplyr::filter(referrer == input$endpoint.name) %>%
-      dplyr::group_by(info_found) %>%
-      dplyr::count() %>%
-      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?")
-    print(ggplotly(plt))
-  })
-  
-  output$formstack.table.endpoint <- renderDataTable(formstack.master %>%
-                                                     dplyr::filter(referrer == input$endpoint.name) %>%
-                                                     dplyr::select(-c(site, referrer, child_content_author, 
-                                                                      ip_addr:lat, time_of_day)),
-                                                   options = list(
-                                                     pageLength = 5,
-                                                     autoWidth = TRUE,
-                                                     dom = 'tp'))
-})

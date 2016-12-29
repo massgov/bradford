@@ -94,7 +94,7 @@ shinyUI(navbarPage(
     "----",
     "",
     tabPanel(
-      "User Satisfaction - Funnels",
+      "User Satisfaction",
       fluidRow(
         splitLayout(
           cellWidths = c("50%", "50%"),
@@ -129,30 +129,6 @@ shinyUI(navbarPage(
         br(),
         dataTableOutput("formstack.table.funnel")
       )
-    ),
-    tabPanel(
-      "User Satisfaction - Endpoints",
-      fluidRow(
-        selectInput(
-          "endpoint.name",
-          "Endpoint:",
-          c(
-            "/lwd/unemployment-insur/programs-and-services-for-claimants/training-opportunities-program/" = "http://www.mass.gov/lwd/unemployment-insur/programs-and-services-for-claimants/training-opportunities-program/",
-            "/lwd/unemployment-insur/business-support/worksharing/" = "http://www.mass.gov/lwd/unemployment-insur/business-support/worksharing/",
-            "/portal/employment/finding-a-job/" = "http://www.mass.gov/portal/employment/finding-a-job/"
-          ),
-          selected = "http://www.mass.gov/portal/employment/finding-a-job/"
-        )
-      ),
-      plotlyOutput("formstack.response.plot.endpoints"),
-      plotlyOutput("formstack.volume.plot.endpoint.bar"),
-      splitLayout(
-        cellWidths = c("44%", "44%"),
-        plotlyOutput("formstack.os.plot.endpoint"),
-        plotlyOutput("formstack.affirmative.plot.endpoint")
-      ),
-      br(),
-      dataTableOutput("formstack.table.endpoint")
     )
   )
 ))

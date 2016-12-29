@@ -374,14 +374,19 @@ shinyServer(function(input, output) {
     print(ggplotly(plt))
   })
   
-  output$formstack.table.funnel <- renderDataTable(formstack.master %>%
-                                               dplyr::filter(site == input$funnel.name) %>%
-                                               dplyr::select(-c(site, child_content_author, 
-                                                                ip_addr:lat, time_of_day)),
-                                             options = list(
-                                               pageLength = 5,
-                                               autoWidth = TRUE,
-                                               dom = 'tp'))
+  output$formstack.table.funnel <- renderDataTable(
+    if (input$funnel.name == "show.all") {
+      formstack.master %>%
+        dplyr::select(-c(site, child_content_author, ip_addr:lat, time_of_day))
+    } else {
+      formstack.master %>%
+        dplyr::filter(site == input$funnel.name) %>%
+        dplyr::select(-c(site, child_content_author, ip_addr:lat, time_of_day))
+    },
+    options = list(
+      pageLength = 5,
+      autoWidth = TRUE,
+      dom = 'tp'))
   
   #### FORMSTACK - ENDPOINTS ####
   output$formstack.response.plot.endpoints <- renderPlotly({

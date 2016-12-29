@@ -89,7 +89,8 @@ shinyUI(navbarPage(
   ),
   navbarMenu(
     "Analyst",
-    tabPanel("Info"),
+    tabPanel("Info",
+             htmlOutput("help.html")),
     "----",
     "",
     tabPanel(
@@ -108,12 +109,13 @@ shinyUI(navbarPage(
             "funnel.name",
             "Funnel:",
             c(
+              "All" = "show.all",
               "Admin and Finance" = "anf",
               "Courts" = "courts",
               "Dept of Revenue" = "dor",
               "Education" = "edu"
             ),
-            selected = "anf"
+            selected = "show.all"
           )
         ),
         plotlyOutput("formstack.response.plot.funnels"),

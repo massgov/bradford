@@ -2,16 +2,24 @@ library(shiny)
 
 shinyServer(function(input, output) {
   #### MAIN ####
-  # odds plot for metrics 
-  output$odds.plot <- renderPlotly({
-    limits = aes(ymax = odds_ratio + odds_ratio_se, ymin = odds_ratio - odds_ratio_se)
-    print(ggplotly(  # print the output of ggplotly
-      ggplot(conversion.metrics, aes(x = term, y = odds_ratio)) +
-        geom_bar(stat = "identity") +
-        ggtitle("Best Indicators That Someone Will Not Convert") +
-        geom_errorbar(limits, width = 0.15, color = "grey60") +
-        theme_bw()
-    ))
+  output$user.satisfaction.total <- renderValueBox({
+    user.satisfaction = ifelse(formstack.master$info_found == "Yes", 1, 0) %>%
+      mean() * 100
+    valueBox(
+      paste(as.character(round(user.satisfaction, 1)), "%"), # flip to char and ensure % sign is included
+      "Approval", icon = icon("thumbs-up", lib = "glyphicon"),
+      color = "yellow"
+    )
+  })
+  
+  output$conversions.valuebox.home <- renderValueBox({
+    conversion.rate = ifelse(ga.conversions$conversion == "Conversion", 1, 0) %>%
+      mean(.) * 100  # make it a percentage
+    valueBox(
+      paste(as.character(round(conversion.rate, 1)), "%"), # flip to char and ensure % sign is included 
+      "Conversions", icon = icon("ok", lib = "glyphicon"),
+      color = "yellow"
+    )
   })
   
   output$formstack.response.plot.global.home <- renderPlotly({
@@ -48,6 +56,46 @@ shinyServer(function(input, output) {
   })
   
   #### USER SATISFACTION ####
+  output$user.satisfaction.funnel <- renderValueBox({
+    if (input$exec.funnel.name != "show.all") {
+      formstack.master = formstack.master %>% 
+        dplyr::filter(site == input$exec.funnel.name)
+    }
+    user.satisfaction = ifelse(formstack.master$info_found == "Yes", 1, 0) %>%
+      mean() * 100
+    valueBox(
+      paste(as.character(round(user.satisfaction, 1)), "%"), # flip to char and ensure % sign is included 
+      "Satisfied", icon = icon("thumbs-up", lib = "glyphicon"),
+      color = "yellow"
+    )
+  })
+  
+  output$mean.submission.formstack <- renderValueBox({
+    if (input$exec.funnel.name != "show.all") {
+      formstack.master = formstack.master %>%
+        dplyr::filter(site == input$exec.funnel.name) 
+    }
+    if (input$exec.slot.number == 2) {  # if weekly
+      formstack.count = formstack.master %>%
+        dplyr::group_by(lubridate::floor_date(submit_time, unit = "week")) %>%
+        dplyr::count() 
+      valueBox(
+        round(mean(formstack.count$n), 0), "Average Submissions / Week", 
+        icon = icon("list", lib = "glyphicon"),
+        color = "yellow"
+      )
+    } else {
+      formstack.count = formstack.master %>%
+        dplyr::group_by(lubridate::floor_date(submit_time, unit = "month")) %>%
+        dplyr::count()
+      valueBox(
+        round(mean(formstack.count$n), 0), "Average Submissions / Month", 
+        icon = icon("list", lib = "glyphicon"),
+        color = "yellow"
+      )
+    } 
+  })
+  
   output$formstack.response.plot.exec <- renderPlotly({
     if (input$exec.funnel.name == "show.all") { # show global stats if all is selected 
       dat = data.frame(global.summary.frames[[as.numeric(input$exec.slot.number)]]) 
@@ -147,6 +195,47 @@ shinyServer(function(input, output) {
   })
   
   #### CONVERSIONS ####
+  output$conversions.valuebox <- renderValueBox({
+    conversion.rate = ifelse(ga.conversions$conversion == "Conversion", 1, 0) %>%
+      mean(.) * 100  # make it a percentage
+    valueBox(
+      paste(as.character(round(conversion.rate, 1)), "%"), # flip to char and ensure % sign is included 
+      "Conversions", icon = icon("ok", lib = "glyphicon"),
+      color = "yellow"
+    )
+  })
+  
+  output$session.count.valuebox <- renderValueBox({
+    if (input$conversion.time.window == "day") {
+      n.sessions = ga.conversions %>%
+        dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "day")) %>%
+        dplyr::count() 
+      valueBox(
+        round(mean(n.sessions$n), 0), "Average Sessions / Day",
+        icon = icon("transfer", lib = "glyphicon"),
+        color = "yellow"
+      )
+    } else if (input$conversion.time.window == "week") {
+      n.sessions = ga.conversions %>%
+        dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "week")) %>%
+        dplyr::count() 
+      valueBox(
+        round(mean(n.sessions$n), 0), "Average Sessions / Week",
+        icon = icon("transfer", lib = "glyphicon"),
+        color = "yellow"
+      )
+    } else {
+      n.sessions = ga.conversions %>%
+        dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "month")) %>%
+        dplyr::count() 
+      valueBox(
+        round(mean(n.sessions$n), 0), "Average Sessions / Month",
+        icon = icon("transfer", lib = "glyphicon"),
+        color = "yellow"
+      )
+    }
+  })
+  
   # conversion rate over time
   output$conversion.timeseries.plot <- renderPlotly({
     ga.conversions %>%
@@ -253,10 +342,131 @@ shinyServer(function(input, output) {
       xlab("") +
       ylab("")
   })
+  #### FUNNEL PERFORMANCE ####
+  output$funnel.path.count.valuebox <- renderValueBox({
+    funnel.session.count = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["n"]]
+    valueBox(funnel.session.count, subtitle = "Sessions in Funnel", 
+             icon = icon("transfer", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
+  output$funnel.conversion.rate.valuebox <- renderValueBox({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    # calculate the conversion rate for a given funnel hash
+    funnel.conversion.rate = ga.conversions %>% 
+      dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::summarise(n = n(),
+                       n_conversion = sum(conversion == "Conversion"),
+                       conversion_rate = paste(
+                         round(100 * (n_conversion / n), 2), "%")
+                       ) %>%
+      .[["conversion_rate"]]
+    valueBox(funnel.conversion.rate, subtitle = "Funnel Conversion Rate",
+             icon = icon("ok", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
+  output$funnel.path.plot <- renderPlot({
+    ga.session.hashes.top20[[as.numeric(input$funnel.slot.n)]] %>%
+      dplyr::mutate(path_step = 1:nrow(.), 
+                    fixed_y = rep(1, nrow(.))) %>%
+      ggplot(aes(x = path_step, y = fixed_y, color = pagePath, label = pagePath)) +
+      geom_path(group = 1, 
+                show.legend = F) +
+      geom_label(aes(fill = factor(pagePath)), size = 4, colour = "white", fontface = "bold") +
+      theme_minimal() +
+      xlim(1 , padXlim(plot.item.count = nrow(ga.session.hashes.top20[[as.numeric(input$funnel.slot.n)]]),
+                       offset = .5, item.limit = 3)) +
+      theme(legend.position = "top",
+            legend.direction = "horizontal",
+            panel.border = element_blank(), 
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(), 
+            axis.line = element_blank(),
+            #axis.title.x = element_blank(),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            #axis.title.y = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks.y = element_blank()) +
+      guides(color = F, size = F, fill = F) +
+      xlab("") +
+      ylab("")
+  })
+  
+  output$funnel.medium.plot <- renderPlotly({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    
+    plt <- ga.conversions %>%
+      dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
+      dplyr::group_by(medium, conversion) %>%
+      dplyr::count() %>%
+      ggplot(aes(x = medium, y = n, fill = conversion)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      theme_bw() +
+      guides(fill = F) +
+      theme(legend.position = "bottom") +
+      scale_fill_manual(values = cb.palette) +
+      ggtitle("Traffic Medium") +
+      xlab("") +
+      ylab("")
+    
+    print(ggplotly(plt) %>% layout(showlegend = FALSE))
+  })
+    
+  output$funnel.device.plot <- renderPlotly({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    
+    plt <- ga.conversions %>%
+      dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::group_by(deviceCategory, conversion) %>%
+      dplyr::count() %>%
+      ggplot(aes(x = deviceCategory, y = n, fill = conversion)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      theme_bw() +
+      guides(fill = F) +
+      theme(legend.position = "bottom") +
+      scale_fill_manual(values = cb.palette) +
+      ggtitle("Device Category") +
+      xlab("") +
+      ylab("")
+    
+    print(ggplotly(plt) %>% layout(showlegend = FALSE))
+  })
+  
+  output$funnel.browser.plot <- renderPlotly({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    
+    plt <- ga.conversions %>%
+      dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::group_by(browser, conversion) %>%
+      dplyr::count() %>%
+      ggplot(aes(x = browser, y = n, fill = conversion)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      theme_bw() +
+      guides(fill = F) +
+      theme(legend.position = "bottom") +
+      scale_fill_manual(values = cb.palette) +
+      ggtitle("Browser") +
+      xlab("") +
+      ylab("")
+    
+    print(ggplotly(plt) %>% layout(showlegend = FALSE))
+  })
   
   #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({
-    
     if (input$funnel.name == "show.all") {
       dat <- data.frame(global.summary.frames[[as.numeric(input$funnel.slot.number)]]) 
       breakouts <- global.breakout.frames[[as.numeric(input$funnel.slot.number)]]$loc %>%  # positions of the breakouts 

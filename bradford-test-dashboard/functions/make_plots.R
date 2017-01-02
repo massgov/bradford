@@ -68,3 +68,12 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
     ylab(ylab) +
     theme_bw()
 }
+
+#### PLOT HELPERS ####
+padXlim <- function(plot.item.count, item.limit = 4,  offset = .5) {
+  if (plot.item.count > item.limit) {
+    return(plot.item.count + offset)
+  } else {
+    return(plot.item.count)
+  }
+}

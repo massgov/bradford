@@ -8,7 +8,11 @@ DATA.DIR <- "~/Documents/GitHub/bradford/data/"
 source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/read_data.R")
 source("~/Documents/GitHub/bradford/bradford-test-dashboard/functions/make_plots.R")
 
+# color blind palette 
+cb.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 options(scipen = 10000000)
+
 #### READ IN DATA ####
 # User Satisfaction
 formstack.master <- readRDS(paste0(DATA.DIR, "formstack_master.RDS"))
@@ -33,3 +37,8 @@ site.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.break
 ga.conversions <- readRDS(paste0(DATA.DIR, "ga_master_conversions.RDS"))
 
 conversion.metrics <- readRDS(paste0(DATA.DIR, "no_conversion_metrics.RDS"))
+
+# Funnel Performance 
+ga.path.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_path_hashes_top_20.RDS"))
+
+ga.session.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_session_hashes_top_20.RDS"))

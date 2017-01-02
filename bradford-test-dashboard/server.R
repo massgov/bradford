@@ -428,6 +428,7 @@ shinyServer(function(input, output) {
     
     plt <- ga.conversions %>%
       dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
       dplyr::group_by(deviceCategory, conversion) %>%
       dplyr::count() %>%
       ggplot(aes(x = deviceCategory, y = n, fill = conversion)) +
@@ -450,6 +451,7 @@ shinyServer(function(input, output) {
     
     plt <- ga.conversions %>%
       dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
       dplyr::group_by(browser, conversion) %>%
       dplyr::count() %>%
       ggplot(aes(x = browser, y = n, fill = conversion)) +

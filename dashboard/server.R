@@ -3,45 +3,66 @@ library(shiny)
 shinyServer(function(input, output) {
   #### MAIN ####
   output$user.satisfaction.total <- renderValueBox({
-    user.satisfaction = ifelse(formstack.master$info_found == "Yes", 1, 0) %>%
-      mean() * 100
+    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found, 
+                                                  factor.value = "Yes") %>%
+      prettyPercent(round.n = 1)  # flip to char and ensure % sign is included
     valueBox(
-      paste(as.character(round(user.satisfaction, 1)), "%"), # flip to char and ensure % sign is included
+      user.satisfaction,  
       "Approval", icon = icon("thumbs-up", lib = "glyphicon"),
       color = "yellow"
     )
   })
   
   output$conversions.valuebox.home <- renderValueBox({
-    conversion.rate = ifelse(ga.conversions$conversion == "Conversion", 1, 0) %>%
-      mean(.) * 100  # make it a percentage
+    conversion.rate = factorPercentage(factor.vec = ga.conversions$conversion, 
+                                                factor.value = "Conversion") %>%
+      prettyPercent(round.n = 1)
     valueBox(
-      paste(as.character(round(conversion.rate, 1)), "%"), # flip to char and ensure % sign is included 
+      conversion.rate, 
       "Conversions", icon = icon("ok", lib = "glyphicon"),
       color = "yellow"
     )
   })
   
+  output$home.client.count.valuebox <- renderValueBox({
+    n.clients = length(unique(ga.conversions$clientID))
+    valueBox(n.clients, 
+             subtitle = "Unique Clients", 
+             icon = icon("user", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
+  output$home.session.count.valuebox <- renderValueBox({
+    n.sessions = length(unique(ga.conversions$sessionID))
+    valueBox(n.sessions,
+             subtitle = "Sessions",
+             icon = icon("transfer", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
   output$formstack.response.plot.global.home <- renderPlotly({
     dat = data.frame(global.summary.frames[[as.numeric(input$global.slot.number.home)]])
+    
     breakouts = global.breakout.frames[[as.numeric(input$global.slot.number.home)]]$loc %>%  # positions of the breakouts 
       global.summary.frames[[as.numeric(input$global.slot.number.home)]]$timestamp[.]  # subset the date vector
-    plt = makeBreakoutPlot(dat = dat, breakouts = breakouts,
+    
+    makeBreakoutPlot(dat = dat, breakouts = breakouts,
                             x = "timestamp", y = "prop_affirmative",
-                            plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
-    print(ggplotly(plt)) # print the output of ggplotly
+                            plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
+    printGGplotly() # print the output of ggplotly
   })
   
   output$formstack.volume.plot.global.area <- renderPlotly({
     time.unit = c("month", "week")
-    plt = formstack.master %>% 
-      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
-                                                      unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
+    formstack.master %>% 
+      dplyr::mutate(
+        timestamp = lubridate::floor_date(submit_time, 
+                                          unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
       dplyr::group_by(timestamp, site) %>%
       dplyr::count() %>%
-     makeVolumeAreaPlot(x = "timestamp", y = "n", fill = "site",
-                        plot.title = "Funnel Response Count - Formstack")
-    print(ggplotly(plt))
+      makeVolumeAreaPlot(x = "timestamp", y = "n", fill = "site",
+                         plot.title = "Funnel Response Count - Formstack") %>%
+      printGGplotly()
   })
   
   output$formstack.volume.plot.home.bar <- renderPlotly({
@@ -52,7 +73,7 @@ shinyServer(function(input, output) {
       dplyr::group_by(timestamp) %>%
       dplyr::count() %>%
       makeVolumeBarPlot(x = "timestamp", y = "n", plot.title = "Global Reponse Count - Formstack")
-    print(ggplotly(plt))
+    printGGplotly(plt)
   })
   
   #### USER SATISFACTION ####
@@ -61,11 +82,13 @@ shinyServer(function(input, output) {
       formstack.master = formstack.master %>% 
         dplyr::filter(site == input$exec.funnel.name)
     }
-    user.satisfaction = ifelse(formstack.master$info_found == "Yes", 1, 0) %>%
-      mean() * 100
+    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found, 
+                                                  factor.value = "Yes") %>%
+    prettyPercent(round.n = 1)
     valueBox(
-      paste(as.character(round(user.satisfaction, 1)), "%"), # flip to char and ensure % sign is included 
-      "Satisfied", icon = icon("thumbs-up", lib = "glyphicon"),
+      user.satisfaction, # flip to char and ensure % sign is included 
+      subtitle = "Satisfied", 
+      icon = icon("thumbs-up", lib = "glyphicon"),
       color = "yellow"
     )
   })
@@ -78,18 +101,20 @@ shinyServer(function(input, output) {
     if (input$exec.slot.number == 2) {  # if weekly
       formstack.count = formstack.master %>%
         dplyr::group_by(lubridate::floor_date(submit_time, unit = "week")) %>%
-        dplyr::count() 
+        meanCount(round.n = 0)
       valueBox(
-        round(mean(formstack.count$n), 0), "Average Submissions / Week", 
+        formstack.count, 
+        subtitle = "Average Submissions / Week", 
         icon = icon("list", lib = "glyphicon"),
         color = "yellow"
       )
     } else {
       formstack.count = formstack.master %>%
         dplyr::group_by(lubridate::floor_date(submit_time, unit = "month")) %>%
-        dplyr::count()
+        meanCount(round.n = 0)
       valueBox(
-        round(mean(formstack.count$n), 0), "Average Submissions / Month", 
+        formstack.count, 
+        subtitle = "Average Submissions / Month", 
         icon = icon("list", lib = "glyphicon"),
         color = "yellow"
       )
@@ -98,22 +123,28 @@ shinyServer(function(input, output) {
   
   output$formstack.response.plot.exec <- renderPlotly({
     if (input$exec.funnel.name == "show.all") { # show global stats if all is selected 
-      dat = data.frame(global.summary.frames[[as.numeric(input$exec.slot.number)]]) 
+      dat = data.frame(global.summary.frames[[as.numeric(input$exec.slot.number)]])
+      
       breakouts = global.breakout.frames[[as.numeric(input$exec.slot.number)]]$loc %>%  # positions of the breakouts 
         global.summary.frames[[as.numeric(input$exec.slot.number)]]$timestamp[.]  # subset the date vector
-      plt = makeBreakoutPlot(dat = dat, breakouts = breakouts,
+      
+      makeBreakoutPlot(dat = dat, breakouts = breakouts,
                               x = "timestamp", y = "prop_affirmative", 
-                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
-      return(print(ggplotly(plt)))
+                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
+      
+      printGGplotly()
     } else {
       dat = data.frame(site.summary.frames[[as.numeric(input$exec.slot.number)]]) %>%
         dplyr::filter(site == input$exec.funnel.name)
+      
       breakouts = site.breakout.frames[[as.numeric(input$exec.slot.number)]][[input$exec.funnel.name]]$loc %>%  # positions of the breakouts 
         site.summary.frames[[as.numeric(input$exec.slot.number)]]$timestamp[.]  # subset the date vector
-      plt = makeBreakoutPlot(dat = dat, breakouts = breakouts,
+      
+      makeBreakoutPlot(dat = dat, breakouts = breakouts,
                               x = "timestamp", y = "prop_affirmative", 
-                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
-      return(print(ggplotly(plt))) # print the output of ggplotly
+                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
+      
+      printGGplotly() 
     }
   }) 
   
@@ -143,8 +174,9 @@ shinyServer(function(input, output) {
       xlab("") +
       ylab("% of Users Satisfied") +
       ggtitle("User Satisfaction Across Content Group - Top 10") +
-      theme_bw()
-    print(ggplotly(plt))
+      theme_bw() 
+    
+    printGGplotly(plt)
   })
   
   output$formstack.os.plot.exec <- renderPlotly({
@@ -173,8 +205,9 @@ shinyServer(function(input, output) {
       xlab("") +
       coord_flip() +
       ylab("% of Users Satisfied") +
-      theme_bw()
-    print(ggplotly(plt))
+      theme_bw() 
+    
+      printGGplotly(plt)
   })  
   
   output$formstack.affirmative.plot.exec <- renderPlotly({
@@ -188,19 +221,21 @@ shinyServer(function(input, output) {
         dplyr::group_by(info_found) %>%
         dplyr::count()
     }
-    plt <- dat %>%
+    dat %>%
       makeAffirmativeBarPlot(x = "info_found", y = "n", 
-                             plot.title = "Satisfied and Unsatisfied Users")
-    print(ggplotly(plt))
+                             plot.title = "Satisfied and Unsatisfied Users") %>%
+    printGGplotly()
   })
   
   #### CONVERSIONS ####
   output$conversions.valuebox <- renderValueBox({
-    conversion.rate = ifelse(ga.conversions$conversion == "Conversion", 1, 0) %>%
-      mean(.) * 100  # make it a percentage
+    conversion.rate = factorPercentage(factor.vec = ga.conversions$conversion, 
+                                                factor.value = "Conversion") %>%
+      prettyPercent(round.n = 1)
     valueBox(
-      paste(as.character(round(conversion.rate, 1)), "%"), # flip to char and ensure % sign is included 
-      "Conversions", icon = icon("ok", lib = "glyphicon"),
+      conversion.rate, 
+      subtitle = "Conversions", 
+      icon = icon("ok", lib = "glyphicon"),
       color = "yellow"
     )
   })
@@ -209,39 +244,53 @@ shinyServer(function(input, output) {
     if (input$conversion.time.window == "day") {
       n.sessions = ga.conversions %>%
         dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "day")) %>%
-        dplyr::count() 
+        meanCount(round.n = 0)
+        
       valueBox(
-        round(mean(n.sessions$n), 0), "Average Sessions / Day",
+        n.sessions, 
+        subtitle = "Average Sessions / Day",
         icon = icon("transfer", lib = "glyphicon"),
         color = "yellow"
       )
     } else if (input$conversion.time.window == "week") {
       n.sessions = ga.conversions %>%
         dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "week")) %>%
-        dplyr::count() 
+        meanCount(round.n = 0)
+      
       valueBox(
-        round(mean(n.sessions$n), 0), "Average Sessions / Week",
+        n.sessions, 
+        subtitle = "Average Sessions / Week",
         icon = icon("transfer", lib = "glyphicon"),
         color = "yellow"
       )
     } else {
       n.sessions = ga.conversions %>%
         dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "month")) %>%
-        dplyr::count() 
+        meanCount(round.n = 0)
+      
       valueBox(
-        round(mean(n.sessions$n), 0), "Average Sessions / Month",
+        n.sessions, 
+        subtitle = "Average Sessions / Month",
         icon = icon("transfer", lib = "glyphicon"),
         color = "yellow"
       )
     }
   })
   
+  output$conversions.client.count.valuebox <- renderValueBox({
+    n.clients = length(unique(ga.conversions$clientID))
+    valueBox(n.clients, 
+             subtitle = "Unique Clients", 
+             icon = icon("user", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
   # conversion rate over time
   output$conversion.timeseries.plot <- renderPlotly({
-    ga.conversions %>%
-      dplyr::mutate(timestamp = lubridate::floor_date(
+    plt = ga.conversions %>%
+      dplyr::mutate(timestamp = lubridate::floor_date( # floor to input time window
         lubridate::ymd_hms(hitTimestamp), unit = input$conversion.time.window
-      )) %>%
+        )) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::summarise(n = n(),
                        conversion = sum(conversion == "Conversion"),
@@ -253,12 +302,13 @@ shinyServer(function(input, output) {
       xlab("") +
       ylab("") +
       ggtitle("Percent of Sessions Converting")
+    printGGplotly(plt)
   })
 
   # conversion percentages by key categorical variables
   
   output$conversion.device.plot <- renderPlotly({
-    ga.conversions %>% 
+    plt = ga.conversions %>% 
       dplyr::select(deviceCategory, conversion) %>%
       dplyr::group_by(deviceCategory) %>%
       dplyr::summarise(n = n(),
@@ -270,10 +320,11 @@ shinyServer(function(input, output) {
       ggtitle("Conversions by Device Category") +
       xlab("") +
       ylab("Percent of Sessions Converting")
+    printGGplotly(plt)
   })
   
   output$conversion.os.plot <- renderPlotly({
-    ga.conversions %>% 
+    plt = ga.conversions %>% 
       dplyr::select(operatingSystem, conversion) %>%
       dplyr::group_by(operatingSystem) %>%
       dplyr::summarise(n = n(),
@@ -286,10 +337,12 @@ shinyServer(function(input, output) {
       ggtitle("Conversions by Operating System") +
       xlab("") +
       ylab("")
+    
+    printGGplotly(plt)
   })
   
   output$conversion.browser.plot <- renderPlotly({
-    ga.conversions %>% 
+   plt =  ga.conversions %>% 
       dplyr::select(browser, conversion) %>%
       dplyr::group_by(browser) %>%
       dplyr::summarise(n = n(),
@@ -302,11 +355,13 @@ shinyServer(function(input, output) {
       ggtitle("Conversions by Browser") +
       xlab("") +
       ylab("")
+   
+   printGGplotly(plt)
   })
   
   # session volume by key categorical variables
   output$volume.device.plot <- renderPlotly({
-    ga.conversions %>% 
+    plt = ga.conversions %>% 
       dplyr::group_by(deviceCategory) %>%
       dplyr::count() %>% 
       ggplot(aes(x = deviceCategory, y = n)) +
@@ -315,10 +370,12 @@ shinyServer(function(input, output) {
       ggtitle("Sessions by Device Category") +
       xlab("") +
       ylab("Count")
+    
+    printGGplotly(plt)
   })
   
   output$volume.os.plot <- renderPlotly({
-    ga.conversions %>% 
+    plt = ga.conversions %>% 
       dplyr::group_by(operatingSystem) %>%
       dplyr::count() %>% 
       ggplot(aes(x = operatingSystem, y = n)) +
@@ -328,10 +385,12 @@ shinyServer(function(input, output) {
       ggtitle("Sessions by Operating System") +
       xlab("") +
       ylab("")
+    
+    printGGplotly(plt)
   })
   
   output$volume.browser.plot <- renderPlotly({
-    ga.conversions %>% 
+   plt =  ga.conversions %>% 
       dplyr::group_by(browser) %>%
       dplyr::count() %>% 
       ggplot(aes(x = browser, y = n)) +
@@ -341,13 +400,17 @@ shinyServer(function(input, output) {
       ggtitle("Sessions by Browser") +
       xlab("") +
       ylab("")
+   
+   printGGplotly(plt)
   })
   #### FUNNEL PERFORMANCE ####
   output$funnel.path.count.valuebox <- renderValueBox({
     funnel.session.count = ga.path.hashes.top20 %>%
       dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
       .[["n"]]
-    valueBox(funnel.session.count, subtitle = "Sessions in Funnel", 
+    
+    valueBox(funnel.session.count, 
+             subtitle = "Sessions in Funnel", 
              icon = icon("transfer", lib = "glyphicon"),
              color = "yellow")
   })
@@ -359,18 +422,56 @@ shinyServer(function(input, output) {
     # calculate the conversion rate for a given funnel hash
     funnel.conversion.rate = ga.conversions %>% 
       dplyr::filter(pathHash == hash.selected) %>%
-      dplyr::summarise(n = n(),
-                       n_conversion = sum(conversion == "Conversion"),
-                       conversion_rate = paste(
-                         round(100 * (n_conversion / n), 2), "%")
-                       ) %>%
+      dplyr::summarise(
+        n = n(),
+        n_conversion = sum(conversion == "Conversion"),
+        conversion_rate = prettyPercent(num = n_conversion / n, 
+                                        round.n = 2, is.percent.points = F)
+        ) %>%
       .[["conversion_rate"]]
-    valueBox(funnel.conversion.rate, subtitle = "Funnel Conversion Rate",
+    
+    valueBox(funnel.conversion.rate, 
+             subtitle = "Funnel Conversion Rate",
              icon = icon("ok", lib = "glyphicon"),
              color = "yellow")
   })
   
+  output$funnel.client.count.valuebox <- renderValueBox({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    # calculate n clients for current hash
+    funnel.client.count = ga.conversions %>%
+      dplyr::filter(pathHash == hash.selected) %>%
+      summarise(n_clients = length(unique(clientID)))  %>%
+      .[["n_clients"]]
+    
+    valueBox(funnel.client.count,
+             subtitle = "Unique Clients",
+             icon = icon("user", lib = "glyphicon"),
+             color = "yellow")
+  })
+  
+  output$funnel.median.client.session.valuebox <- renderValueBox({
+    hash.selected = ga.path.hashes.top20 %>%
+      dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
+      .[["pathHash"]]
+    
+    funnel.client.session.median = ga.conversions %>%
+      dplyr::filter(pathHash == hash.selected) %>%
+      dplyr::group_by(clientID) %>%
+      dplyr::count() %>%
+      .[["n"]] %>%
+      median()
+    
+      valueBox(funnel.client.session.median,
+               subtitle = "Median Sessions / Client", 
+               icon = icon("tasks", lib = "glyphicon"),
+               color = "yellow")
+  })
+  
   output$funnel.path.plot <- renderPlot({
+    # this has to be ggplot for now because of a lack of support for geom_GeomLabel() within plotly
     ga.session.hashes.top20[[as.numeric(input$funnel.slot.n)]] %>%
       dplyr::mutate(path_step = 1:nrow(.), 
                     fixed_y = rep(1, nrow(.))) %>%
@@ -387,10 +488,8 @@ shinyServer(function(input, output) {
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(), 
             axis.line = element_blank(),
-            #axis.title.x = element_blank(),
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank(),
-            #axis.title.y = element_blank(),
             axis.text.y = element_blank(),
             axis.ticks.y = element_blank()) +
       guides(color = F, size = F, fill = F) +
@@ -403,7 +502,7 @@ shinyServer(function(input, output) {
       dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
       .[["pathHash"]]
     
-    plt <- ga.conversions %>%
+    plt = ga.conversions %>%
       dplyr::filter(pathHash == hash.selected) %>%
       dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
       dplyr::group_by(medium, conversion) %>%
@@ -418,7 +517,7 @@ shinyServer(function(input, output) {
       xlab("") +
       ylab("")
     
-    print(ggplotly(plt) %>% layout(showlegend = FALSE))
+    print(ggplotly(plt) %>% layout(showlegend = FALSE))  # need to do this to hide legend
   })
     
   output$funnel.device.plot <- renderPlotly({
@@ -426,7 +525,7 @@ shinyServer(function(input, output) {
       dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
       .[["pathHash"]]
     
-    plt <- ga.conversions %>%
+    plt = ga.conversions %>%
       dplyr::filter(pathHash == hash.selected) %>%
       dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
       dplyr::group_by(deviceCategory, conversion) %>%
@@ -449,7 +548,7 @@ shinyServer(function(input, output) {
       dplyr::slice(as.numeric(input$funnel.slot.n)) %>%
       .[["pathHash"]]
     
-    plt <- ga.conversions %>%
+    plt = ga.conversions %>%
       dplyr::filter(pathHash == hash.selected) %>%
       dplyr::mutate(conversion = forcats::fct_relevel(conversion, "Conversion")) %>%
       dplyr::group_by(browser, conversion) %>%
@@ -470,21 +569,25 @@ shinyServer(function(input, output) {
   #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({
     if (input$funnel.name == "show.all") {
-      dat <- data.frame(global.summary.frames[[as.numeric(input$funnel.slot.number)]]) 
-      breakouts <- global.breakout.frames[[as.numeric(input$funnel.slot.number)]]$loc %>%  # positions of the breakouts 
+      dat = data.frame(global.summary.frames[[as.numeric(input$funnel.slot.number)]]) 
+      
+      breakouts = global.breakout.frames[[as.numeric(input$funnel.slot.number)]]$loc %>%  # positions of the breakouts 
         global.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]  # subset the date vector
-      plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
+      
+      makeBreakoutPlot(dat = dat, breakouts = breakouts,
                               x = "timestamp", y = "prop_affirmative", 
-                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time")
-      return(print(ggplotly(plt)))
+                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
+      printGGplotly()
     } else {
-      dat <- data.frame(site.summary.frames[[as.numeric(input$funnel.slot.number)]]) %>%
+      dat = data.frame(site.summary.frames[[as.numeric(input$funnel.slot.number)]]) %>%
         dplyr::filter(site == input$funnel.name)
-      breakouts <- site.breakout.frames[[as.numeric(input$funnel.slot.number)]][[input$funnel.name]]$loc %>%  # positions of the breakouts 
+      
+      breakouts = site.breakout.frames[[as.numeric(input$funnel.slot.number)]][[input$funnel.name]]$loc %>%  # positions of the breakouts 
         site.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]
-      plt <- makeBreakoutPlot(dat = dat, breakouts = breakouts,
-                              x = "timestamp", y = "prop_affirmative")
-      return(print(ggplotly(plt))) # print the output of ggplotly
+      
+      makeBreakoutPlot(dat = dat, breakouts = breakouts,
+                              x = "timestamp", y = "prop_affirmative") %>%
+      printGGplotly() # print the output of ggplotly
     }
   }) 
   
@@ -504,8 +607,8 @@ shinyServer(function(input, output) {
         dplyr::group_by(timestamp) %>%
         dplyr::count()
     }
-    plt = makeVolumeBarPlot(df = dat, x = "timestamp", y = "n", ylab = "Response Count")
-    print(ggplotly(plt))  
+    makeVolumeBarPlot(df = dat, x = "timestamp", y = "n", ylab = "Response Count") %>%
+    printGGplotly()
   })
   
   output$formstack.volume.plot.funnel.endpoints <- renderPlotly({
@@ -536,7 +639,8 @@ shinyServer(function(input, output) {
       ylab("") +
       ggtitle("Endpoint Response Count") +
       theme_bw()
-    print(ggplotly(plt))
+    
+    printGGplotly(plt)
   })
   
   output$formstack.os.plot.funnel <- renderPlotly({
@@ -567,7 +671,8 @@ shinyServer(function(input, output) {
       scale_fill_continuous(name = "% Found <br>Content") +
       ylab("") +
       theme_bw()
-    print(ggplotly(plt))
+    
+    printGGplotly(plt)
   })  
   
   output$formstack.affirmative.plot.funnel <- renderPlotly({
@@ -581,9 +686,9 @@ shinyServer(function(input, output) {
         dplyr::group_by(info_found) %>%
         dplyr::count()
     }
-    plt = dat %>%
-      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?")
-    print(ggplotly(plt))
+    dat %>%
+      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?") %>%
+    printGGplotly()
   })
   
   output$formstack.table.funnel <- renderDataTable(

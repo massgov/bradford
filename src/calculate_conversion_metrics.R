@@ -24,10 +24,10 @@ ga.dims.user <- c("ga:dimension1", "ga:medium", "ga:deviceCategory", "ga:operati
 ga.metrics.user <- c("ga:sessionDuration")
 
 start.date <- "2016-12-14"
-end.date <- "2016-12-16"
+end.date <- "2016-12-28"
 
 # authorize with GA
-load("data/GA_token/pilot_token")
+load("~/Documents/GitHub/bradford/data/GA_token/pilot_token")
 RGoogleAnalytics::ValidateToken(token)
 
 #### IMPORT DATA ####
@@ -38,7 +38,7 @@ ga.master.events <- RGoogleAnalytics::Init(start.date = start.date,
                                     max.results = 99999,
                                     table.id = 'ga:132193522') %>%
   RGoogleAnalytics::QueryBuilder() %>%
-  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = F)
+  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = T)
 
 ga.master.sessions <- RGoogleAnalytics::Init(start.date = start.date, 
                                            end.date = end.date,
@@ -60,45 +60,49 @@ ga.master.user <- RGoogleAnalytics::Init(start.date = start.date,
 
 
 #### MUNGING ####
-ga.conversions <- ga.master.events %>%
+ga.no.conversion <- ga.master.events %>%
   dplyr::group_by(dimension1) %>%
   dplyr::summarise(no_conversion = ifelse("Conversion" %in% eventCategory == F, 1, 0))
 
-ga.master <- ga.master.sessions %>%
+ga.master.no.conversion <- ga.master.sessions %>%
   dplyr::group_by(dimension1) %>%  # group by session ID
   dplyr::mutate(hit_time_utc = lubridate::ymd_hms(dimension2)) %>%
   dplyr::filter(hit_time_utc == max(hit_time_utc)) %>%
   dplyr::full_join(ga.master.user, by = "dimension1") %>%
-  dplyr::full_join(ga.conversions, by = "dimension1") %>%
+  dplyr::full_join(ga.no.conversion, by = "dimension1") %>%
   dplyr::rename(sessionID = dimension1,  # naming which does not comply with style 
                 hitTimestamp = dimension2,
                 nodeID = dimension3,
-                clientID = dimension4) %>%
+                clientID = dimension4,
+                timeOnLastPage = timeOnPage) %>%
   dplyr::ungroup() %>%
   .[complete.cases(.),]  # remove records with NA
 
 #### MODEL ####
-conversion.logistic <- ga.master %>% 
-  dplyr::select(timeOnPage, medium:no_conversion, -browserSize) %>%
-  purrr::map_if(is.character, as.factor) %>%
-  data.frame() %>%
-  dplyr::mutate(
-    medium = relevel(medium, "(none)"),
-    deviceCategory = relevel(deviceCategory, "desktop"),
-    operatingSystem = relevel(operatingSystem, "Windows"),
-    browser = relevel(browser, "Chrome")) %>%
-  useful::build.x(no_conversion ~ ., data = .) %>%  
-  cbind(no_conversion = ga.master$no_conversion) %>%
-  data.frame(.) %>%
-  dplyr::select(-X.Intercept.) %>%
-  glm(data = ., no_conversion ~ . - 1, family = binomial(link = "logit")) 
+no.conversion.logistic <- ga.master.no.conversion %>% 
+     dplyr::select(timeOnLastPage, medium:no_conversion, -browserSize) %>%
+     purrr::map_if(is.character, as.factor) %>%
+     data.frame() %>%
+     dplyr::mutate(
+         medium = relevel(medium, "(none)"),
+         deviceCategory = relevel(deviceCategory, "desktop"),
+         operatingSystem = relevel(operatingSystem, "Windows"),
+         browser = relevel(browser, "Chrome")) %>%
+     useful::build.x(no_conversion ~ ., data = .) %>%  
+     cbind(no_conversion = ga.master.no.conversion$no_conversion) %>%
+     data.frame(.) %>%
+     dplyr::select(-X.Intercept.) %>%
+     glm(data = ., no_conversion ~ ., family = binomial(link = "logit"))
 
-conversion.metrics <- conversion.logistic %>%  
+# get the metrics out 
+no.conversion.metrics <- no.conversion.logistic %>%  
   broom::tidy() %>%  # convert to df 
   dplyr::mutate(odds_ratio = exp(estimate),  # Odds ratio aka gradient
-         var_diag = diag(vcov(conversion.logistic)),  # Variance of each coefficient
-         odds_ratio_se = sqrt(odds_ratio ^ 2 * var_diag)) %>% # Odds-ratio adjusted 
+         var_diag = diag(vcov(no.conversion.logistic)),  # Variance of each coefficient
+         odds_ratio_se = sqrt(odds_ratio ^ 2 * var_diag)) %>%  # Odds-ratio adjusted 
   dplyr::filter(p.value < .05)
-  
+
  #### SAVE DATA ####
-saveRDS(conversion.metrics, "data/conversion_metrics.RDS")
+saveRDS(no.conversion.metrics, "data/no_conversion_metrics.RDS")
+saveRDS(ga.master.no.conversion, "data/ga_master.RDS")
+saveRDS(ga.master.sessions, "data/ga_master_sessions.RDS")

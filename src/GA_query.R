@@ -14,7 +14,7 @@ ga.dims.events <- c("ga:pagePath", "ga:dimension1", "ga:dimension4", "ga:eventCa
                     "ga:eventAction")
 
 ga.dims.sessions <- c("ga:pagePath", "ga:dimension1", "ga:dimension2", "ga:dimension3", 
-                      "ga:dimension4", "ga:searchUsed")
+                      "ga:dimension4")
 
 ga.metrics.sessions <- c("ga:timeOnPage")
 
@@ -24,7 +24,7 @@ ga.dims.user <- c("ga:dimension1", "ga:medium", "ga:deviceCategory", "ga:operati
 ga.metrics.user <- c("ga:sessionDuration")
 
 start.date <- "2016-12-14"
-end.date <- "2017-01-02"
+end.date <- "2017-01-07"
 
 # authorize with GA
 load("~/Documents/GitHub/bradford/data/GA_token/pilot_token")
@@ -114,6 +114,6 @@ ga.master.conversion <- ga.master.conversion %>%
   dplyr::inner_join(ga.path.hashes, by = c("sessionID" = "dimension1")) 
 
 #### SAVE DATA ####
-saveRDS(ga.master.conversion, "data/ga_master_conversions.RDS")
-saveRDS(ga.path.hashes.top20, "data/ga_path_hashes_top_20.RDS")
-saveRDS(ga.session.hashes.top20, "data/ga_session_hashes_top_20.RDS")
+saveRDS(ga.master.conversion, "~/Documents/GitHub/bradford/dashboard/data/ga_master_conversions.RDS")
+saveRDS(ga.path.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_path_hashes_top_20.RDS")
+saveRDS(ga.session.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_session_hashes_top_20.RDS")

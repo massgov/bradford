@@ -19,7 +19,9 @@ shinyUI(navbarPage(
              splitLayout(
                cellWidths = c("25%", "25%", "25%", "25%"),
                valueBoxOutput("user.satisfaction.total"),
-               valueBoxOutput("conversions.valuebox.home")
+               valueBoxOutput("conversions.valuebox.home"),
+               valueBoxOutput("home.client.count.valuebox"),
+               valueBoxOutput("home.session.count.valuebox")
              ),
                #put a plot re: conversions over time here
              plotlyOutput("formstack.response.plot.global.home"),
@@ -84,7 +86,8 @@ shinyUI(navbarPage(
       splitLayout(
         cellWidths = c("25%", "25%", "25%", "25%"),
         valueBoxOutput("conversions.valuebox"),
-        valueBoxOutput("session.count.valuebox")
+        valueBoxOutput("session.count.valuebox"),
+        valueBoxOutput("conversions.client.count.valuebox")
         ),
       plotlyOutput("conversion.timeseries.plot"),
       splitLayout(
@@ -131,7 +134,9 @@ shinyUI(navbarPage(
     splitLayout(
       cellWidths = c("25%", "25%", "25%", "25%"),
       valueBoxOutput("funnel.conversion.rate.valuebox"),
-      valueBoxOutput("funnel.path.count.valuebox")
+      valueBoxOutput("funnel.path.count.valuebox"),
+      valueBoxOutput("funnel.client.count.valuebox"),
+      valueBoxOutput("funnel.median.client.session.valuebox")
     ),
     plotOutput("funnel.path.plot"),
     splitLayout(

@@ -24,7 +24,7 @@ ga.dims.user <- c("ga:dimension1", "ga:medium", "ga:deviceCategory", "ga:operati
 ga.metrics.user <- c("ga:sessionDuration")
 
 start.date <- "2016-12-14"
-end.date <- "2017-01-07"
+end.date <- as.character(lubridate::ymd(Sys.Date()))
 
 # authorize with GA
 load("~/Documents/GitHub/bradford/data/GA_token/pilot_token")

@@ -76,3 +76,5 @@ sudo cp -r ~/bradford/dashboard/* /srv/shiny-server/bradford
 
 #switch to port 80
 sudo sed -i '/listen 3838;/c\  listen 80;' /etc/shiny-server/shiny-server.conf
+
+sudo systemctl restart shiny-server

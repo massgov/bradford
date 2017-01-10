@@ -36,6 +36,8 @@ git clone https://github.com/massgov/bradford ~/
 
 # Install packages
 declare -a packages=('shiny'
+                     'reshape2'
+
                      'magrittr'
                      'dplyr'
                      'scales'
@@ -55,7 +57,7 @@ declare -a packages=('shiny'
                      )
 
 for package_name in "${packages[@]}"; do
-  sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/')\""
+  sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/', dependencies = TRUE)\""
 done
 
 # restart the server

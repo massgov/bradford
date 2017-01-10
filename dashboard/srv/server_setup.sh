@@ -46,7 +46,7 @@ declare -a packages=('shiny'
 
 for package_name in "${packages[@]}"; do
   echo "installing $package_name"
-  sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/', depenedencies = T)\""
+  sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/')\""
 done
 
 # restart the server

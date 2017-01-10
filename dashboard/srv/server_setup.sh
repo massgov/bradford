@@ -29,7 +29,7 @@ done
 
 # get and install shiny-server
 wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
-sudo gdebi -y ~/shiny-server-1.5.1.834-amd64.deb
+sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
 # get the bradford repo
 git clone https://github.com/massgov/bradford ~/

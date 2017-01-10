@@ -23,6 +23,8 @@ declare -a ubuntu_packages=('r-base'
                             'postgresql-contrib'
                             'libpq-dev'
                             'libmariadb-client-lgpl-dev'
+                            'libcairo2-dev'
+                            'r-cran-slam'
                             )
 for package_name in ${ubuntu_packages[@]}; do
   sudo apt-get install -y $package_name
@@ -38,7 +40,6 @@ git clone https://github.com/massgov/bradford ~/
 # Install packages
 declare -a packages=('shiny'
                      'reshape2'
-
                      'magrittr'
                      'dplyr'
                      'scales'

@@ -22,6 +22,7 @@ declare -a ubuntu_packages=('r-base'
                             'postgresql'
                             'postgresql-contrib'
                             'libpq-dev'
+                            'libmariadb-client-lgpl-dev'
                             )
 for package_name in ${ubuntu_packages[@]}; do
   sudo apt-get install -y $package_name

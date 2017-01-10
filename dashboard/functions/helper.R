@@ -31,6 +31,9 @@ prettyPercent <- function(num, round.n = 1, is.percent.points = T) {
   if (!is.numeric(num) | !is.numeric(round.n)) {
     stop("num and round.n must be of class numeric!")
   } 
+  if (round.n < 0) {
+    stop("round.n must be greater than or equal to 0")
+  }
   if (num > 100) {
     warning("num > 100")
   } 

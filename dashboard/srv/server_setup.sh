@@ -1,25 +1,20 @@
 #!/bin/bash
 # Update system
 sudo apt-get update
-sudo apt-get upgrade
 sudo apt-get dist-upgrade
-
-# Install emacs
-sudo apt-get install emacs24
 
 # Add new R CRAN
 sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
 
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-sudo apt-get update
 sudo apt-get install r-base
 sudo apt-get install r-cran-xml libcurl4-gnutls-dev libxml2-dev
 sudo apt-get install openssl
 sudo apt-get install libssl-dev
 sudo apt-get install gdebi-core
 sudo apt-get install jq
-wget https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.4.1.759-amd64.deb
-sudo gdebi shiny-server-1.4.1.759-amd64.deb
+wget -O ~/shiny-server-1.4.1.759-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.4.1.759-amd64.deb
+sudo gdebi ~/shiny-server-1.4.1.759-amd64.deb
 
 # Install postgres
 sudo apt-get install postgresql postgresql-contrib libpq-dev

@@ -9,18 +9,29 @@ sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sou
 # Add ssl reference for install
 sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
 
+# add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-sudo apt-get install r-base
-sudo apt-get install r-cran-xml libcurl4-gnutls-dev libxml2-dev
-sudo apt-get install openssl
-sudo apt-get install gdebi-core
-sudo apt-get install jq
+
+declare -a ubuntu_packages=('r-base'
+                            'r-cran-xml'
+                            'libcurl4-gnutls-dev'
+                            'libxml2-dev'
+                            'openssl'
+                            'gdebi-core'
+                            'jq'
+                            'postgresql'
+                            'postgresql-contrib'
+                            'libpq-dev'
+                            )
+for package_name in ${ubuntu_packages[@]}; do
+  sudo apt-get install -y $package_name
+done
+
+# get and install shiny-server
 wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
-sudo gdebi ~/shiny-server-1.5.1.834-amd64.deb
+sudo gdebi -y ~/shiny-server-1.5.1.834-amd64.deb
 
-# Install postgres
-sudo apt-get install postgresql postgresql-contrib libpq-dev
-
+# get the bradford repo
 git clone https://github.com/massgov/bradford ~/
 
 # Install packages

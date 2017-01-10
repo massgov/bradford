@@ -3,8 +3,8 @@ library(shiny)
 shinyServer(function(input, output) {
   #### MAIN ####
   output$user.satisfaction.total <- renderValueBox({
-    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found, 
-                                                  factor.value = "Yes") %>%
+    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found,
+                                         factor.value = "Yes") %>%
       prettyPercent(round.n = 1)  # flip to char and ensure % sign is included
     valueBox(
       user.satisfaction,  
@@ -14,8 +14,8 @@ shinyServer(function(input, output) {
   })
   
   output$conversions.valuebox.home <- renderValueBox({
-    conversion.rate = factorPercentage(factor.vec = ga.conversions$conversion, 
-                                                factor.value = "Conversion") %>%
+    conversion.rate = factorPercentage(factor.vec = ga.conversions$conversion,
+                                       factor.value = "Conversion") %>%
       prettyPercent(round.n = 1)
     valueBox(
       conversion.rate, 
@@ -56,8 +56,11 @@ shinyServer(function(input, output) {
     time.unit = c("month", "week")
     formstack.master %>% 
       dplyr::mutate(
+        check_timeperiod = flagIncompleteTimeperiod(reference.vector = submit_time, 
+                                                    time.unit = time.unit[[as.numeric(input$global.slot.number.home)]]),
         timestamp = lubridate::floor_date(submit_time, 
                                           unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
+      dplyr::filter(check_timeperiod != F) %>%
       dplyr::group_by(timestamp, site) %>%
       dplyr::count() %>%
       makeVolumeAreaPlot(x = "timestamp", y = "n", fill = "site",
@@ -67,13 +70,17 @@ shinyServer(function(input, output) {
   
   output$formstack.volume.plot.home.bar <- renderPlotly({
     time.unit = c("month", "week")
-    plt = formstack.master %>% 
-      dplyr::mutate(timestamp = lubridate::floor_date(submit_time, 
-                                                      unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
+    formstack.master %>% 
+      dplyr::mutate(check_timeperiod = flagIncompleteTimeperiod(reference.vector = submit_time, 
+                                                                time.unit = time.unit[[as.numeric(input$global.slot.number.home)]]),
+      timestamp = lubridate::floor_date(submit_time,
+                                        unit = time.unit[[as.numeric(input$global.slot.number.home)]])) %>%
+      dplyr::filter(check_timeperiod != F) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::count() %>%
-      makeVolumeBarPlot(x = "timestamp", y = "n", plot.title = "Global Reponse Count - Formstack")
-    printGGplotly(plt)
+      makeVolumeBarPlot(x = "timestamp", y = "n", 
+                        plot.title = "Global Reponse Count - Formstack") %>%
+    printGGplotly()
   })
   
   #### USER SATISFACTION ####
@@ -82,8 +89,8 @@ shinyServer(function(input, output) {
       formstack.master = formstack.master %>% 
         dplyr::filter(site == input$exec.funnel.name)
     }
-    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found, 
-                                                  factor.value = "Yes") %>%
+    user.satisfaction = factorPercentage(factor.vec = formstack.master$info_found,
+                                         factor.value = "Yes") %>%
     prettyPercent(round.n = 1)
     valueBox(
       user.satisfaction, # flip to char and ensure % sign is included 
@@ -100,7 +107,13 @@ shinyServer(function(input, output) {
     }
     if (input$exec.slot.number == 2) {  # if weekly
       formstack.count = formstack.master %>%
-        dplyr::group_by(lubridate::floor_date(submit_time, unit = "week")) %>%
+        dplyr::mutate(
+          check_timeperiod = flagIncompleteTimeperiod(reference.vector = submit_time, 
+                                                      time.unit = "week"),
+          timestamp = lubridate::floor_date(submit_time, 
+                                            unit = "week")) %>%
+        dplyr::filter(check_timeperiod != F) %>%
+        dplyr::group_by(timestamp) %>%
         meanCount(round.n = 0)
       valueBox(
         formstack.count, 
@@ -110,7 +123,13 @@ shinyServer(function(input, output) {
       )
     } else {
       formstack.count = formstack.master %>%
-        dplyr::group_by(lubridate::floor_date(submit_time, unit = "month")) %>%
+        dplyr::mutate(
+          check_timeperiod = flagIncompleteTimeperiod(reference.vector = submit_time, 
+                                                      time.unit = "month"),
+          timestamp = lubridate::floor_date(submit_time, 
+                                            unit = "month")) %>%
+        dplyr::filter(check_timeperiod != F) %>%
+        dplyr::group_by(timestamp) %>%
         meanCount(round.n = 0)
       valueBox(
         formstack.count, 
@@ -254,7 +273,12 @@ shinyServer(function(input, output) {
       )
     } else if (input$conversion.time.window == "week") {
       n.sessions = ga.conversions %>%
-        dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "week")) %>%
+        dplyr::mutate(check_timeperiod = flagIncompleteTimeperiod(reference.vector = hit_time_utc,
+                                                                  time.unit = "week"),
+                      timestamp = lubridate::floor_date(hit_time_utc,
+                                                        unit = "week")) %>%
+        dplyr::filter(check_timeperiod != F) %>%
+        dplyr::group_by(timestamp) %>%
         meanCount(round.n = 0)
       
       valueBox(
@@ -265,7 +289,12 @@ shinyServer(function(input, output) {
       )
     } else {
       n.sessions = ga.conversions %>%
-        dplyr::group_by(lubridate::floor_date(hit_time_utc, unit = "month")) %>%
+        dplyr::mutate(check_timeperiod = flagIncompleteTimeperiod(reference.vector = hit_time_utc,
+                                                                  time.unit = "month"),
+                      timestamp = lubridate::floor_date(hit_time_utc,
+                                                        unit = "month")) %>%
+        dplyr::filter(check_timeperiod != F) %>%
+        dplyr::group_by(timestamp) %>%
         meanCount(round.n = 0)
       
       valueBox(
@@ -288,9 +317,11 @@ shinyServer(function(input, output) {
   # conversion rate over time
   output$conversion.timeseries.plot <- renderPlotly({
     plt = ga.conversions %>%
-      dplyr::mutate(timestamp = lubridate::floor_date( # floor to input time window
-        lubridate::ymd_hms(hitTimestamp), unit = input$conversion.time.window
-        )) %>%
+      dplyr::mutate(check_timeperiod = flagIncompleteTimeperiod(reference.vector = hit_time_utc,
+                                                                time.unit = input$conversion.time.window),
+                    timestamp = lubridate::floor_date(hit_time_utc,
+                                                      unit = input$conversion.time.window)) %>%
+      dplyr::filter(check_timeperiod != F) %>%
       dplyr::group_by(timestamp) %>%
       dplyr::summarise(n = n(),
                        conversion = sum(conversion == "Conversion"),

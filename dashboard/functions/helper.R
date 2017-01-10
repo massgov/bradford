@@ -60,3 +60,19 @@ meanCount <- function(grouped.df, round.n = 0) {
     mean() %>%
     round(digits = round.n)
 }
+
+flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
+  # checks reference.vector to see if it belongs to a floored time period which is not yet complete
+  # Args:
+  #   reference.vector = a vector of class date to floor and check for incomplete time periods
+  #   time.unit = the unit arg to floor_date, the period to floor the reference.vector to
+  # Returns:
+  #   a vector of booleans indicating which entries are part of a complete time period (TRUE) 
+  if (!lubridate::is.Date(reference.vector)) {
+    stop("reference.vector must be of class date!")
+  } 
+  if (!any(time.unit %in% c("day", "week", "month"))) {
+    stop("unit can only be day, week, or month. If a more granular view is needed please file an issue.")
+  }
+  ifelse(reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+}

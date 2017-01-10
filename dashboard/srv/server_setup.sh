@@ -1,7 +1,7 @@
 #!/bin/bash
 # Update system
-sudo apt-get update
-sudo apt-get dist-upgrade
+sudo apt-get -y update
+sudo apt-get -y dist-upgrade
 
 # Add new R CRAN
 sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
@@ -69,3 +69,6 @@ sudo chown -R shiny:shiny /srv/shiny-server
 
 # move the dashboard to the shiny-server directory
 sudo cp -r ~/bradford/dashboard/* /srv/shiny-server/bradford
+
+#switch to port 80
+sudo sed -i '/listen 3838;/c\  listen 80;' /etc/shiny-server/shiny-server.conf

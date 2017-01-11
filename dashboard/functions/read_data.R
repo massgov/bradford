@@ -6,11 +6,11 @@ readIntoList <- function(data.dir, pattern, gsub.pattern) {
   #   gsub.pattern = a pattern to remove from the file name, usually the file extension
   # Returns:
   #   a list of length n where n = length of files in dir who match pattern and whose members are returned via readRDS
-  file.list <- list.files(data.dir, pattern = pattern) %>%
+  file.list = list.files(data.dir, pattern = pattern) %>%
     paste0(data.dir, .) %>%
     purrr::map(readRDS) 
   # set names for slots 
-  names(file.list) <- list.files(data.dir, pattern = pattern) %>%
+  names(file.list) = list.files(data.dir, pattern = pattern) %>%
     gsub(x = ., pattern = gsub.pattern, replacement = "")
   return(file.list)
 }

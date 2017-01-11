@@ -44,6 +44,7 @@ prettyPercent <- function(num, round.n = 1, is.percent.points = T) {
     paste(as.character(round(num, round.n)), "%")
   }
 }
+
 meanCount <- function(grouped.df, round.n = 0) {
   # takes a grouped df and counts according to the groups and calculates a mean for the n vector
   # Args:
@@ -56,6 +57,9 @@ meanCount <- function(grouped.df, round.n = 0) {
   }
   if (!is.numeric(round.n)) {
     stop("round.n must be of class numeric!")
+  }
+  if (round.n < 0) {
+    stop("round.n must be a positive integer")
   }
   grouped.df %>%
     dplyr::count() %>%
@@ -77,5 +81,9 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
   if (!any(time.unit %in% c("day", "week", "month"))) {
     stop("unit can only be day, week, or month. If a more granular view is needed please file an issue.")
   }
-  ifelse(reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+  if (time.unit == "day") {
+    ifelse(reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+  } else {
+    ifelse(reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+  }
 }

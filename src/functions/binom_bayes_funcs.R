@@ -28,7 +28,15 @@ createTimeBucket <- function(x) {
 
 # Bayesian funcs
 # perhaps create a calculateAlpha/calculateBeta function 
-betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n = "", prior = T){
+betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n = "", prior = T) {
+  # calculates the variance of a beta given a mean and "n". Can handle priors as well as posteriors given additional input
+  # Args:
+  #   prior.mean = the a priori prior mean
+  #   prior.n = the a priori prior "n" or sample size
+  #   df = (only for posterior) a data frame containing sample.n and affirm.n for posterior calculation
+  #   sample.n = (only for posterior) name of vector containing the sample size as character
+  #   affirm.n = (only for posterior) name of vector containing the n affirming as character
+  #   prior = boolean whether we are calculating the variance of a prior or posterior
   if (prior) {
     prior.mean * (1 - prior.mean) / (1 + prior.n)
   } else {

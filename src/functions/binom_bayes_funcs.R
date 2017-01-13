@@ -27,7 +27,17 @@ createTimeBucket <- function(x) {
 }
 
 # Bayesian funcs
-# perhaps create a calculateAlpha/calculateBeta function for lines 34-35 and 42-43
+# perhaps create a calculateAlpha/calculateBeta function 
+betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n = "", prior = T){
+  if (prior) {
+    prior.mean * (1 - prior.mean) / (1 + prior.n)
+  } else {
+    a = df[[affirm.n]] + (prior.n * prior.mean) - 1
+    b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+    a * b / ((a + b)^2 * (a + b + 1))
+  }
+}
+
 betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
   # calculates an approximate beta posterior given the mean and n of a beta prior as well as 
   # the n and n sucesses from a binomial 
@@ -42,7 +52,9 @@ betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "")
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   domain = seq(0, 1, 0.005)
   val = dbeta(domain, a, b)
-  data.frame("domain" = domain, "prob_dens" = val)
+  data.frame("domain" = domain, 
+             "prob_dens" = val
+             )
 }
 
 betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {

@@ -4,7 +4,7 @@ library(foreach)
 library(doParallel)
 
 #source functions
-source("src/funcs.R")
+source("src/functions/binom_bayes_funcs.R")
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat",
@@ -68,10 +68,20 @@ response.bayes.site <- foreach(interest.site = iter(response.summary.site$site))
                                        affirm.n = "n_affirmative")
   cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 
                     level = .95, tol = 0.01, verbose = FALSE)
+  prior.variance = betaVariance(prior.mean = PRIOR.MEAN, prior.n = PRIOR.N.SITE, prior = T)
+  posterior.variance = betaVariance(df = interest.pop, 
+                                    intereprior.mean = PRIOR.MEAN, 
+                                    prior.n = PRIOR.N.SITE, 
+                                    sample.n = "n_total_responses", 
+                                    affirm.n = "n_affirmative",
+                                    prior = F)
   list("site" = interest.site,
        "posterior" = posterior,
        "posterior_mean" = posterior.mean,
-       "credible_interval" = cred.int)
+       "credible_interval" = cred.int, 
+       "prior_variance" = prior.variance,
+       "posterior_variance" = posterior.variance
+       )
 }
 
 response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer), 
@@ -87,10 +97,20 @@ response.bayes.page <- foreach(interest.page = iter(response.summary.page$referr
                                        affirm.n = "n_affirmative")
   cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 
                                level = .95, tol = 0.01, verbose = FALSE)
+  prior.variance = betaVariance(prior.mean = PRIOR.MEAN, prior.n = PRIOR.N.SITE, prior = T)
+  posterior.variance = betaVariance(df = interest.pop,
+                                    prior.mean = PRIOR.MEAN, 
+                                    prior.n = PRIOR.N.SITE, 
+                                    sample.n = "n_total_responses", 
+                                    affirm.n = "n_affirmative",
+                                    prior = F)
   list("page" = interest.page,
        "posterior" = posterior,
        "posterior_mean" = posterior.mean,
-       "credible_interval" = cred.int)
+       "credible_interval" = cred.int,
+       "prior_variance" = prior.variance,
+       "posterior_variance" = posterior.variance
+       )
 }
 
 # stop the cluster

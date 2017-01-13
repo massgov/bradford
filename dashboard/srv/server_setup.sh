@@ -68,9 +68,6 @@ sudo systemctl restart shiny-server
 sudo mkdir /srv/shiny-server/bradford
 sudo mkdir /srv/shiny-server/bradford/data
 
-# hack per https://github.com/ropensci/plotly/issues/494 to get shiny + plotly to play nicely
-sudo chown -R shiny:shiny /srv/shiny-server
-
 # move the dashboard to the shiny-server directory
 sudo cp -r ~/bradford/dashboard/* /srv/shiny-server/bradford
 
@@ -78,3 +75,6 @@ sudo cp -r ~/bradford/dashboard/* /srv/shiny-server/bradford
 sudo sed -i '/listen 3838;/c\  listen 80;' /etc/shiny-server/shiny-server.conf
 
 sudo systemctl restart shiny-server
+
+# hack per https://github.com/ropensci/plotly/issues/494 to get shiny + plotly to play nicely
+sudo chown -R shiny:shiny /srv/shiny-server

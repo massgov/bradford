@@ -1,13 +1,13 @@
 #!/bin/bash
-# Update system
-sudo apt-get -y update
-sudo apt-get -y dist-upgrade
-
 # Add new R CRAN
 sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
 
 # Add ssl reference for install
 sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
+
+# Update and upgrade system
+sudo apt-get -y update
+sudo apt-get -y dist-upgrade
 
 # add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9

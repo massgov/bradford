@@ -1,2 +1,2 @@
 # bradford
-analysis of formstack/response module data 
+analysis of pilot site data, some bayesian fun times, and a dashboard (of course)

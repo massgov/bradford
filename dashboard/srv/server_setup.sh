@@ -1,6 +1,6 @@
 #!/bin/bash
 # Add new R CRAN
-sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list
+echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
 
 # add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9

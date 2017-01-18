@@ -37,6 +37,10 @@ sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 # get the bradford repo
 git clone https://github.com/massgov/bradford ~/
 
+# get the necessary data from s3'
+sudo mkdir ~/bradford/dashboard/data/
+sudo aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
+
 # Install packages
 declare -a packages=('shiny'
                      'reshape2'
@@ -66,7 +70,6 @@ done
 sudo systemctl restart shiny-server
 
 sudo mkdir /srv/shiny-server/bradford
-sudo mkdir /srv/shiny-server/bradford/data
 
 # move the dashboard to the shiny-server directory
 sudo cp -r ~/bradford/dashboard/* /srv/shiny-server/bradford

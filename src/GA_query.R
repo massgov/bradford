@@ -19,7 +19,7 @@ ga.dims.sessions <- c("ga:pagePath", "ga:dimension1", "ga:dimension2", "ga:dimen
 ga.metrics.sessions <- c("ga:timeOnPage")
 
 ga.dims.user <- c("ga:dimension1", "ga:medium", "ga:deviceCategory", "ga:operatingSystem", 
-                  "ga:browserSize", "ga:browser")
+                  "ga:browser", "ga:source")
 
 ga.metrics.user <- c("ga:sessionDuration")
 
@@ -115,5 +115,8 @@ ga.master.conversion <- ga.master.conversion %>%
 
 #### SAVE DATA ####
 saveRDS(ga.master.conversion, "~/Documents/GitHub/bradford/dashboard/data/ga_master_conversions.RDS")
+saveRDS(ga.master.events, "~/Documents/GitHub/bradford/dashboard/data/ga_master_events.RDS")
 saveRDS(ga.path.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_path_hashes_top_20.RDS")
 saveRDS(ga.session.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_session_hashes_top_20.RDS")
+
+system(command = "aws s3 sync ~/Documents/GitHub/bradford/dashboard/data/ s3://mass.gov-analytics/dashboards/bradford/data")

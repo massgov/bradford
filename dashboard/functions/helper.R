@@ -75,15 +75,15 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
   #   time.unit = the unit arg to floor_date, the period to floor the reference.vector to
   # Returns:
   #   a vector of booleans indicating which entries are part of a complete time period (TRUE) 
-  if (!lubridate::is.Date(reference.vector) & !is.POSIXct(reference.vector)) {
+  if (!lubridate::is.Date(reference.vector) & !lubridate::is.POSIXct(reference.vector)) {
     stop("reference.vector must be of class date or POSIXct!")
   } 
   if (!any(time.unit %in% c("day", "week", "month"))) {
     stop("unit can only be day, week, or month. If a more granular view is needed please file an issue.")
   }
   if (time.unit == "day") {
-    ifelse(reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+    reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit)
   } else {
-    ifelse(reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit), F, T)
+   reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
 }

@@ -1,5 +1,5 @@
 library(testthat)
-source("~/Documents/GitHub/bradford/dashboard/functions/helper.R")
+source("../functions/helper.R")
 
 context("helper functions within dashboard/functions/helper.R")
 
@@ -44,6 +44,8 @@ test_that("meanCount errors on incorrect input", {
 })
 
 test_that("meanCount outputs the correct answer", {
+  grouped.df <- tibble::tibble(x = c("cats", "cats", "dogs", "rabbits")) %>%
+    dplyr::group_by(x)
   expect_equal(meanCount(grouped.df = grouped.df, round.n = 0), 1)
   expect_equal(meanCount(grouped.df = grouped.df, round.n = 1), 1.3)
 })
@@ -60,6 +62,6 @@ test_that("flagIncompleteTimeperiod errors on incorrect input", {
 
 test_that("flagIncompleteTimeperiod outputs the correct answer", {
   flag.vector <- seq.Date(from = date(lubridate::now()), to = (date(lubridate::now()) + 3), by = "day")
-  expect_false(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "week")))
+  expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "week")))
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "day")))
 })

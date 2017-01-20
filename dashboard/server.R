@@ -1,4 +1,6 @@
 library(shiny)
+library(shinydashboard)
+library(shinyURL)
 
 shinyServer(function(input, output) {
   #### MAIN ####
@@ -82,7 +84,6 @@ shinyServer(function(input, output) {
                         plot.title = "Global Reponse Count - Formstack") %>%
     printGGplotly()
   })
-  
   #### USER SATISFACTION ####
   output$user.satisfaction.funnel <- renderValueBox({
     if (input$exec.funnel.name != "show.all") {

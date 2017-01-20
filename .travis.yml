@@ -29,6 +29,7 @@ before_script:
   - cd dashboard/tests/
   - mkdir data/
   - Rscript -e "saveRDS(file = 'data/global.summary.RDS', object = list(list(c(1,2), c(3,4)), list(c(1,2), c(3,4))))"
+  - Rscript -e "saveRDS(file = 'data/global.summary2.RDS', object = list(list(c(1,2), c(3,4)), list(c(1,2), c(3,4))))"
 script:
   - Rscript -e "library(magrittr); error <- testthat::test_dir('.') %>% data.frame(); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save = 'no', status = 1) }"
   - rm -rf data/

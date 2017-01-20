@@ -4,8 +4,7 @@ source("../functions/read_data.R")
 context("read data functions within dashboard/functions/read_data.R")
 
 # create some fake data so we do not have to commit RDS files
-saveRDS("data/global.summary.RDS", list(c(1,2), c(3,4)))
-
+saveRDS(file = "data/global.summary.RDS", object = list(c(1,2), c(3,4)))
 
 test_that("readIntoList errors on incorrect input", {
   expect_error(readIntoList(data.dir = "../",

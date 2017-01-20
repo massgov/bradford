@@ -16,5 +16,6 @@ Imports:
   shinydashboard,
   emdbook,
   lubridate,
+  zoo,
   testthat
 LazyData: true

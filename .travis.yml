@@ -16,6 +16,7 @@ r_packages:
    - emdbook
    - testthat
    - lubridate
+   - zoo
 addons:
   apt:
     packages:

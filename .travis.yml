@@ -1,0 +1,29 @@
+language: r
+sudo: required
+git:
+  depth: 3
+r:
+  - release
+cache: packages
+r_packages:
+   - shiny
+   - magrittr
+   - ggplot2
+   - openssl
+   - XML
+   - plotly
+   - shinydashboard
+   - emdbook
+   - testthat
+addons:
+  apt:
+    packages:
+      - r-cran-xml
+      - libcurl4-gnutls-dev
+      - libxml2-dev
+      - openssl
+      - gdebi-core
+before_script:
+  - cd dashboard/tests/
+script:
+  - Rscript -e "library(magrittr); error <- testthat::test_dir('.') %>% data.frame(); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save = 'no', status = 1) }"

@@ -34,10 +34,13 @@ done
 wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
 sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
-# get the bradford repo
-git clone https://github.com/massgov/bradford ~/
+# get pip and the aws-cli
+curl -O https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py
+rm get-pip.py
+pip install awscli 
 
-# get the necessary data from s3'
+# get the necessary data from s3
 sudo mkdir ~/bradford/dashboard/data/
 sudo aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
 

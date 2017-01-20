@@ -15,6 +15,7 @@ r_packages:
    - shinydashboard
    - emdbook
    - testthat
+   - lubridate
 addons:
   apt:
     packages:

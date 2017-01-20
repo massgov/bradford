@@ -15,5 +15,6 @@ Imports:
   plotly,
   shinydashboard,
   emdbook,
+  lubridate,
   testthat
 LazyData: true

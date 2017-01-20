@@ -53,8 +53,8 @@ test_that("meanCount outputs the correct answer", {
 test_that("flagIncompleteTimeperiod errors on incorrect input", {
   ts.vector <- ts(lubridate::ymd("2017-01-01", "2017-01-02"))
   zoo.vector <- zoo::as.zoo(lubridate::ymd("2017-01-01", "2017-01-02"))
-  from <- date(lubridate::now())
-  to <- date(lubridate::now() + 3)
+  from <- as.Date(lubridate::now())
+  to <- as.Date(lubridate::now() + lubridate::days(3))
   flag.vector <- seq.Date(from = from, to = to, by = "day")
   expect_error(flagIncompleteTimeperiod(reference.vector = ts.vector, time.unit = "day"))
   expect_error(flagIncompleteTimeperiod(reference.vector = zoo.vector, time.unit = "day"))
@@ -63,8 +63,8 @@ test_that("flagIncompleteTimeperiod errors on incorrect input", {
 })
 
 test_that("flagIncompleteTimeperiod outputs the correct answer", {
-  from <- date(lubridate::now())
-  to <- date(lubridate::now() + 3)
+  from <- as.Date(lubridate::now())
+  to <- as.Date(lubridate::now() + lubridate::days(3))
   flag.vector <- seq.Date(from = from, to = to, by = "day")
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "week")))
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "day")))

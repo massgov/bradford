@@ -1,10 +1,11 @@
-# Bayesian Binomial tests for formstack data 
+# Bayesian Binomial tests for formstack data
 library(magrittr)
 library(foreach)
 library(doParallel)
 
 #source functions
 source("src/functions/binom_bayes_funcs.R")
+source("src/creds.R")
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat",
@@ -17,11 +18,11 @@ PRIOR.N.PAGE <- 10
 
 
 #### IMPORT DATA ####
-formstack.master <- readr::read_csv('data/formstack/formstack_master.csv') %>%
+formstack.master <- readr::read_csv("data/formstack/formstack_master.csv") %>%
   dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
   purrr::map_if(is.character, stringr::str_trim) %>%
   data.frame() %>%
-  dplyr::filter(ip_addr != "^(146\\.243\\.\\d{1,3}|170\\.63\\.\\d{1,3}|170\\.154\\.\\d{1,3}|65\\.217\\.255\\.\\d{1,3}|4.36.198.102|65.118.148.102|204.166.193.130|204.130.104.10)",
+  dplyr::filter(ip_addr != ip.range,
                 info_found %in% c("Yes", "No"),
                 referrer != "http://<!--") %>%
   dplyr::mutate(info_found = droplevels(info_found),
@@ -39,7 +40,7 @@ response.summary.site <- formstack.master %>%
   dplyr::summarise(n_affirmative = sum(info_found == "Yes", na.rm = T),
                    n_negative = sum(info_found == "No", na.rm = T),
                    n_total_responses = n()) %>%
-  dplyr::mutate(site = droplevels(site)) 
+  dplyr::mutate(site = droplevels(site))
 
 # group by page
 response.summary.page <- formstack.master %>%
@@ -58,50 +59,50 @@ registerDoParallel(cl)
 
 response.bayes.site <- foreach(interest.site = iter(response.summary.site$site)) %dopar% {
   interest.pop = response.summary.site[response.summary.site$site == interest.site, ]
-  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
-                             prior.n = PRIOR.N.SITE, 
-                             sample.n = "n_total_responses", 
+  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN,
+                             prior.n = PRIOR.N.SITE,
+                             sample.n = "n_total_responses",
                              affirm.n = "n_affirmative")
-  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
-                                       prior.n = PRIOR.N.SITE, 
-                                       sample.n = "n_total_responses", 
+  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN,
+                                       prior.n = PRIOR.N.SITE,
+                                       sample.n = "n_total_responses",
                                        affirm.n = "n_affirmative")
-  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 
+  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens,
                     level = .95, tol = 0.01, verbose = FALSE)
   prior.variance = betaVariance(prior.mean = PRIOR.MEAN, prior.n = PRIOR.N.SITE, prior = T)
-  posterior.variance = betaVariance(df = interest.pop, 
-                                    intereprior.mean = PRIOR.MEAN, 
-                                    prior.n = PRIOR.N.SITE, 
-                                    sample.n = "n_total_responses", 
+  posterior.variance = betaVariance(df = interest.pop,
+                                    intereprior.mean = PRIOR.MEAN,
+                                    prior.n = PRIOR.N.SITE,
+                                    sample.n = "n_total_responses",
                                     affirm.n = "n_affirmative",
                                     prior = F)
   list("site" = interest.site,
        "posterior" = posterior,
        "posterior_mean" = posterior.mean,
-       "credible_interval" = cred.int, 
+       "credible_interval" = cred.int,
        "prior_variance" = prior.variance,
        "posterior_variance" = posterior.variance
        )
 }
 
-response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer), 
+response.bayes.page <- foreach(interest.page = iter(response.summary.page$referrer),
                                .errorhandling = "remove") %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]
-  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN, 
-                             prior.n = PRIOR.N.PAGE, 
-                             sample.n = "n_total_responses", 
+  posterior = betaPosterior(interest.pop,  prior.mean = PRIOR.MEAN,
+                             prior.n = PRIOR.N.PAGE,
+                             sample.n = "n_total_responses",
                              affirm.n = "n_affirmative")
-  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN, 
-                                       prior.n = PRIOR.N.PAGE, 
-                                       sample.n = "n_total_responses", 
+  posterior.mean = betaPosteriorMean(interest.pop, prior.mean = PRIOR.MEAN,
+                                       prior.n = PRIOR.N.PAGE,
+                                       sample.n = "n_total_responses",
                                        affirm.n = "n_affirmative")
-  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens, 
+  cred.int = emdbook::ncredint(pvec = posterior$domain, npost = posterior$prob_dens,
                                level = .95, tol = 0.01, verbose = FALSE)
   prior.variance = betaVariance(prior.mean = PRIOR.MEAN, prior.n = PRIOR.N.SITE, prior = T)
   posterior.variance = betaVariance(df = interest.pop,
-                                    prior.mean = PRIOR.MEAN, 
-                                    prior.n = PRIOR.N.SITE, 
-                                    sample.n = "n_total_responses", 
+                                    prior.mean = PRIOR.MEAN,
+                                    prior.n = PRIOR.N.SITE,
+                                    sample.n = "n_total_responses",
                                     affirm.n = "n_affirmative",
                                     prior = F)
   list("page" = interest.page,

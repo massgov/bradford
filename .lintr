@@ -15,3 +15,4 @@ linters: with_defaults(
     single_quotes_linter,
     spaces_left_parentheses_linter
   )
+exclusions: list("src/creds.R")

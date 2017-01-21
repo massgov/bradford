@@ -36,7 +36,7 @@ ga.master.events <- RGoogleAnalytics::Init(start.date = start.date,
                                            dimensions = ga.dims.events,
                                            metrics = ga.metrics.events,
                                            max.results = 99999,
-                                           table.id = 'ga:132193522') %>%
+                                           table.id = "ga:132193522") %>%
   RGoogleAnalytics::QueryBuilder() %>%
   RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = T)
 
@@ -45,7 +45,7 @@ ga.master.sessions <- RGoogleAnalytics::Init(start.date = start.date,
                                              dimensions = ga.dims.sessions,
                                              metrics = ga.metrics.sessions,
                                              max.results = 99999,
-                                             table.id = 'ga:132193522') %>%
+                                             table.id = "ga:132193522") %>%
   RGoogleAnalytics::QueryBuilder() %>%
   RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = F)
 
@@ -54,7 +54,7 @@ ga.master.user <- RGoogleAnalytics::Init(start.date = start.date,
                                          dimensions = ga.dims.user,
                                          metrics = ga.metrics.user,
                                          max.results = 99999,
-                                         table.id = 'ga:132193522') %>%
+                                         table.id = "ga:132193522") %>%
   RGoogleAnalytics::QueryBuilder() %>%
   RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = F)
 
@@ -74,7 +74,7 @@ ga.master.conversion <- ga.master.sessions %>%
                 nodeID = dimension3,
                 clientID = dimension4) %>%
   dplyr::ungroup() %>%
-  .[complete.cases(.),]  # remove records with NA
+  .[complete.cases(.), ]  # remove records with NA
 
 # create a representation of variable length page traversal paths via md5 hashing
 ga.session.paths <- ga.master.sessions %>%
@@ -114,9 +114,9 @@ ga.master.conversion <- ga.master.conversion %>%
   dplyr::inner_join(ga.path.hashes, by = c("sessionID" = "dimension1"))
 
 #### SAVE DATA ####
-saveRDS(ga.master.conversion, "~/Documents/GitHub/bradford/dashboard/data/ga_master_conversions.RDS")
-saveRDS(ga.master.events, "~/Documents/GitHub/bradford/dashboard/data/ga_master_events.RDS")
-saveRDS(ga.path.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_path_hashes_top_20.RDS")
-saveRDS(ga.session.hashes.top20, "~/Documents/GitHub/bradford/dashboard/data/ga_session_hashes_top_20.RDS")
+saveRDS(ga.master.conversion, "dashboard/data/ga_master_conversions.RDS")
+saveRDS(ga.master.events, "dashboard/data/ga_master_events.RDS")
+saveRDS(ga.path.hashes.top20, "dashboard/data/ga_path_hashes_top_20.RDS")
+saveRDS(ga.session.hashes.top20, "dashboard/data/ga_session_hashes_top_20.RDS")
 
-system(command = "aws s3 sync ~/Documents/GitHub/bradford/dashboard/data/ s3://mass.gov-analytics/dashboards/bradford/data")
+system(command = "aws s3 sync dashboard/data/ s3://mass.gov-analytics/dashboards/bradford/data")

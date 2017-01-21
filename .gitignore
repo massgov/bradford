@@ -25,3 +25,5 @@ vignettes/*.pdf
 .Rproj.user
 bradford.Rproj
 data
+# credentials file
+src/creds.R

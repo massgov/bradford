@@ -17,6 +17,7 @@ r_packages:
 - testthat
 - lubridate
 - zoo
+- lintr
 addons:
   apt:
     packages:

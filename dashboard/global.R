@@ -9,8 +9,8 @@ source("functions/read_data.R")
 source("functions/make_plots.R")
 source("functions/helper.R")
 
-# color blind palette 
-cb.palette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+# color blind palette
+cb.palette <- c("#999999","#E69F00","#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 options(scipen = 10000000)
 
@@ -22,11 +22,11 @@ referrer.breakouts.monthly <- readRDS(paste0(DATA.DIR, "referrer.breakouts.month
 
 referrer.summary.monthly <- readRDS(paste0(DATA.DIR, "referrer.summary.monthly.RDS"))
 
-global.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.summary", 
+global.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.summary",
                                       gsub.pattern = ".RDS")
 
 site.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.summary",
-                                    gsub.pattern = ".RDS") 
+                                    gsub.pattern = ".RDS")
 
 global.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.breakouts",
                                        gsub.pattern = ".RDS")
@@ -39,7 +39,7 @@ ga.conversions <- readRDS(paste0(DATA.DIR, "ga_master_conversions.RDS"))
 
 conversion.metrics <- readRDS(paste0(DATA.DIR, "no_conversion_metrics.RDS"))
 
-# Funnel Performance 
+# Funnel Performance
 ga.path.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_path_hashes_top_20.RDS"))
 
 ga.session.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_session_hashes_top_20.RDS"))

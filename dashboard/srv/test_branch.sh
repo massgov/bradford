@@ -21,7 +21,7 @@ test_dir=$dir_name"_TEST"
 
 # create test dir if it does not exist
 if [ ! -d "/srv/shiny-server/$test_dir" ]; then
-  mkdir /srv/shiny-server/$test_dir/
+  sudo mkdir /srv/shiny-server/$test_dir/
 fi
 
 sudo cp -r ~/$dir_name/* /srv/shiny-server/$test_dir/

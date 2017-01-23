@@ -18,6 +18,6 @@ else
   git pull || exit 255
 fi
 
-sudo cp -r ~/$dir_name/* /srv/shiny-server/$dir_name_TEST/
+sudo cp -r ~/$dir_name/* /srv/shiny-server/$dir_name+=_TEST/
 # restart the server
 sudo restart shiny-server

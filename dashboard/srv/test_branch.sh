@@ -17,7 +17,7 @@ else
   git checkout $branch
   git pull || exit 255
 fi
-append_dir = "_TEST"
-sudo cp -r ~/$dir_name/* /srv/shiny-server/${dir_name}${append_dir}/
+test_dir = $dir_name"_TEST"
+sudo cp -r ~/$dir_name/* /srv/shiny-server/$test_dir/
 # restart the server
 sudo restart shiny-server

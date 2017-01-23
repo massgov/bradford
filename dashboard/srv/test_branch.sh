@@ -20,4 +20,4 @@ fi
 
 sudo cp -r ~/$dir_name/* /srv/shiny-server/$dir_name_TEST/
 # restart the server
-sudo systemctl restart shiny-server
+sudo restart shiny-server

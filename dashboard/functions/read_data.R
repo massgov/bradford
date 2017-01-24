@@ -5,7 +5,7 @@ readIntoList <- function(data.dir, pattern, gsub.pattern) {
   #   pattern = a pattern to look for in the file name
   #   gsub.pattern = a pattern to remove from the file name, usually the file extension
   # Returns:
-  #   a list of length n where n = length of files in dir who match pattern and whose members are returned via readRDS
+  #   a list of length n where n = length of files in dir who match pattern
   file.list = list.files(data.dir, pattern = pattern) %>%
     paste0(data.dir, .) %>%
     purrr::map(readRDS)

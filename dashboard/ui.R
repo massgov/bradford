@@ -140,7 +140,7 @@ shinyUI(navbarPage(
     ),
     plotOutput("funnel.path.plot"),
     splitLayout(
-      cellWidths = c("33%","33%", "33%"),
+      cellWidths = c("33%", "33%", "33%"),
       plotlyOutput("funnel.medium.plot"),
       plotlyOutput("funnel.device.plot"),
       plotlyOutput("funnel.browser.plot")

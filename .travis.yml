@@ -18,6 +18,7 @@ r_packages:
 - lubridate
 - zoo
 - covr
+- lintr
 addons:
   apt:
     packages:
@@ -29,13 +30,12 @@ addons:
 before_script:
 - cd dashboard/tests/
 - mkdir data/
-- Rscript -e "saveRDS(file = 'data/global.summary.RDS', object = list(list(c(1,2),
-  c(3,4)), list(c(1,2), c(3,4))))"
-- Rscript -e "saveRDS(file = 'data/global.summary2.RDS', object = list(list(c(1,2),
-  c(3,4)), list(c(1,2), c(3,4))))"
+- Rscript -e "saveRDS(file = 'data/global.summary.RDS', object = list(list(c(1,2), c(3,4)), list(c(1,2), c(3,4))))"
+- Rscript -e "saveRDS(file = 'data/global.summary2.RDS', object = list(list(c(1,2), c(3,4)), list(c(1,2), c(3,4))))"
 script:
 - Rscript -e "library(magrittr); error <- testthat::test_file('test_helper.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save= 'no', status = 1) }"
 - Rscript -e "library(magrittr); error <- testthat::test_file('test_read_data.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save= 'no', status = 1) }"
+- Rscript -e "library(magrittr); error <- testthat::test_file('test_lint.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save = 'no', status = 1) }"
 - rm -rf data/
 after_success:
 - Rscript -e "x <- covr::file_coverage(source_files = c("../functions/helper.R", "../functions/read_data.R", "../functions/make_plots.R"), test_files = c("test_helper.R", "test_read_data.R")); covr::codecov(x)"

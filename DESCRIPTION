@@ -5,7 +5,7 @@ Authors@R: person("Connor", "McKay", email = "Connor.T.McKay@mass.gov",
                   role = c("aut", "cre"))
 Description: Shiny app to visualize visitor satisfaction and success rates
 Depends: R (>= 3.1.0)
-License: MIT
+Suggest: lintr
 Imports:
   shiny,
   magrittr,

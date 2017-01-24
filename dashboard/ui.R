@@ -15,7 +15,7 @@ shinyUI(navbarPage(
             inputId = "visitor.success.daterange", 
             label = "Select a Date Range",
             start = "2017-02-01",
-            end = NULL,
+            end = yesterday,  # sourced from global.R
             startview = "month"
           ),
           radioButtons(
@@ -36,12 +36,7 @@ shinyUI(navbarPage(
             selected = "all", 
             inline = T
           ),
-          selectInput(
-            inputId = "visitor.success.type.selector", 
-            label = "Filter by Type (if applicbable)",
-            choices = c("All" = "all"),
-            selected = "all"
-          ),
+          uiOutput("type.selection.options"),
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
             label = "Group by:", 

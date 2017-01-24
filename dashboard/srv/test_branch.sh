@@ -24,6 +24,6 @@ if [ ! -d "/srv/shiny-server/$test_dir" ]; then
   sudo mkdir /srv/shiny-server/$test_dir/
 fi
 
-sudo cp -r ~/$dir_name/* /srv/shiny-server/$test_dir/
+sudo cp -r ~/$dir_name/dashboard /srv/shiny-server/$test_dir/
 # restart the server
 sudo restart shiny-server

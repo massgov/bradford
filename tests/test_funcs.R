@@ -1,7 +1,9 @@
 # unit tests for bradford repo functions
 library(testthat)
 
-source("~/Documents/GitHub/bradford/src/funcs.R")
+source("../src/functions/detect_breakout_funcs.R")
+source("../src/functions/binom_bayes_funcs.R")
+
 
 context("createTimeBucket")
 test_that("createTimeBucket Errors out on incorrect input", {
@@ -29,14 +31,13 @@ test_that("createTimeBucket returns the expected values given an input",{
 
 context("Bayesian Functions")
 test_that("betaPosterior outputs the correct vector", {
-  x <- readRDS(file = "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_post_df.RDS")
-  expect_equal_to_reference(betaPosterior(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"), 
-                            "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_posterior.RDS")
+  x <- readRDS(file = "test_data/test_post_df.RDS")
+  expect_equal_to_reference(betaPosterior(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"),
+                            "test_data/test_posterior.RDS")
 })
 
 test_that("betaPosteriorMean outputs the correct scalar", {
-  x <- readRDS(file = "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_post_df.RDS")
-  expect_equal_to_reference(betaPosteriorMean(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"), 
-                            "/Users/Connor/Documents/GitHub/bradford/tests/test_data/test_posterior_mean.RDS")
+  x <- readRDS(file = "test_data/test_post_df.RDS")
+  expect_equal_to_reference(betaPosteriorMean(x, prior.mean = .5, prior.n = 10, sample.n = "sample.n", affirm.n = "affirm.n"),
+                            "test_data/test_posterior_mean.RDS")
 })
-

@@ -1,8 +1,8 @@
 #### PLOTS ####
 makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
   # makes a timeseries line plot with vertical red bars indicating the date a breakout is detetected
-  # Args: 
-  #   dat = data frame which is the output of detect breakouts in bradford. This df contains point 
+  # Args:
+  #   dat = data frame which is the output of detect breakouts in bradford. This df contains point
   #         estimates for user satisfaction as well as a vector indicating standard error for the point
   #         estimate and dates for each
   #   breakouts = a vector of dates for which a breakout was detected
@@ -10,8 +10,8 @@ makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
   #   y = the vector to plot along the y axis
   #   plot.title = atomic character or factor vector which will be the plot title
   # Returns:
-  #   a ggplot object 
-  limits = aes(ymax = prop_affirmative + prop_affirmative_se, 
+  #   a ggplot object
+  limits = aes(ymax = prop_affirmative + prop_affirmative_se,
                 ymin = prop_affirmative - prop_affirmative_se)
   if (length(breakouts) > 0) {
     plt = ggplot(dat, aes_string(x = x, y = y)) +
@@ -21,7 +21,7 @@ makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
       theme_bw() +
       xlab("") +
       ggtitle(plot.title) +
-      ylab("Proportion Finding Desired Content") + 
+      ylab("Proportion Finding Desired Content") +
       scale_x_date()
     return(plt)
   } else {
@@ -43,12 +43,12 @@ makeVolumeAreaPlot <- function(df, x, y, fill, plot.title = "", xlab = "", ylab 
   #   x = the vector to plot along the x axis
   #   y = the vector to plot along the y axis
   #   fill = the categorical which will constitute the "stacks" in the area chart
-  #   plot.title = atomic character or factor vector which will be the plot title 
+  #   plot.title = atomic character or factor vector which will be the plot title
   #   xlab = atomic character or factor vector which will be the x axis label
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
- df %>% 
+ df %>%
     ggplot(aes_string(x = x, y = y, fill = fill)) +
       geom_area() +
       theme_bw() +
@@ -64,12 +64,12 @@ makeVolumeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = "") {
   #   df = a data frame of counts and categorical values
   #   x = the vector to plot along the x axis (should be a vector of dates)
   #   y = the vector to plot along the y axis
-  #   plot.title = atomic character or factor vector which will be the plot title 
+  #   plot.title = atomic character or factor vector which will be the plot title
   #   xlab = atomic character or factor vector which will be the x axis label
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
-  df %>% 
+  df %>%
   ggplot(aes_string(x = x, y = y)) +
     geom_bar(stat = "identity", fill = "steelblue") +
     theme_bw() +
@@ -84,11 +84,11 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   #   df = a data frame of counts and categorical values
   #   x = the vector to plot along the x axis (should be a categorical)
   #   y = the vector to plot along the y axis
-  #   plot.title = atomic character or factor vector which will be the plot title 
+  #   plot.title = atomic character or factor vector which will be the plot title
   #   xlab = atomic character or factor vector which will be the x axis label
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
-  #   a ggplot object 
+  #   a ggplot object
   df %>%
   ggplot(aes_string(x = x, y = y)) +
     geom_bar(stat = "identity") +
@@ -103,10 +103,13 @@ padXlim <- function(plot.item.count, item.limit = 4,  offset = .5) {
   # conditional logic function to pad xlim values in ggplot plot object creation
   # Args:
   #   plot.item.count = the number of items to plot along a given axis. corresponds to the number of levels in a factor
-  #   item.limit = the lower bound beyond which no padding will occur 
+  #   item.limit = the lower bound beyond which no padding will occur
   #   offset = the value with which to pad the xlim with
   # Returns:
   #   a scalar offset
+  if (!any(purrr::map(c(plot.item.count, item.limit, offset), is.numeric))) {
+    stop("all args to padXlim must be numeric!")
+  }
   if (plot.item.count > item.limit) {
     return(plot.item.count + offset)
   } else {

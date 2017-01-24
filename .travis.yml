@@ -38,8 +38,7 @@ script:
 - Rscript -e "library(magrittr); error <- testthat::test_file('test_lint.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save = 'no', status = 1) }"
 - rm -rf data/
 after_success:
-- cd ..
-- Rscript -e "x <- covr::file_coverage(source_files = c("functions/helper.R", "functions/read_data.R", "functions/make_plots.R"), test_files = c("tests/test_helper.R", "tests/test_read_data.R")); covr::codecov(x)"
+- Rscript -e "x <- covr::file_coverage(source_files = c('../functions/helper.R', '../functions/read_data.R', '../functions/make_plots.R'), test_files = c('test_helper.R', 'test_read_data.R')); covr::codecov(x)"
 notifications:
   slack:
     secure: NrJTeRwJcW0WR3oTb5o7w30Pra79S0kqinPC5Tcq8dwlJ3wUPfWVcJ9kjDRUBFvP+t3doCLKBI6ErmCAy5wVToirivR4lrDUJaC1mJqud6yenWtsr7pMtkCYf4kp+v3LYGx5ECsno10NMO8w7ITU7S+YUEE/mm1RaL5ptpEGsbEdBEAhavD548ysiiYy/ILL7RjFvvFhXlSOY/mofrxAYX1p7lebAUFqhv97GeXREkuAt+DPq9DKzO2PrigaBhCgs7NVuUgL3d8HRlcqkg8q7WQU/YSwVMoxn57AyEryjY5X9hYXn55uIqjlzKfMs4CLyTDw0la6YzBgD3vudCf9tFevpgMVXUiX2Mj4zsf4IYNiNM3crvfFv8+G+EG7fH4x3qjGkgK0bKuMiQA8uQUi316PBipqwzXOG0+O9H6iHuo+sQsn1jTVyfStJ6WEbjK1W+tJDev6VY1Cs5cm9SSjUUP8rOXTT6Z9kHwZinyMvUC3710uAL1c8PAUKc7sZcpfrUpdIAcvTQTV0zQ8NCKyZdlxeUI6JBI/LWcqfhzNoGUT1o7x3YcfSnH1VuiE/xArLmZ56cIpQ3NAifGFv4THjEgHntXZzhRmQMNzvPx9sVzDwSfu/7D7tqGbm2G7QEieVVDzPRpwprnGT9fnOmOlWDvgYwicn687UWeXi8lRsPI=

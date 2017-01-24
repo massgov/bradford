@@ -3,7 +3,7 @@ makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
   # makes a timeseries line plot with vertical red bars indicating the date a breakout is detetected
   # Args:
   #   dat = data frame which is the output of detect breakouts in bradford. This df contains point
-  #         estimates for user satisfaction as well as a vector indicating standard error
+  #         estimates for user satisfaction as well as a vector indicating standard error for the point
   #         estimate and dates for each
   #   breakouts = a vector of dates for which a breakout was detected
   #   x = the vector to plot along the x axis
@@ -99,21 +99,6 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
 }
 
 #### PLOT HELPERS ####
-padXlim <- function(plot.item.count, item.limit = 4,  offset = .5) {
-  # conditional logic function to pad xlim values in ggplot plot object creation
-  # Args:
-  #   plot.item.count = the number of items to plot along a given axis. corresponds to the number of levels in a factor
-  #   item.limit = the lower bound beyond which no padding will occur
-  #   offset = the value with which to pad the xlim with
-  # Returns:
-  #   a scalar offset
-  if (plot.item.count > item.limit) {
-    return(plot.item.count + offset)
-  } else {
-    return(plot.item.count)
-  }
-}
-
 printGGplotly <- function(plt) {
   # coerces a ggplot object to a plotly object and prints that objects contents for rendering
   # Args:

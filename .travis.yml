@@ -37,7 +37,7 @@ script:
 - Rscript -e "library(magrittr); error <- testthat::test_file('test_read_data.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save= 'no', status = 1) }"
 - Rscript -e "library(magrittr); error <- testthat::test_file('test_lint.R') %>% data.frame() %>% dplyr::select(failed); if (sum(error$failed) > 0){ error %>% dplyr::filter(failed > 0) %>% print(); q(save = 'no', status = 1) }"
 after_success:
-- Rscript -e "x <- covr::file_coverage(source_files = c('../functions/helper.R', '../functions/read_data.R', '../functions/make_plots.R'), test_files = c('test_helper.R', 'test_read_data.R')); covr::codecov(coverage = x)"
+- Rscript -e "x <- covr::file_coverage(source_files = c('../functions/helper.R', '../functions/read_data.R', '../functions/make_plots.R'), test_files = c('test_make_plots.R', 'test_helper.R', 'test_read_data.R')); covr::codecov(coverage = x)"
 - rm -rf data/
 notifications:
   slack:

@@ -39,7 +39,7 @@ git clone https://github.com/massgov/bradford ~/
 
 # get the necessary data from s3'
 sudo mkdir ~/bradford/dashboard/data/
-sudo aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
+sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
 
 # Install packages
 declare -a packages=('shiny'

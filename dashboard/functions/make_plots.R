@@ -1,5 +1,5 @@
 #### PLOTS ####
-makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
+makeBreakoutPlot <- function(df, breakouts, x, y, plot.title = "") {
   # makes a timeseries line plot with vertical red bars indicating the date a breakout is detetected
   # Args:
   #   dat = data frame which is the output of detect breakouts in bradford. This df contains point
@@ -11,28 +11,43 @@ makeBreakoutPlot <- function(dat, breakouts, x, y, plot.title = "") {
   #   plot.title = atomic character or factor vector which will be the plot title
   # Returns:
   #   a ggplot object
-  limits = aes(ymax = prop_affirmative + prop_affirmative_se,
-                ymin = prop_affirmative - prop_affirmative_se)
-  if (length(breakouts) > 0) {
-    plt = ggplot(dat, aes_string(x = x, y = y)) +
-      geom_vline(xintercept = as.numeric(breakouts), color = "red", linetype = "dashed") +
-      geom_line(group = 1) +
-      geom_errorbar(limits) +
-      theme_bw() +
-      xlab("") +
-      ggtitle(plot.title) +
-      ylab("Proportion Finding Desired Content") +
-      scale_x_date()
-    return(plt)
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
   } else {
-    plt = ggplot(dat, aes_string(x = x, y = y)) +
-      geom_line(group = 1) +
-      geom_errorbar(limits) +
-      theme_bw() +
-      ggtitle(plot.title) +
-      xlab("") +
-      ylab("Proportion Finding Desired Content")
-    return(plt)
+    limits = aes(ymax = prop_affirmative + prop_affirmative_se,
+                 ymin = prop_affirmative - prop_affirmative_se)
+    if (length(breakouts) > 0) {
+      plt = ggplot(df, aes_string(x = x, y = y)) +
+        geom_vline(xintercept = as.numeric(breakouts), color = "red", linetype = "dashed") +
+        geom_line(group = 1) +
+        geom_errorbar(limits) +
+        theme_bw() +
+        xlab("") +
+        ggtitle(plot.title) +
+        ylab("Proportion Finding Desired Content") +
+        scale_x_date()
+      return(plt)
+    } else {
+      plt = ggplot(df, aes_string(x = x, y = y)) +
+        geom_line(group = 1) +
+        geom_errorbar(limits) +
+        theme_bw() +
+        ggtitle(plot.title) +
+        xlab("") +
+        ylab("Proportion Finding Desired Content")
+      return(plt)
+    }  
   }
 }
 
@@ -48,14 +63,29 @@ makeVolumeAreaPlot <- function(df, x, y, fill, plot.title = "", xlab = "", ylab 
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
- df %>%
-    ggplot(aes_string(x = x, y = y, fill = fill)) +
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+  } else {
+    df %>%
+      ggplot(aes_string(x = x, y = y, fill = fill)) +
       geom_area() +
       theme_bw() +
       theme(legend.position = "none") +
       ggtitle(plot.title) +
       xlab(xlab) +
-      ylab(ylab)
+      ylab(ylab) 
+  }
 }
 
 makeVolumeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = "") {
@@ -69,13 +99,28 @@ makeVolumeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = "") {
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
-  df %>%
-  ggplot(aes_string(x = x, y = y)) +
-    geom_bar(stat = "identity", fill = "steelblue") +
-    theme_bw() +
-    ggtitle(plot.title) +
-    xlab(xlab) +
-    ylab(ylab)
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+  } else {
+    df %>%
+      ggplot(aes_string(x = x, y = y)) +
+      geom_bar(stat = "identity", fill = "steelblue") +
+      theme_bw() +
+      ggtitle(plot.title) +
+      xlab(xlab) +
+      ylab(ylab)
+  }
 }
 
 makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = "") {
@@ -89,13 +134,66 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
-  df %>%
-  ggplot(aes_string(x = x, y = y)) +
-    geom_bar(stat = "identity") +
-    xlab(xlab) +
-    ggtitle(plot.title) +
-    ylab(ylab) +
-    theme_bw()
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+  } else {
+    df %>%
+      ggplot(aes_string(x = x, y = y)) +
+      geom_bar(stat = "identity") +
+      xlab(xlab) +
+      ggtitle(plot.title) +
+      ylab(ylab) +
+      theme_bw() 
+  }
+}
+
+makeGroupedPareto <- function(df, x, y, plot.title = "", xlab = "", ylab = "", group.by = "") {
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+  } else {
+    return(NA)
+  }
+}
+
+makeGroupedTimeseries <- function(df, x, y, plot.title = "", xlab = "", ylab = "", group.by = "") {
+  if (nrow(df) == 0) {
+    ggplot(data.frame()) +  # pass an empty data frame 
+      geom_blank() + 
+      theme_bw() + 
+      geom_label() + 
+      geom_text() +
+      theme(axis.line = element_blank(), 
+            axis.text.x = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks = element_blank(),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank()) +
+      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+  } else {
+    return(NA)
+  }
 }
 
 #### PLOT HELPERS ####

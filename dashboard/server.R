@@ -1,12 +1,15 @@
 library(shiny)
+library(shinyURL)
 
 shinyServer(function(input, output) {
+  shinyURL.server()
   #### VISITOR SUCCESS ####
-  subset.data <- reactive({
-    GOOGLE_DATA_HERE %>%
-      dplyr::filter(hit_timestamp >= input$visitor.success.daterange[1],
-                    hit_timestamp <= input$visitor.success.daterange[2]) %>%
-                    {  # anon function to filter by service_type
+  visitor.success.subset.data <- reactive({
+    ga.conversions %>%
+      dplyr::filter(hitTimestamp >= input$visitor.success.daterange[1],
+                    hitTimestamp <= input$visitor.success.daterange[2]) %>%
+                    {
+                      # anon function to filter by service_type
                       if ("All" %in% c(input$visitor.success.type, input$visitor.success.type.selector)) {
                         return(.)
                       } else {
@@ -16,14 +19,57 @@ shinyServer(function(input, output) {
                     } 
   })
   
+  visitor.success.timeseries.data <- reactive({
+    # add additional group_by hit_timestamp
+    visitor.success.subset.data() %>%
+      dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
+      dplyr::count()
+  })
+  
+  visitor.success.aggregate.data <- reactive({
+    visitor.success.subset.data() %>%
+      dplyr::group_by_(.dots = input$visitor.success.group.by) %>%
+      dplyr::count()
+  })
+  
   output$type.selection.options <- renderUI({
     unique.subtypes <- dat %>%  # data which is 2 vector data frame 1) every type and 2) corresponding subtypes 
       dplyr::filter(type == input$visitor.success.type) %>%
       unique(.$subtype)
     selectInput(inputId = "visitor.success.type.selector",
                 label = "Filter by Type (if applicbable)",
-                choices = c("All", unique.subtypes),
-                selected = "All")
+                choices = c("All" = "all", unique.subtypes),
+                selected = "all")
+  })
+  
+  # file download 
+  output$visitor.success.download.timeseries <- downloadHandler(
+    filename = function() {
+      paste("vs-timeseries-", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      readr::write_csv(visitor.success.timeseries.data(), file)
+      }
+    )
+  
+  output$visitor.success.download.aggregate <- downloadHandler(
+    filename = function() {
+      paste("vs-aggregate-", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      readr::write_csv(visitor.success.aggregate.data(), file)
+    }
+  )
+  
+  # Plots 
+  output$visitor.success.grouped.pareto <- renderPlotly({
+    makeGroupedPareto(df = data.frame(), x = NULL, y = NULL) %>%
+      printGGplotly()
+  })
+  
+  output$visitor.success.grouped.timeseries <- renderPlotly({
+    makeGroupedTimeseries(df = data.frame(), x = NULL, y = NULL) %>%
+      printGGplotly()
   })
   #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({
@@ -33,7 +79,7 @@ shinyServer(function(input, output) {
       breakouts = global.breakout.frames[[as.numeric(input$funnel.slot.number)]]$loc %>%  # positions of the breakouts 
         global.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]  # subset the date vector
       
-      makeBreakoutPlot(dat = dat, breakouts = breakouts,
+      makeBreakoutPlot(df = dat, breakouts = breakouts,
                               x = "timestamp", y = "prop_affirmative", 
                               plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
       printGGplotly()
@@ -44,7 +90,7 @@ shinyServer(function(input, output) {
       breakouts = site.breakout.frames[[as.numeric(input$funnel.slot.number)]][[input$funnel.name]]$loc %>%  # positions of the breakouts 
         site.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]
       
-      makeBreakoutPlot(dat = dat, breakouts = breakouts,
+      makeBreakoutPlot(df = dat, breakouts = breakouts,
                               x = "timestamp", y = "prop_affirmative") %>%
       printGGplotly() # print the output of ggplotly
     }

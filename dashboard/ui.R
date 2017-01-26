@@ -36,7 +36,7 @@ shinyUI(navbarPage(
             selected = "all", 
             inline = T
           ),
-          uiOutput("type.selection.options"),
+          uiOutput("type.selection.options").
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
             label = "Group by:", 
@@ -72,11 +72,15 @@ shinyUI(navbarPage(
               min = 1, 
               max = 5
             )
-          )
-          
+          ),
+          # URL generator
+          shinyURL.ui(display = T, copyURL = T, tinyURL = T)
         ),
         mainPanel(
-          
+          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
+          plotlyOutput("visitor.success.grouped.pareto"),
+          downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
+          plotlyOutput("visitor.success.grouped.timeseries")
         )
       )
     )

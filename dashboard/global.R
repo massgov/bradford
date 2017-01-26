@@ -17,6 +17,11 @@ options(scipen = 10000000)
 yesterday <- as.character(lubridate::ymd(Sys.Date()) - lubridate::days(1))
 
 #### READ IN DATA ####
+# metadata
+ga.node.metadata <- readRDS(paste0(data.dir, "ga_node_metadata_joined.RDS"))
+
+ga.node.parent.child <- readRDS(paste0(data.dir, "ga_node_parent_child.RDS"))
+
 # User Satisfaction
 formstack.master <- readRDS(paste0(data.dir, "formstack_master.RDS"))
 
@@ -37,9 +42,9 @@ site.breakout.frames <- readIntoList(data.dir = data.dir, pattern = "^site.break
                                      gsub.pattern = ".RDS")
 
 # Converions
-ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS"))
-
-conversion.metrics <- readRDS(paste0(data.dir, "no_conversion_metrics.RDS"))
+ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS")) %>%
+  dplyr::mutate(nodeID = as.integer(nodeID)) %>%
+  dplyr::inner_join(ga.node.metadata, by = c("nodeID" = "id"))
 
 # Funnel Performance 
 ga.path.hashes.top20 <- readRDS(paste0(data.dir, "ga_path_hashes_top_20.RDS"))

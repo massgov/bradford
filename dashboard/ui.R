@@ -14,7 +14,7 @@ shinyUI(navbarPage(
           dateRangeInput(
             inputId = "visitor.success.daterange", 
             label = "Select a Date Range",
-            start = "2017-02-01",
+            start = "2017-01-01",
             end = yesterday,  # sourced from global.R
             startview = "month"
           ),
@@ -40,17 +40,9 @@ shinyUI(navbarPage(
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
             label = "Group by:", 
-            choices = c("Site Section" = "site.section.landing",
-                        "Topic" = "topic", 
-                        "Subtopic" = "subtopic",
-                        "Service Type" = "service.type",
-                        "Service" = "service",
-                        "Event Type" = "event.type",
-                        "Guide" = "guide",
-                        "Provider/Org" = "provider.org",
-                        "Owner" = "owner",
-                        "Referrer" = "referrer",
-                        "Page Type" = "page.type"),
+            choices = c("Event Type" = "event_action",
+                        "Referrer" = "source",
+                        "Page Type" = "content_type"),
             selected = NULL, 
             inline = F
           ),

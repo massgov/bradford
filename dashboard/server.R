@@ -32,12 +32,13 @@ shinyServer(function(input, output) {
   
   # debug
   output$data.view <- renderDataTable({
-    visitor.success.subset.data()
+    visitor.success.aggregate.data()
   })
   
   visitor.success.timeseries.data <- reactive({
     # add additional group_by hit_timestamp
     visitor.success.subset.data() %>%
+      dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
       dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
       dplyr::count()
   })
@@ -59,7 +60,7 @@ shinyServer(function(input, output) {
         unique(.$event_action) %>%
           return(.)
       } else {
-        return(NA)
+        return(NULL)
       }
     }
     selectInput(inputId = "visitor.success.type.selector",

@@ -1,22 +1,38 @@
 library(shiny)
 library(shinyURL)
 
+#options(shiny.trace = TRUE)
+
 shinyServer(function(input, output) {
   shinyURL.server()
   #### VISITOR SUCCESS ####
-  visitor.success.subset.data <- reactive({
+  visitor.success.subset.timeseries <- reactive({
     ga.conversions %>%
-      dplyr::filter(hitTimestamp >= input$visitor.success.daterange[1],
-                    hitTimestamp <= input$visitor.success.daterange[2]) %>%
-                    {
-                      # anon function to filter by service_type
-                      if ("All" %in% c(input$visitor.success.type, input$visitor.success.type.selector)) {
-                        return(.)
-                      } else {
-                        dplyr::filter(., service_type == input$visitor.success.type.selector) %>%
-                          return()
-                      }
-                    } 
+      dplyr::filter(lubridate::date(hit_timestamp_eastern) >= input$visitor.success.daterange[1],
+                    lubridate::date(hit_timestamp_eastern) <= input$visitor.success.daterange[2])
+  })
+  
+  visitor.success.subset.data <- reactive({
+    visitor.success.subset.timeseries() %>%
+    {
+      # anon function to filter by service_type
+      if ("all" %in% c(input$visitor.success.type, input$visitor.success.type.selector)) {
+        return(.)
+      } else if (input$visitor.success.type == "page.type") {
+        dplyr::filter(., content_type == input$visitor.success.type.selector) %>%
+          return(.)
+      } else if (input$visitor.success.type == "event.type") {
+        dplyr::filter(., event_action == input$visitor.success.type.selector) %>%
+          return(.)
+      } else {
+        return(.)
+      }
+    } 
+  })
+  
+  # debug
+  output$data.view <- renderDataTable({
+    visitor.success.subset.data()
   })
   
   visitor.success.timeseries.data <- reactive({
@@ -32,14 +48,23 @@ shinyServer(function(input, output) {
       dplyr::count()
   })
   
+  # filter by type 
   output$type.selection.options <- renderUI({
-    unique.subtypes <- dat %>%  # data which is 2 vector data frame 1) every type and 2) corresponding subtypes 
-      dplyr::filter(type == input$visitor.success.type) %>%
-      unique(.$subtype)
+    unique.subtypes <- visitor.success.subset.timeseries() %>%  # data which is 2 vector data frame 1) every type and 2) corresponding subtypes 
+    {
+      if (input$visitor.success.type == "page.type") {
+        unique(.$content_type) %>%
+          return(.)
+      } else if (input$visitor.success.type == "event.type") {
+        unique(.$event_action) %>%
+          return(.)
+      } else {
+        return(NA)
+      }
+    }
     selectInput(inputId = "visitor.success.type.selector",
                 label = "Filter by Type (if applicbable)",
-                choices = c("All" = "all", unique.subtypes),
-                selected = "all")
+                choices = c("all", unique.subtypes))
   })
   
   # file download 
@@ -71,6 +96,8 @@ shinyServer(function(input, output) {
     makeGroupedTimeseries(df = data.frame(), x = NULL, y = NULL) %>%
       printGGplotly()
   })
+  
+  
   #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({
     if (input$funnel.name == "show.all") {

@@ -32,21 +32,29 @@ shinyServer(function(input, output) {
   
   # debug
   output$data.view <- renderDataTable({
-    visitor.success.aggregate.data()
+    visitor.success.timeseries.data()
   })
   
   visitor.success.timeseries.data <- reactive({
     # add additional group_by hit_timestamp
-    visitor.success.subset.data() %>%
+    dat = visitor.success.subset.data() %>%
       dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
       dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
-      dplyr::count()
+      dplyr::count() %>%
+      dplyr::ungroup()
+    dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
+                             MARGIN = 1, paste, collapse = " - ")
+    return(dat)
   })
   
   visitor.success.aggregate.data <- reactive({
-    visitor.success.subset.data() %>%
+    dat = visitor.success.subset.data() %>%
       dplyr::group_by_(.dots = input$visitor.success.group.by) %>%
-      dplyr::count()
+      dplyr::count() %>% 
+      dplyr::ungroup()
+    dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
+                         MARGIN = 1, paste, collapse = " - ")
+    return(dat)
   })
   
   # filter by type 
@@ -94,7 +102,19 @@ shinyServer(function(input, output) {
   })
   
   output$visitor.success.grouped.timeseries <- renderPlotly({
-    makeGroupedTimeseries(df = data.frame(), x = NULL, y = NULL) %>%
+    slice.to = as.numeric(input$visitor.success.select.k)
+    
+    top.groups = visitor.success.timeseries.data() %>%
+      dplyr::group_by(group_factor) %>%
+      dplyr::summarise(n = n()) %>%
+      dplyr::arrange(dplyr::desc(n)) %>%
+      dplyr::slice(1:slice.to)
+      
+    visitor.success.timeseries.data() %>%
+      dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+    makeGroupedTimeseries(x = "hit_timestamp",
+                          y = "n",
+                          fill = "group_factor") %>%
       printGGplotly()
   })
   

@@ -60,10 +60,18 @@ declare -a packages=('shiny'
                      'purrr'
                      'lubridate'
                      'shinydashboard'
+                     'BreakoutDetection'
+                     'devtools'
                      )
 
-for package_name in "${packages[@]}"; do
+for package_name in ${packages[@]}; do
   sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/', dependencies = TRUE)\""
+done
+
+declare -a git_packages=('aoles/shinyURL')
+
+for package_name in ${git_packages[@]}; do
+  sudo su - -c "R -e \"devtools::install_github('$package_name')\""
 done
 
 # restart the server

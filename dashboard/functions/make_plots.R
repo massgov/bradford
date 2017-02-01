@@ -158,7 +158,7 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   }
 }
 
-makeGroupedPareto <- function(df, x, y, plot.title = "", xlab = "", ylab = "", group.by = "") {
+makeGroupedPareto <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
   if (nrow(df) == 0) {
     ggplot(data.frame()) +  # pass an empty data frame 
       geom_blank() + 
@@ -171,13 +171,13 @@ makeGroupedPareto <- function(df, x, y, plot.title = "", xlab = "", ylab = "", g
             axis.ticks = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+      annotate("text", label = "No Data, yet!", x = 50, y = 50, size = 8, colour = "black")
   } else {
     return(NA)
   }
 }
 
-makeGroupedTimeseries <- function(df, x, y, plot.title = "", xlab = "", ylab = "", group.by = "") {
+makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
   if (nrow(df) == 0) {
     ggplot(data.frame()) +  # pass an empty data frame 
       geom_blank() + 
@@ -190,9 +190,15 @@ makeGroupedTimeseries <- function(df, x, y, plot.title = "", xlab = "", ylab = "
             axis.ticks = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+      annotate("text", label = "No Data, yet!", x = 50, y = 50, size = 8, colour = "black")
   } else {
-    return(NA)
+    df %>%
+    ggplot(aes_string(x = x, y = y, color = fill)) +
+      geom_line(group = 1) +
+      theme_bw() +
+      xlab(xlab) +
+      ylab(ylab) +
+      ggtitle(plot.title)
   }
 }
 

@@ -193,11 +193,14 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
       annotate("text", label = "No Data, yet!", x = 50, y = 50, size = 8, colour = "black")
   } else {
     df %>%
-    ggplot(aes_string(x = x, y = y, color = fill)) +
+    ggplot(aes_string(x = x, y = y, color = fill, fill = fill)) +
       geom_line(group = 1) +
+      geom_point() +
       theme_bw() +
       xlab(xlab) +
       ylab(ylab) +
+      labs(fill = "", 
+           color = "") +
       ggtitle(plot.title)
   }
 }

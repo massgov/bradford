@@ -37,14 +37,23 @@ shinyServer(function(input, output) {
   
   visitor.success.timeseries.data <- reactive({
     # add additional group_by hit_timestamp
-    dat = visitor.success.subset.data() %>%
-      dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
-      dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
-      dplyr::count() %>%
-      dplyr::ungroup()
-    dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
-                             MARGIN = 1, paste, collapse = " - ")
-    return(dat)
+    if (is.null(input$visitor.success.group.by)) {
+      dat = visitor.success.subset.data() %>%
+        dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
+        dplyr::group_by(hit_timestamp) %>%
+        dplyr::count() %>%
+        dplyr::ungroup()
+      return(dat)
+    } else {
+      dat = visitor.success.subset.data() %>%
+        dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
+        dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
+        dplyr::count() %>%
+        dplyr::ungroup()
+      dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
+                               MARGIN = 1, paste, collapse = " - ")
+      return(dat)
+    }
   })
   
   visitor.success.aggregate.data <- reactive({
@@ -102,20 +111,52 @@ shinyServer(function(input, output) {
   })
   
   output$visitor.success.grouped.timeseries <- renderPlotly({
-    slice.to = as.numeric(input$visitor.success.select.k)
-    
-    top.groups = visitor.success.timeseries.data() %>%
-      dplyr::group_by(group_factor) %>%
-      dplyr::summarise(n = n()) %>%
-      dplyr::arrange(dplyr::desc(n)) %>%
-      dplyr::slice(1:slice.to)
+    if (is.null(input$visitor.success.group.by)) {
+      visitor.success.timeseries.data() %>%
+        makeGroupedTimeseries(x = "hit_timestamp",
+                              y = "n",
+                              fill = NULL) %>%
+        printGGplotly()
+    } else if (input$visitor.success.top.bottom == "top") {
+      slice.to = as.numeric(input$visitor.success.select.k)
       
-    visitor.success.timeseries.data() %>%
-      dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-    makeGroupedTimeseries(x = "hit_timestamp",
-                          y = "n",
-                          fill = "group_factor") %>%
-      printGGplotly()
+      top.groups = visitor.success.timeseries.data() %>%
+        dplyr::group_by(group_factor) %>%
+        dplyr::summarise(n = sum(n)) %>%
+        dplyr::arrange(dplyr::desc(n)) %>%
+        dplyr::slice(1:slice.to)
+      
+      visitor.success.timeseries.data() %>%
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        makeGroupedTimeseries(x = "hit_timestamp",
+                              y = "n",
+                              fill = "group_factor") %>%
+        printGGplotly()
+    } else {
+      slice.to = as.numeric(input$visitor.success.select.k)
+      
+      top.groups = visitor.success.timeseries.data() %>%
+        dplyr::group_by(group_factor) %>%
+        dplyr::summarise(n = sum(n)) %>%
+        dplyr::arrange(dplyr::desc(n)) %>% 
+        dplyr::ungroup() %>%
+        {
+          if (slice.to > 1) {
+            start = nrow(.) - (slice.to - 1)
+            end = nrow(.)
+            return(dplyr::slice(., start:end))
+          } else {
+            return(dplyr::slice(., nrow(.)))
+          }
+        }
+      
+      visitor.success.timeseries.data() %>%
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        makeGroupedTimeseries(x = "hit_timestamp",
+                              y = "n",
+                              fill = "group_factor") %>%
+        printGGplotly()
+    }
   })
   
   

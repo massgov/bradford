@@ -42,14 +42,16 @@ shinyServer(function(input, output) {
         dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
         dplyr::group_by(hit_timestamp) %>%
         dplyr::count() %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::mutate(percent_success = round(n / sum(n), 3) * 100)
       return(dat)
     } else {
       dat = visitor.success.subset.data() %>%
         dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
         dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
         dplyr::count() %>%
-        dplyr::ungroup()
+        dplyr::ungroup() %>%
+        dplyr::mutate(percent_success = round(n / sum(n), 3) * 100)  # round to 3rd decimal and multiply 
       dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
                                MARGIN = 1, paste, collapse = " - ")
       return(dat)
@@ -112,11 +114,22 @@ shinyServer(function(input, output) {
   
   output$visitor.success.grouped.timeseries <- renderPlotly({
     if (is.null(input$visitor.success.group.by)) {
+      
       visitor.success.timeseries.data() %>%
-        makeGroupedTimeseries(x = "hit_timestamp",
-                              y = "n",
-                              fill = NULL) %>%
-        printGGplotly()
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedTimeseries(df = .,
+                                  x = "hit_timestamp",
+                                  y = "percent_success",
+                                  fill = NULL)
+          } else {
+            makeGroupedTimeseries(df = .,
+                                  x = "hit_timestamp",
+                                  y = "n",
+                                  fill = NULL)
+          }
+        } %>%
+        printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
       
@@ -128,10 +141,21 @@ shinyServer(function(input, output) {
       
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-        makeGroupedTimeseries(x = "hit_timestamp",
-                              y = "n",
-                              fill = "group_factor") %>%
-        printGGplotly()
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedTimeseries(df = .,
+                                  x = "hit_timestamp",
+                                  y = "percent_success",
+                                  fill = "group_factor")
+          } else {
+            makeGroupedTimeseries(df = .,
+                                  x = "hit_timestamp",
+                                  y = "n",
+                                  fill = "group_factor")
+          }
+        } %>%
+        printGGplotly(.)
     } else {
       slice.to = as.numeric(input$visitor.success.select.k)
       
@@ -152,10 +176,21 @@ shinyServer(function(input, output) {
       
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-        makeGroupedTimeseries(x = "hit_timestamp",
-                              y = "n",
-                              fill = "group_factor") %>%
-        printGGplotly()
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedTimeseries(df = ., 
+                                  x = "hit_timestamp",
+                                  y = "percent_success",
+                                  fill = "group_factor")
+          } else {
+            makeGroupedTimeseries(df = .,
+                                  x = "hit_timestamp",
+                                  y = "n",
+                                  fill = "group_factor")
+          }
+        } %>%
+        printGGplotly(.)
+        
     }
   })
   

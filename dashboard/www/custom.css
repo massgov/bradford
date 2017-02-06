@@ -1,0 +1,202 @@
+@charset "UTF-8";
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-light-webfont.eot");
+  src: url("../fonts/texta-light-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-light-webfont.woff") format("woff"), url("../fonts/texta-light-webfont.ttf") format("truetype"), url("../fonts/texta-light-webfont.svg#open_sansregular") format("svg");
+  font-weight: 300;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-lightitalic-webfont.eot");
+  src: url("../fonts/texta-lightitalic-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-lightitalic-webfont.woff") format("woff"), url("../fonts/texta-lightitalic-webfont.ttf") format("truetype"), url("../fonts/texta-lightitalic-webfont.svg#open_sansregular") format("svg");
+  font-weight: 300;
+  font-style: italic; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-book-webfont.eot");
+  src: url("../fonts/texta-book-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-book-webfont.woff") format("woff"), url("../fonts/texta-book-webfont.ttf") format("truetype"), url("../fonts/texta-book-webfont.svg#open_sansregular") format("svg");
+  font-weight: 400;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-bookitalic-webfont.eot");
+  src: url("../fonts/texta-bookitalic-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-bookitalic-webfont.woff") format("woff"), url("../fonts/texta-bookitalic-webfont.ttf") format("truetype"), url("../fonts/texta-bookitalic-webfont.svg#open_sansregular") format("svg");
+  font-weight: 400;
+  font-style: italic; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-medium-webfont.eot");
+  src: url("../fonts/texta-medium-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-medium-webfont.woff") format("woff"), url("../fonts/texta-medium-webfont.ttf") format("truetype"), url("../fonts/texta-medium-webfont.svg#open_sansregular") format("svg");
+  font-weight: 500;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-mediumitalic-webfont.eot");
+  src: url("../fonts/texta-mediumitalic-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-mediumitalic-webfont.woff") format("woff"), url("../fonts/texta-mediumitalic-webfont.ttf") format("truetype"), url("../fonts/texta-mediumitalic-webfont.svg#open_sansregular") format("svg");
+  font-weight: 500;
+  font-style: italic; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-bold-webfont.eot");
+  src: url("../fonts/texta-bold-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-bold-webfont.woff") format("woff"), url("../fonts/texta-bold-webfont.ttf") format("truetype"), url("../fonts/texta-bold-webfont.svg#open_sansregular") format("svg");
+  font-weight: 700;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-bolditalic-webfont.eot");
+  src: url("../fonts/texta-bolditalic-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-bolditalic-webfont.woff") format("woff"), url("../fonts/texta-bolditalic-webfont.ttf") format("truetype"), url("../fonts/texta-bolditalic-webfont.svg#open_sansregular") format("svg");
+  font-weight: 700;
+  font-style: italic; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-black-webfont.eot");
+  src: url("../fonts/texta-black-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-black-webfont.woff") format("woff"), url("../fonts/texta-black-webfont.ttf") format("truetype"), url("../fonts/texta-black-webfont.svg#open_sansregular") format("svg");
+  font-weight: 800;
+  font-style: normal; }
+
+@font-face {
+  font-family: 'Texta';
+  src: url("../fonts/texta-blackitalic-webfont.eot");
+  src: url("../fonts/texta-blackitalic-webfont.eot?#iefix") format("embedded-opentype"), url("../fonts/texta-blackitalic-webfont.woff") format("woff"), url("../fonts/texta-blackitalic-webfont.ttf") format("truetype"), url("../fonts/texta-blackitalic-webfont.svg#open_sansregular") format("svg");
+  font-weight: 800;
+  font-style: italic; }
+
+body {
+    font-family: "Texta", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+}
+
+.navbar-default {
+  background-color: #43956f;
+  border-color: #e7e7e7;
+}
+
+.navbar-default .navbar-brand {
+  color: #fff;
+}
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #fff;
+}
+
+input[type="radio"] {
+  background-color: #fff;
+  border: 2px solid rgb(220, 220, 220);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-block;
+  height: 19px;
+  margin: 5px 0 0 19px;
+  position: relative;
+  width: 19px;
+  -webkit-appearance: none;
+}
+
+input[type="radio"]:checked:after {
+  background-color: #535353;
+  border-radius: 50%;
+  content: '';
+  display: block;
+  height: 7px;
+  width: 7px;
+  left: 4px;
+  top: 4px;
+  position: absolute;;
+
+}
+
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -4px;
+}
+input[type="radio"] + span,
+input[type="checkbox"] + span {
+    padding-left: 3px;
+}
+
+input[type="checkbox"] {
+  background-color: #fff;
+  border: 2px solid rgb(220, 220, 220);
+  cursor: pointer;
+  display: inline-block;
+  height: 19px;
+  /*margin: 5px 0 0 19px;*/
+  position: relative;
+  width: 19px;
+  -webkit-appearance: none;
+}
+
+input[type="checkbox"]:checked:before {
+  content: url("/images/checkmark.svg");
+  left: 1px;
+  top: -5px;
+  position: absolute;;
+
+}
+
+.navbar-default {
+  background-color: #43956f;
+  border-color: #43956f; }
+  .navbar-default .navbar-brand {
+    color: #fff; }
+    .navbar-default .navbar-brand:hover, .navbar-default .navbar-brand:focus {
+      color: #e6e6e6;
+      background-color: transparent; }
+  .navbar-default .navbar-text {
+    color: #fff; }
+  .navbar-default .navbar-nav > li > a {
+    color: #fff; }
+    .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+      color: #141414;
+      background-color: #f2f2f2; }
+  .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
+    color: #141414;
+    background-color: #fff; }
+  .navbar-default .navbar-nav > .disabled > a, .navbar-default .navbar-nav > .disabled > a:hover, .navbar-default .navbar-nav > .disabled > a:focus {
+    color: #dcdcdc;
+    background-color: transparent; }
+  .navbar-default .navbar-toggle {
+    border-color: #ddd; }
+    .navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+      background-color: #ddd; }
+    .navbar-default .navbar-toggle .icon-bar {
+      background-color: #888; }
+  .navbar-default .navbar-collapse,
+  .navbar-default .navbar-form {
+    border-color: #43956f; }
+  .navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
+    background-color: #fff;
+    color: #141414; }
+  @media (max-width: 767px) {
+    .navbar-default .navbar-nav .open .dropdown-menu > li > a {
+      color: #fff; }
+      .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+        color: #141414;
+        background-color: #f2f2f2; }
+    .navbar-default .navbar-nav .open .dropdown-menu > .active > a, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
+      color: #141414;
+      background-color: #fff; }
+    .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a, .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:hover, .navbar-default .navbar-nav .open .dropdown-menu > .disabled > a:focus {
+      color: #dcdcdc;
+      background-color: transparent; } }
+  .navbar-default .navbar-link {
+    color: #fff; }
+    .navbar-default .navbar-link:hover {
+      color: #141414; }
+  .navbar-default .btn-link {
+    color: #fff; }
+    .navbar-default .btn-link:hover, .navbar-default .btn-link:focus {
+      color: #141414; }
+    .navbar-default .btn-link[disabled]:hover, .navbar-default .btn-link[disabled]:focus,
+    fieldset[disabled] .navbar-default .btn-link:hover,
+    fieldset[disabled] .navbar-default .btn-link:focus {
+      color: #dcdcdc; }

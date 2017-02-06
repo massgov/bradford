@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinyURL)
 
 shinyUI(navbarPage(
+  theme = "custom.css",
   # Application title
   title = "KPI Dashboard",
   #### VISITOR SUCCESS ####

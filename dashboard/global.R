@@ -21,7 +21,7 @@ cb.palette <- c("#999999",
 
 options(scipen = 10000000)
 
-yesterday <- as.character(lubridate::ymd(Sys.Date()) - lubridate::days(1))
+yesterday <- as.character(lubridate::ymd(Sys.Date(), tz = "America/New_York") - lubridate::days(1))
 
 #### READ IN DATA ####
 # VISITOR SUCCESS 

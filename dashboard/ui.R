@@ -40,7 +40,10 @@ shinyUI(navbarPage(
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
             label = "Group by:", 
-            choices = c("Event Type" = "event_action",
+            choices = c("Site Section Landing" = "site_section",
+                        "Topic" = "topic",
+                        "Sub-Topic" = "subtopic",
+                        "Event Type" = "event_action",
                         "Referrer" = "source",
                         "Page Type" = "content_type"),
             selected = NULL, 
@@ -73,7 +76,6 @@ shinyUI(navbarPage(
           plotlyOutput("visitor.success.grouped.pareto"),
           downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.timeseries")
-          #dataTableOutput("data.view")
         )
       )
     )

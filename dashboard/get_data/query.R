@@ -30,7 +30,7 @@ drupal.node.descendants <- paste("SELECT ",
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection)
  
 # get all node meta types and descendants 
-drupal.node.with.descendants <- drupal.node.descendants %>%
+ drupal.node.descendants %>%
   dplyr::filter(descendant_list != "") %>%
   dplyr::right_join(drupal.node.metadata %>%
                       dplyr::select(content_type, node_id, title), by = "node_id") %>%  # join content type to descendant list
@@ -38,10 +38,40 @@ drupal.node.with.descendants <- drupal.node.descendants %>%
   split(.$content_type) %>%
   purrr::map(function(x) split(x = x, f = x["title"])) %>%
   purrr::map(function(x) purrr::map(x, function(y) stringr::str_split(y["descendant_list"],  # go two levels deep in the list
-                                                                      pattern = ",") %>%  # pull out all node ids as numeric
-                                      purrr::map(as.numeric)
+                                                                      pattern = ",") %>% 
+                                      data.frame("node_id" = ., "title" = y[["title"]]) %>%
+                                      set_names(value = c("node_id", "title")) %>%
+                                      dplyr::mutate(node_id = as.numeric(node_id))
                                     )
-             )
+             ) %>%
+             {
+               saveRDS(., "dashboard/data/drupal_node_descendants.RDS")
+               drupal.node.with.descendants <<- .
+             }
+
+drupal.node.with.descendants$`Section Landing` %>%
+  dplyr::bind_rows() %>%
+  dplyr::rename(site_section = title) %>%
+  {
+    saveRDS(., "dashboard/data/section_landing_node_ids.RDS")
+    section.landing.ids <<- . 
+  }
+
+drupal.node.with.descendants$Topic %>%
+  dplyr::bind_rows() %>%
+  dplyr::rename(topic = title) %>%
+  {
+    saveRDS(., "dashboard/data/topic_node_ids.RDS")
+    topic.ids <<- .
+  }
+ 
+drupal.node.with.descendants$Subtopic %>%
+  dplyr::bind_rows() %>%
+  dplyr::rename(subtopic = title) %>%
+  {
+    saveRDS(., "dashboard/data/subtopic_node_ids.RDS")
+    subtopic.ids <<- .
+  }
 
 # Google analytics
 ga.sessions <- paste(" SELECT page_path,",
@@ -72,6 +102,7 @@ ga.conversions <- paste(" SELECT *",
                         "FROM", event.table,
                         "WHERE event_category = 'Conversion'") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection)
+
 ga.sessions %>%
   dplyr::inner_join(ga.conversions, by = c("session_id" = "session_id", "page_path" = "page_path")) %>%
   dplyr::inner_join(drupal.node.metadata, by = "node_id") %>%

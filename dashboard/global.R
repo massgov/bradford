@@ -31,6 +31,14 @@ drupal.node.descendants <- readRDS(paste0(data.dir, "drupal_node_descendants.RDS
 # Converions
 ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS")) 
 
+# node id join tables
+section.landing.ids <- readRDS(paste0(data.dir, "section_landing_node_ids.RDS"))
+
+topic.ids <- readRDS(paste0(data.dir, "topic_node_ids.RDS"))
+
+subtopic.ids <- readRDS(paste0(data.dir, "subtopic_node_ids.RDS"))
+
+
 # ANALYST - USER SATISFACTION
 formstack.master <- readRDS(paste0(data.dir, "formstack_master.RDS"))
 

@@ -30,9 +30,16 @@ shinyServer(function(input, output) {
     } 
   })
   
-  # debug
-  output$data.view <- renderDataTable({
-    visitor.success.timeseries.data()
+  type.group.by <- reactive({
+    if ("site_section" %in% input$visitor.success.group.by) {
+      return(section.landing.ids)
+    } else if ("topic" %in% input$visitor.success.group.by) {
+      return(topic.ids)
+    } else if ("subtopic" %in% input$visitor.success.group.by) {
+      return(subtopic.ids)
+    } else {
+      return(NULL)
+    }
   })
   
   visitor.success.timeseries.data <- reactive({
@@ -48,6 +55,7 @@ shinyServer(function(input, output) {
     } else {
       dat = visitor.success.subset.data() %>%
         dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
+        dplyr::inner_join(type.group.by(), by = "node_id") %>%
         dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
         dplyr::count() %>%
         dplyr::ungroup() %>%

@@ -1,4 +1,20 @@
 #### PLOTS ####
+makeBlankPlot <- function() {
+  ggplot(data.frame()) +  # pass an empty data frame 
+    geom_blank() + 
+    theme_bw() + 
+    geom_label() + 
+    geom_text() +
+    theme(axis.line = element_blank(), 
+          axis.text.x = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank()) +
+    annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+}
+
+
 makeBreakoutPlot <- function(df, breakouts, x, y, plot.title = "") {
   # makes a timeseries line plot with vertical red bars indicating the date a breakout is detetected
   # Args:
@@ -12,18 +28,7 @@ makeBreakoutPlot <- function(df, breakouts, x, y, plot.title = "") {
   # Returns:
   #   a ggplot object
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     limits = aes(ymax = prop_affirmative + prop_affirmative_se,
                  ymin = prop_affirmative - prop_affirmative_se)
@@ -64,18 +69,7 @@ makeVolumeAreaPlot <- function(df, x, y, fill, plot.title = "", xlab = "", ylab 
   # Returns:
   #   a ggplot object
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     df %>%
       ggplot(aes_string(x = x, y = y, fill = fill)) +
@@ -100,18 +94,7 @@ makeVolumeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = "") {
   # Returns:
   #   a ggplot object
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     df %>%
       ggplot(aes_string(x = x, y = y)) +
@@ -135,18 +118,7 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   # Returns:
   #   a ggplot object
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!",x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     df %>%
       ggplot(aes_string(x = x, y = y)) +
@@ -160,18 +132,7 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
 
 makeGroupedPareto <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!", x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     return(NA)
   }
@@ -179,18 +140,7 @@ makeGroupedPareto <- function(df, x, y, fill, plot.title = "", xlab = "", ylab =
 
 makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
   if (nrow(df) == 0) {
-    ggplot(data.frame()) +  # pass an empty data frame 
-      geom_blank() + 
-      theme_bw() + 
-      geom_label() + 
-      geom_text() +
-      theme(axis.line = element_blank(), 
-            axis.text.x = element_blank(),
-            axis.text.y = element_blank(),
-            axis.ticks = element_blank(),
-            axis.title.x = element_blank(),
-            axis.title.y = element_blank()) +
-      annotate("text", label = "No Data, yet!", x = 50, y = 50, size = 8, colour = "black")
+    makeBlankPlot()
   } else {
     df %>%
     ggplot(aes_string(x = x, y = y, color = fill, fill = fill)) +

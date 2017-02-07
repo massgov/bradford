@@ -14,8 +14,8 @@ shinyUI(navbarPage(
           dateRangeInput(
             inputId = "visitor.success.daterange", 
             label = "Select a Date Range",
-            start = "2017-02-01",
-            end = NULL,
+            start = "2017-01-01",
+            end = yesterday,  # sourced from global.R
             startview = "month"
           ),
           radioButtons(
@@ -36,26 +36,16 @@ shinyUI(navbarPage(
             selected = "all", 
             inline = T
           ),
-          selectInput(
-            inputId = "visitor.success.type.selector", 
-            label = "Filter by Type (if applicbable)",
-            choices = c("All" = "all"),
-            selected = "all"
-          ),
+          uiOutput("type.selection.options"),
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
             label = "Group by:", 
-            choices = c("Site Section" = "site.section.landing",
-                        "Topic" = "topic", 
-                        "Subtopic" = "subtopic",
-                        "Service Type" = "service.type",
-                        "Service" = "service",
-                        "Event Type" = "event.type",
-                        "Guide" = "guide",
-                        "Provider/Org" = "provider.org",
-                        "Owner" = "owner",
-                        "Referrer" = "referrer",
-                        "Page Type" = "page.type"),
+            choices = c("Site Section Landing" = "site_section",
+                        "Topic" = "topic",
+                        "Sub-Topic" = "subtopic",
+                        "Event Type" = "event_action",
+                        "Referrer" = "source",
+                        "Page Type" = "content_type"),
             selected = NULL, 
             inline = F
           ),
@@ -77,11 +67,15 @@ shinyUI(navbarPage(
               min = 1, 
               max = 5
             )
-          )
-          
+          ),
+          # URL generator
+          shinyURL.ui(display = T, copyURL = T, tinyURL = T)
         ),
         mainPanel(
-          
+          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
+          plotlyOutput("visitor.success.grouped.pareto"),
+          downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
+          plotlyOutput("visitor.success.grouped.timeseries")
         )
       )
     )

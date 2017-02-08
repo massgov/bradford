@@ -110,7 +110,6 @@ input[type="radio"]:checked:after {
   left: 4px;
   top: 4px;
   position: absolute;;
-
 }
 
 input[type="radio"]:focus,
@@ -136,9 +135,11 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked:before {
-  content: url("/images/checkmark.svg");
+  font-family: "Glyphicons Halflings";
+  content: "\e013";
+  font-size: .6em;
   left: 1px;
-  top: -5px;
+  bottom: 1px;
   position: absolute;;
 
 }

@@ -43,3 +43,8 @@ conversion.metrics <- readRDS(paste0(DATA.DIR, "no_conversion_metrics.RDS"))
 ga.path.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_path_hashes_top_20.RDS"))
 
 ga.session.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_session_hashes_top_20.RDS"))
+
+ga.sessions_conversions <- readRDS(paste0(DATA.DIR,"grouped_sessions_conversions.RDS"))  %>% 
+                               mutate(conversion = ifelse(is.na(conversions), 0, conversions)) %>%
+                               mutate(sessions = ifelse(is.na(sessions), 0, sessions))
+

@@ -86,6 +86,10 @@ shinyUI(navbarPage(
       )
     )
   ),
+ 
+    #### VISITOR SUCCESS ####
+    tabPanel(title = "Success Rate",
+             plotlyOutput("topic.visits")),
   #### ANALYST ####
   navbarMenu(
     "Analyst",

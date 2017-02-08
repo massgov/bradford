@@ -1,0 +1,21 @@
+Package: bradford
+Title: Bradford
+Version: 0.1
+Authors@R: person("Connor", "McKay", email = "Connor.T.McKay@mass.gov",
+                  role = c("aut", "cre"))
+Description: Shiny app to visualize visitor satisfaction and success rates
+Depends: R (>= 3.1.0)
+Suggest: lintr
+Imports:
+  shiny,
+  magrittr,
+  ggplot2,
+  openssl,
+  XML,
+  plotly,
+  shinydashboard,
+  emdbook,
+  lubridate,
+  zoo,
+  testthat
+LazyData: true

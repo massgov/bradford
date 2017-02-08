@@ -12,6 +12,7 @@ sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/ap
 sudo apt-get -y update
 sudo apt-get -y dist-upgrade
 
+# install packages both for linux and R
 declare -a ubuntu_packages=('r-base'
                             'r-cran-xml'
                             'libcurl4-gnutls-dev'
@@ -29,17 +30,6 @@ declare -a ubuntu_packages=('r-base'
 for package_name in ${ubuntu_packages[@]}; do
   sudo apt-get install -y $package_name
 done
-
-# get and install shiny-server
-wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
-sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
-
-# get the bradford repo
-git clone https://github.com/massgov/bradford ~/
-
-# get the necessary data from s3'
-sudo mkdir ~/bradford/dashboard/data/
-sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
 
 # Install packages
 declare -a packages=('shiny'
@@ -74,9 +64,24 @@ for package_name in ${git_packages[@]}; do
   sudo su - -c "R -e \"devtools::install_github('$package_name')\""
 done
 
-# restart the server
-sudo systemctl restart shiny-server
+# get and install shiny-server
+wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
+sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
+# get the bradford repo
+git clone https://github.com/massgov/bradford ~/
+
+# get the necessary data from s3'
+sudo mkdir ~/bradford/dashboard/data/
+sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
+
+# get the connection creds
+sudo /home/ubuntu/.local/bin/aws s3 cp s3://massgov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+
+# run the query
+Rscript ~/bradford/dashboard/get_data/query.R
+
+# create the bradford app dir
 sudo mkdir /srv/shiny-server/bradford
 
 # move the dashboard to the shiny-server directory

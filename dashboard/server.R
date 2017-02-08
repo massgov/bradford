@@ -342,4 +342,21 @@ shinyServer(function(input, output) {
       autoWidth = TRUE,
       dom = 'tp')
     )
+  output$topic.visits <- renderPlotly({
+    if (input$funnel.name == "show.all") {
+      dat = formstack.master %>% 
+        dplyr::group_by(info_found) %>%
+        dplyr::count()
+    } else {
+      dat = formstack.master %>% 
+        dplyr::filter(site == input$funnel.name) %>%
+        dplyr::group_by(info_found) %>%
+        dplyr::count()
+    }
+    dat %>%
+      makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?") %>%
+      printGGplotly()
+  })
+  output$test <- renderText("testing")
+  
   })

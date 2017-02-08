@@ -58,3 +58,7 @@ global.breakout.frames <- readIntoList(data.dir = data.dir, pattern = "^global.b
 site.breakout.frames <- readIntoList(data.dir = data.dir, pattern = "^site.breakouts",
                                      gsub.pattern = ".RDS")
 
+ga.sessions_conversions <- readRDS(paste0(DATA.DIR,"grouped_sessions_conversions.RDS"))  %>% 
+                               mutate(conversion = ifelse(is.na(conversions), 0, conversions)) %>%
+                               mutate(sessions = ifelse(is.na(sessions), 0, sessions))
+

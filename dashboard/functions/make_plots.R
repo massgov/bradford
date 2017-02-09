@@ -209,6 +209,60 @@ buildParetoChart <- function(df, group.col, data.col, x.lab = "Groups", y.lab = 
   
 }
 
+buildParetoChart <- function(df, group.col, data.col, x.lab = "Groups", y.lab = "Total",title = "TITLE",
+                             percent = TRUE, cumul.line = TRUE, top.pct = 1){
+  
+  # Draws a bar chart based off grouped data in a specific column displaying the highest value categories descending, includes
+  # an option to draw a cumulative traffic line
+  #
+  # df: dataframe
+  # group.col: column that will be grouped along x-axis
+  # data.col: numeric column
+  # x and y lab: labels for x and y axes
+  # percent: Show metrics as % of total
+  # cumul.line: Show cumulative line
+  # max.entries: Number of bars to show in graph
+  
+  grouped.df <- df %>% dplyr::group_by_(.dots = group.col) %>% 
+    dplyr::summarise_(total = paste('sum( ',data.col,")")) %>%
+    dplyr::arrange(.,desc(total)) %>% dplyr::rename_(group = paste(group.col))
+  
+  
+  # Drop NAs
+  grouped.df <- grouped.df[!is.na(grouped.df$group),]
+  
+  
+  # Make cumulative column
+  grouped.df$cumul <- cumsum(grouped.df$total)
+  
+  grouped.df <- grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)),]
+  
+  
+  # Reorder factors largest to smallest
+  grouped.df <- transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
+  
+  if(percent){
+    data.total <- sum(grouped.df$total)
+    grouped.df$total <- grouped.df$total / data.total * 100
+    grouped.df$cumul <- cumsum(grouped.df$total)
+  }
+  
+  plt <- ggplot(grouped.df, aes(x=group, y = total)) +
+    geom_bar(stat="identity", colour = "black") + 
+    labs(x = x.lab, title = title, y = y.lab) +
+    expand_limits(y=0) + 
+    theme_bw() + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  if(cumul.line){
+    plt <- plt + geom_line(aes(x=group, y=cumul, group = 1), colour = "black") + 
+      scale_colour_manual(values = c("Cumulative Graph"))
+  }
+  
+  return(plt)
+  
+}
+
 #### PLOT HELPERS ####
 padXlim <- function(plot.item.count, item.limit = 4,  offset = .5) {
   # conditional logic function to pad xlim values in ggplot plot object creation
@@ -237,6 +291,7 @@ printGGplotly <- function(plt) {
   print(plotly::ggplotly(plt))
 }
 
+
 buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total', cumul.col = 'cumul', 
                               x.lab = "Groups", y.lab = "Total",title = "TITLE", cumul.line = TRUE){
   
@@ -250,7 +305,6 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   # x and y lab: labels for x and y axes
   # percent: Show metrics as % of total
   # cumul.line: Show cumulative line
-  # top.pct: Number of bars to show in graph
   
   
   # Rename columns

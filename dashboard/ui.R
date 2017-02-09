@@ -46,7 +46,7 @@ shinyUI(navbarPage(
                         "Event Type" = "event_action",
                         "Referrer" = "source",
                         "Page Type" = "content_type"),
-            selected = NULL, 
+            selected = "site_section", 
             inline = F
           ),
           br(),

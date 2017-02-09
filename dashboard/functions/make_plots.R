@@ -1,11 +1,11 @@
 #### PLOTS ####
 makeBlankPlot <- function() {
-  ggplot(data.frame()) +  # pass an empty data frame 
-    geom_blank() + 
-    theme_bw() + 
-    geom_label() + 
+  ggplot(data.frame()) +  # pass an empty data frame
+    geom_blank() +
+    theme_bw() +
+    geom_label() +
     geom_text() +
-    theme(axis.line = element_blank(), 
+    theme(axis.line = element_blank(),
           axis.text.x = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks = element_blank(),
@@ -52,7 +52,7 @@ makeBreakoutPlot <- function(df, breakouts, x, y, plot.title = "") {
         xlab("") +
         ylab("Proportion Finding Desired Content")
       return(plt)
-    }  
+    }
   }
 }
 
@@ -78,7 +78,7 @@ makeVolumeAreaPlot <- function(df, x, y, fill, plot.title = "", xlab = "", ylab 
       theme(legend.position = "none") +
       ggtitle(plot.title) +
       xlab(xlab) +
-      ylab(ylab) 
+      ylab(ylab)
   }
 }
 
@@ -126,15 +126,35 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
       xlab(xlab) +
       ggtitle(plot.title) +
       ylab(ylab) +
-      theme_bw() 
+      theme_bw()
   }
 }
 
-makeGroupedPareto <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
+makeGroupedPareto <- function(df, x, y, cumul.line = NULL, plot.title = "", xlab = "", ylab = "") {
   if (nrow(df) == 0) {
     makeBlankPlot()
+  } else if (is.null(cumul.line)) {
+    df %>%
+      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      xlab(xlab) +
+      ylab(ylab) +
+      labs(fill = "",
+           color = "") +
+      ggtitle(plot.title)
   } else {
-    return(NA)
+    df %>%
+      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
+      geom_line(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line, group = 1)) +
+      geom_point(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      xlab(xlab) +
+      ylab(ylab) +
+      labs(fill = "",
+           color = "") +
+      ggtitle(plot.title)
   }
 }
 
@@ -149,7 +169,7 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
       theme_bw() +
       xlab(xlab) +
       ylab(ylab) +
-      labs(fill = "", 
+      labs(fill = "",
            color = "") +
       ggtitle(plot.title)
   }

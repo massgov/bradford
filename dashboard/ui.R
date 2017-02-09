@@ -83,7 +83,21 @@ shinyUI(navbarPage(
  
     #### VISITOR SUCCESS ####
     tabPanel(title = "Success Rate",
-             plotlyOutput("topic.visits")),
+             radioButtons(
+               inputId = "success.rate.percent", 
+               label = "Select Unit", 
+               choices = c("Percent" = TRUE, 
+                           "Number" = FALSE),
+               selected = FALSE, 
+               inline = T
+             ),
+             fluidRow(
+               splitLayout(
+                 cellWidths = c("50%", "50%"),
+             plotlyOutput("topic.sessions"),
+             plotlyOutput("topic.conversions"))),
+             br(),
+             plotlyOutput("topic.conversion.rate")),
   #### ANALYST ####
   navbarMenu(
     "Analyst",

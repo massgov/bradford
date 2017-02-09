@@ -171,8 +171,7 @@ shinyServer(function(input, output) {
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n",
-                              cumul.line = "cum_percent")
+                              y = "n")
           }
         } %>%
         printGGplotly(.)
@@ -194,8 +193,7 @@ shinyServer(function(input, output) {
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n",
-                              cumul.line = "cum_percent")
+                              y = "n")
           }
         } %>%
         printGGplotly(.)

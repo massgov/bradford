@@ -74,6 +74,7 @@ shinyUI(navbarPage(
         mainPanel(
           downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          br(),
           downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.timeseries")
         )

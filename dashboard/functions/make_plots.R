@@ -1,5 +1,10 @@
 #### PLOTS ####
 makeBlankPlot <- function() {
+  # makes a blank plot
+  # Args:
+  #   none
+  # Returns:
+  #   a ggplot object
   ggplot(data.frame()) +  # pass an empty data frame
     geom_blank() +
     theme_bw() +
@@ -131,6 +136,17 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
 }
 
 makeGroupedPareto <- function(df, x, y, cumul.line = NULL, plot.title = "", xlab = "", ylab = "") {
+  # makes a bar chart and optionally adds a pareto line 
+  # Args:
+  #   df = a data frame of counts and categorical values
+  #   x = the vector of categoricals to plot along the x axis
+  #   y = the vector of values to plot along the y axis 
+  #   cumul.line = the vector of values which are a cumumlative sum of percentages to plot, NULL returns no line
+  #   plot.title = the title of the plot to be applied
+  #   xlab = the label for the x axis
+  #   ylab = the label for the y axis
+  # Returns:
+  #   a ggplot object
   if (nrow(df) == 0) {
     makeBlankPlot()
   } else if (is.null(cumul.line)) {
@@ -159,6 +175,17 @@ makeGroupedPareto <- function(df, x, y, cumul.line = NULL, plot.title = "", xlab
 }
 
 makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
+  # makes a grouped time series chart 
+  # Args:
+  #   df = a data frame of counts, categorical values, and dates
+  #   x = the vector of dates to plot along the x axis
+  #   y = the vector of values to plot along the y axis 
+  #   fill = the vector of categorical values which color the lines
+  #   plot.title = the title of the plot to be applied
+  #   xlab = the label for the x axis
+  #   ylab = the label for the y axis
+  # Returns:
+  #   a ggplot object
   if (nrow(df) == 0) {
     makeBlankPlot()
   } else {

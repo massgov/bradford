@@ -130,7 +130,7 @@ shinyServer(function(input, output) {
   
   # FILE DOWNLOADS 
   output$visitor.success.download.timeseries <- downloadHandler(
-    filename = function() {
+    filename = function() {  # for some reason shiny expects it this way
       paste("vs-timeseries-", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
@@ -150,27 +150,14 @@ shinyServer(function(input, output) {
   # PLOTS
   #   Pareto
   output$visitor.success.grouped.pareto <- renderPlotly({
-    if (is.null(input$visitor.success.group.by)) {
-      visitor.success.aggregate.data() %>%
-      {
-        if (input$visitor.success.units == "percent") {
-          makeGroupedPareto(df = .,
-                            x = "group_factor",
-                            y = "percent_success",
-                            cumul.line = "cum_percent")
-        } else {
-          makeGroupedPareto(df = .,
-                            x = "group_factor",
-                            y = "n",
-                            cumul.line = "cum_percent")
-        }
-      } %>%
+    if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
+      makeBlankPlot() %>%
         printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
       
       top.groups = visitor.success.aggregate.data() %>%
-        dplyr::arrange(dplyr::desc(n)) %>%
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
       
       visitor.success.aggregate.data() %>%
@@ -193,7 +180,7 @@ shinyServer(function(input, output) {
       slice.to = as.numeric(input$visitor.success.select.k)
       
       top.groups = visitor.success.aggregate.data() %>%
-        dplyr::arrange(n) %>%
+        dplyr::arrange(n) %>%  # arrange low to high
         dplyr::slice(1:slice.to)
       
       visitor.success.aggregate.data() %>%
@@ -217,7 +204,7 @@ shinyServer(function(input, output) {
   
   # grouped timeseries 
   output$visitor.success.grouped.timeseries <- renderPlotly({
-    if (is.null(input$visitor.success.group.by)) {
+    if (is.null(input$visitor.success.group.by)) {  # if we are grouping on nothing show the raw trend
       visitor.success.timeseries.data() %>%
         {
           if (input$visitor.success.units == "percent") {
@@ -239,11 +226,10 @@ shinyServer(function(input, output) {
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(dplyr::desc(n)) %>%
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
       
       visitor.success.timeseries.data() %>%
-        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
           if (input$visitor.success.units == "percent") {
@@ -265,7 +251,7 @@ shinyServer(function(input, output) {
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(n) %>% 
+        dplyr::arrange(n) %>%  # arrange low to high
         dplyr::ungroup() %>%
         dplyr::slice(1:slice.to)
       

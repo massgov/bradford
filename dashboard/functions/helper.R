@@ -96,14 +96,11 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1){
   # group.col: column that will be grouped along x-axis
   # data.col: numeric column
   
-  grouped.df <- df %>% dplyr::group_by_(.dots = group.col) %>% 
-    dplyr::summarise_(total = paste('sum( ',data.col,")")) %>%
-    dplyr::arrange(.,desc(total)) %>% dplyr::rename_(group = paste(group.col))
-  
-  
-  # Drop NAs
-  grouped.df <- grouped.df[!is.na(grouped.df$group),]
-  
+  grouped.df = df %>% 
+    dplyr::group_by_(.dots = group.col) %>% 
+    dplyr::summarise_(total = paste('sum( ', data.col,")")) %>%
+    dplyr::arrange(., desc(total)) %>% dplyr::rename_(group = paste(group.col)) %>% 
+    dplyr::filter(ifelse(is.na(group), F, T))
   
   # Make cumulative column
   grouped.df$cumul <- cumsum(grouped.df$total)
@@ -115,6 +112,6 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1){
     grouped.df$cumul <- cumsum(grouped.df$total)
   }
   
-  grouped.df <- grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)),]
+  grouped.df <- grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
   
 }

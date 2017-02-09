@@ -140,10 +140,8 @@ grouped.sessions.query <- "SELECT parent_info.content_type as parent_type,
 
 # Get dataframe and fill na conversions and sessions with 0
 dbGetQuery(db.connection, grouped.sessions.query)  %>% 
-  mutate(conversions = ifelse(is.na(conversions), 0, conversions)) %>%
-  mutate(sessions = ifelse(is.na(sessions), 0, sessions)) %>%
-  {
+  mutate(conversions = ifelse(is.na(conversions), 0, conversions),
+         sessions = ifelse(is.na(sessions), 0, sessions)) %>%
     saveRDS(., "dashboard/data/grouped.sessions.conversions.RDS")
-    grouped.sessions.conversions <<- .
-  }
+
   

@@ -201,14 +201,14 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   
   
   # Rename columns
-  grouped.df$group <- grouped.df[[group.col]]
-  grouped.df$total <- grouped.df[[data.col]]
-  grouped.df$cumul <- grouped.df[[cumul.col]]
+  grouped.df$group = grouped.df[[group.col]]
+  grouped.df$total = grouped.df[[data.col]]
+  grouped.df$cumul = grouped.df[[cumul.col]]
   
   # Reorder factors largest to smallest
-  grouped.df <- transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
+  grouped.df = transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
   
-  plt <- ggplot(grouped.df, aes(x=group, y = total)) +
+  plt = ggplot(grouped.df, aes(x=group, y = total)) +
             geom_bar(stat="identity", colour = "black") + 
             labs(x = paste0(x.lab), title = title, y = y.lab) +
             expand_limits(y=0) + 
@@ -216,7 +216,8 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
             theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
   if(cumul.line){
-    plt <- plt + geom_line(aes(x=group, y=cumul, group = 1), colour = "black") + 
+    plt = plt + 
+        geom_line(aes(x=group, y=cumul, group = 1), colour = "black") + 
             scale_colour_manual(values = c("Cumulative Graph"))
   }
   

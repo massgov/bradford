@@ -1,4 +1,5 @@
 library(testthat)
+library(methods)
 source("../functions/helper.R")
 
 context("helper functions within dashboard/functions/helper.R")

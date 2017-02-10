@@ -131,7 +131,7 @@ shinyServer(function(input, output) {
   # FILE DOWNLOADS 
   output$visitor.success.download.timeseries <- downloadHandler(
     filename = function() {  # for some reason shiny expects it this way
-      paste("vs-timeseries-", Sys.Date(), ".csv", sep = "")
+      paste("vs-timeseries-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
       readr::write_csv(visitor.success.timeseries.data(), file)
@@ -140,7 +140,7 @@ shinyServer(function(input, output) {
   
   output$visitor.success.download.aggregate <- downloadHandler(
     filename = function() {
-      paste("vs-aggregate-", Sys.Date(), ".csv", sep = "")
+      paste("vs-aggregate-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
       readr::write_csv(visitor.success.aggregate.data(), file)

@@ -14,7 +14,7 @@ input[type="radio"] {
   cursor: pointer;
   display: inline-block;
   height: 19px;
-  margin: 5px 0 0 19px;
+  margin: 1px 0 0 19px;
   position: relative;
   width: 19px;
   -webkit-appearance: none;
@@ -48,7 +48,7 @@ input[type="checkbox"] {
   cursor: pointer;
   display: inline-block;
   height: 19px;
-  /*margin: 5px 0 0 19px;*/
+  margin: 1px 0 0 19px;*/
   position: relative;
   width: 19px;
   -webkit-appearance: none;
@@ -64,6 +64,15 @@ input[type="checkbox"]:checked:before {
 
 }
 
+/////////* NAVBAR *//////////
+
+.navbar-default .navbar-brand {
+  color: #fff;
+}
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #fff;
+}
 .navbar-default {
   background-color: #43956f;
   border-color: #43956f; }
@@ -121,3 +130,38 @@ input[type="checkbox"]:checked:before {
     fieldset[disabled] .navbar-default .btn-link:hover,
     fieldset[disabled] .navbar-default .btn-link:focus {
       color: #dcdcdc; }
+
+//////////* BUTTONS *//////////
+
+.btn {
+  border: 3px solid;
+  box-shadow: 0 0.25rem 0.5rem rgba(1, 1, 1, 0.25);
+  display: inline-block;
+  letter-spacing: 0.1em;
+  padding: 0.4em 1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-transition: all 0.4s ease;
+  transition: all 0.4s ease;
+  font-weight: 700;
+  font-family: "Montserrat", "Helvetica", "Arial", "sans-serif";
+  background-color: white;
+  border-color: rgba(20, 85, 143, 0.5);
+  color: #14558f;
+  border: none !important; }
+  .btn:hover {
+    text-decoration: none; }
+  .btn:hover {
+    background-color: #14558f;
+    color: white; }
+
+.btn-default {
+  font-weight: 700;
+  font-family: "Montserrat", "Helvetica", "Arial", "sans-serif";
+  background-color: #14558f;
+  border-color: transparent;
+  box-shadow: 0 0.25rem 0.5rem rgba(1, 1, 1, 0.25);
+  color: white; 
+  border-radius: 0; }
+  .btn-default:hover {
+    background-color: rgba(20, 85, 143, 0.75); }

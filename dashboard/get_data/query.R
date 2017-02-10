@@ -21,10 +21,7 @@ paste(" SELECT ",
       "FROM", node.table, 
       "WHERE is_disabled = False") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  {
-    saveRDS(., "dashboard/data/drupal_node_metadata.RDS")
-    drupal.node.metadata <<- .
-  }
+  saveRDS(., "dashboard/data/drupal_node_metadata.RDS")
   
 
 drupal.node.descendants <- paste("SELECT ",
@@ -57,27 +54,18 @@ drupal.node.descendants <- paste("SELECT ",
 drupal.node.with.descendants$`Section Landing` %>%
   dplyr::bind_rows() %>%
   dplyr::rename(site_section = title) %>%
-  {
-    saveRDS(., "dashboard/data/section_landing_node_ids.RDS")
-    section.landing.ids <<- . 
-  }
-
+  saveRDS(., "dashboard/data/section_landing_node_ids.RDS")
+  
 drupal.node.with.descendants$Topic %>%
   dplyr::bind_rows() %>%
   dplyr::rename(topic = title) %>%
-  {
-    saveRDS(., "dashboard/data/topic_node_ids.RDS")
-    topic.ids <<- .
-  }
- 
+  saveRDS(., "dashboard/data/topic_node_ids.RDS")
+  
 drupal.node.with.descendants$Subtopic %>%
   dplyr::bind_rows() %>%
   dplyr::rename(subtopic = title) %>%
-  {
-    saveRDS(., "dashboard/data/subtopic_node_ids.RDS")
-    subtopic.ids <<- .
-  }
-
+  saveRDS(., "dashboard/data/subtopic_node_ids.RDS")
+  
 # Google analytics
 ga.sessions <- paste(" SELECT page_path,",
               "features.session_id,",
@@ -114,10 +102,7 @@ ga.sessions %>%
   dplyr::inner_join(ga.conversions, by = c("session_id" = "session_id", "page_path" = "page_path")) %>%
   dplyr::inner_join(drupal.node.metadata, by = "node_id") %>%
   unique() %>%
-  {
-    saveRDS(., "dashboard/data/ga_master_conversions.RDS")
-    ga.master.conversions <<- .
-  }
+  saveRDS(., "dashboard/data/ga_master_conversions.RDS")
 
 # Macro View query
 
@@ -143,5 +128,3 @@ dbGetQuery(db.connection, grouped.sessions.query)  %>%
   mutate(conversions = ifelse(is.na(conversions), 0, conversions),
          sessions = ifelse(is.na(sessions), 0, sessions)) %>%
     saveRDS(., "dashboard/data/grouped.sessions.conversions.RDS")
-
-  

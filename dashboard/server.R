@@ -6,12 +6,19 @@ library(shinyURL)
 shinyServer(function(input, output) {
   shinyURL.server()
   #### VISITOR SUCCESS ####
-  visitor.success.subset.timeseries <- reactive({
+  
+  ## DEBUG
+  output$debug.dat <- renderDataTable({visitor.success.subset.data()})
+  
+  # DATA MUNGING
+  # subset by timeseries start and end
+  visitor.success.subset.timeseries <- reactive({  # creates data frame subset by time selection
     ga.conversions %>%
       dplyr::filter(lubridate::date(hit_timestamp_eastern) >= input$visitor.success.daterange[1],
                     lubridate::date(hit_timestamp_eastern) <= input$visitor.success.daterange[2])
   })
   
+  # subset by radio button selector
   visitor.success.subset.data <- reactive({
     visitor.success.subset.timeseries() %>%
     {
@@ -30,6 +37,7 @@ shinyServer(function(input, output) {
     } 
   })
   
+  # get ids for current group by selections
   type.group.by <- reactive({
     if ("site_section" %in% input$visitor.success.group.by) {
       return(section.landing.ids)
@@ -42,6 +50,7 @@ shinyServer(function(input, output) {
     }
   })
   
+  # creates data frame of conversions (grouped or not) by date
   visitor.success.timeseries.data <- reactive({
     # add additional group_by hit_timestamp
     if (is.null(input$visitor.success.group.by)) {
@@ -54,29 +63,55 @@ shinyServer(function(input, output) {
       return(dat)
     } else {
       dat = visitor.success.subset.data() %>%
-        dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>%
-        dplyr::inner_join(type.group.by(), by = "node_id") %>%
+        dplyr::mutate(hit_timestamp = lubridate::date(hit_timestamp_eastern)) %>% 
+        {
+          if (is.null(type.group.by())) {  # if we have no types to join on don't join
+            return(.)
+          } else {
+            dplyr::inner_join(., type.group.by(), by = "node_id")
+          }
+        } %>%
         dplyr::group_by_(.dots = c("hit_timestamp", input$visitor.success.group.by)) %>%
         dplyr::count() %>%
         dplyr::ungroup() %>%
         dplyr::mutate(percent_success = round(n / sum(n), 3) * 100)  # round to 3rd decimal and multiply 
       dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
-                               MARGIN = 1, paste, collapse = " - ")
+                               MARGIN = 1, FUN = paste, collapse = " - ")
       return(dat)
     }
   })
   
+  # reactively create aggregate data frame sans timeseries 
   visitor.success.aggregate.data <- reactive({
-    dat = visitor.success.subset.data() %>%
-      dplyr::group_by_(.dots = input$visitor.success.group.by) %>%
-      dplyr::count() %>% 
-      dplyr::ungroup()
-    dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
-                             MARGIN = 1, paste, collapse = " - ")
-    return(dat)
+
+    if (is.null(input$visitor.success.group.by)) {  # if nothing selected pass an empty df
+      data.frame()
+    } else {
+      dat = visitor.success.subset.data() %>%
+      {
+        if (is.null(type.group.by())) {  # if we have no types to join on don't join
+          return(.)
+        } else {
+          dplyr::inner_join(., type.group.by(), by = "node_id")
+            
+        }
+      } %>%
+        dplyr::group_by_(.dots = input$visitor.success.group.by) %>%
+        dplyr::count() %>% 
+        dplyr::arrange(desc(n)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(percent_success = round(n / sum(n), 3) * 100,
+                      cum_percent = cumsum(percent_success))
+      
+      dat$group_factor = apply(dat[, c(input$visitor.success.group.by)], 
+                               MARGIN = 1, FUN = paste, collapse = " - ")
+      return(dat)
+    }
+
   })
   
-  # filter by type 
+  # REACTIVE UI
+  #   filter by type 
   output$type.selection.options <- renderUI({
     unique.subtypes <- visitor.success.subset.timeseries() %>%  # data which is 2 vector data frame 1) every type and 2) corresponding subtypes 
     {
@@ -95,10 +130,10 @@ shinyServer(function(input, output) {
                 choices = c("all", unique.subtypes))
   })
   
-  # file download 
+  # FILE DOWNLOADS 
   output$visitor.success.download.timeseries <- downloadHandler(
-    filename = function() {
-      paste("vs-timeseries-", Sys.Date(), ".csv", sep = "")
+    filename = function() {  # for some reason shiny expects it this way
+      paste("vs-timeseries-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
       readr::write_csv(visitor.success.timeseries.data(), file)
@@ -107,22 +142,69 @@ shinyServer(function(input, output) {
   
   output$visitor.success.download.aggregate <- downloadHandler(
     filename = function() {
-      paste("vs-aggregate-", Sys.Date(), ".csv", sep = "")
+      paste("vs-aggregate-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
       readr::write_csv(visitor.success.aggregate.data(), file)
     }
   )
   
-  # Plots 
+  # PLOTS
+  #   Pareto
   output$visitor.success.grouped.pareto <- renderPlotly({
-    makeGroupedPareto(df = data.frame(), x = NULL, y = NULL) %>%
-      printGGplotly()
+    if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
+      makeBlankPlot() %>%
+        printGGplotly(.)
+    } else if (input$visitor.success.top.bottom == "top") {
+      slice.to = as.numeric(input$visitor.success.select.k)
+      
+      top.groups = visitor.success.aggregate.data() %>%
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
+        dplyr::slice(1:slice.to)
+      
+      visitor.success.aggregate.data() %>%
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "percent_success",
+                              cumul.line = "cum_percent")
+          } else {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "n")
+          }
+        } %>%
+        printGGplotly(.)
+    } else {
+      slice.to = as.numeric(input$visitor.success.select.k)
+      
+      top.groups = visitor.success.aggregate.data() %>%
+        dplyr::arrange(n) %>%  # arrange low to high
+        dplyr::slice(1:slice.to)
+      
+      visitor.success.aggregate.data() %>%
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "percent_success",
+                              cumul.line = "cum_percent")
+          } else {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "n")
+          }
+        } %>%
+        printGGplotly(.)
+    }
   })
   
+  # grouped timeseries 
   output$visitor.success.grouped.timeseries <- renderPlotly({
-    if (is.null(input$visitor.success.group.by)) {
-      
+    if (is.null(input$visitor.success.group.by)) {  # if we are grouping on nothing show the raw trend
       visitor.success.timeseries.data() %>%
       {
         if (input$visitor.success.units == "percent") {
@@ -144,11 +226,10 @@ shinyServer(function(input, output) {
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(dplyr::desc(n)) %>%
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
       
       visitor.success.timeseries.data() %>%
-        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
           if (input$visitor.success.units == "percent") {
@@ -170,17 +251,9 @@ shinyServer(function(input, output) {
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(dplyr::desc(n)) %>% 
+        dplyr::arrange(n) %>%  # arrange low to high
         dplyr::ungroup() %>%
-        {
-          if (slice.to > 1) {
-            start = nrow(.) - (slice.to - 1)
-            end = nrow(.)
-            return(dplyr::slice(., start:end))
-          } else {
-            return(dplyr::slice(., nrow(.)))
-          }
-        }
+        dplyr::slice(1:slice.to)
       
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
@@ -198,10 +271,9 @@ shinyServer(function(input, output) {
           }
         } %>%
         printGGplotly(.)
-      
+
     }
   })
-  
   
   #### ANALYST - USER SATISFACTION ####
   output$formstack.response.plot.funnels <- renderPlotly({

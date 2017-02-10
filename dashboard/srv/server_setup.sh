@@ -9,8 +9,8 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
 
 # Update and upgrade system
-sudo apt-get -y update
-sudo apt-get -y dist-upgrade
+sudo apt -y update
+sudo apt -y dist-upgrade
 
 # install packages both for linux and R
 declare -a ubuntu_packages=('r-base'
@@ -26,9 +26,10 @@ declare -a ubuntu_packages=('r-base'
                             'libmariadb-client-lgpl-dev'
                             'libcairo2-dev'
                             'r-cran-slam'
+                            'awscli'
                             )
 for package_name in ${ubuntu_packages[@]}; do
-  sudo apt-get install -y $package_name
+  sudo apt install -y $package_name
 done
 
 # Install packages

@@ -46,7 +46,7 @@ shinyUI(navbarPage(
                         "Event Type" = "event_action",
                         "Referrer" = "source",
                         "Page Type" = "content_type"),
-            selected = NULL, 
+            selected = "site_section", 
             inline = F
           ),
           br(),
@@ -74,6 +74,7 @@ shinyUI(navbarPage(
         mainPanel(
           downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          br(),
           downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.timeseries")
         )

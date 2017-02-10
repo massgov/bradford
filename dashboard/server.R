@@ -447,7 +447,7 @@ shinyServer(function(input, output) {
     grouped.sessions.conversions %>% dplyr::filter(., parent_type == 'Topic') %>%
       groupAndOrder(.,group.col = 'parent_title', data.col = 'sessions',percent = input$success.rate.percent, top.pct = .8) %>%
       buildParetoChart(grouped.df = .,x.lab = 'Topics',y.lab = 'Sessions',
-                       title = "Conversions on Top Topics",cumul.line = TRUE) %>%
+                       title = "Sessions on Top Topics",cumul.line = TRUE) %>%
       printGGplotly()
   })
   

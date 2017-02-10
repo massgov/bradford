@@ -354,8 +354,10 @@ shinyServer(function(input, output) {
   
   output$topic.conversion.rate <- renderPlotly({
     
-    plt <- grouped.sessions.conversions %>% dplyr::filter(., parent_type == 'Topic') %>%
-                plyr::ddply(., c('parent_title'), summarise,
+    plt <- grouped.sessions.conversions %>% 
+              dplyr::filter(., parent_type == 'Topic') %>%
+              dplyr::group_by(parent_title) %>%
+                dplyr::summarise(.,
                    conversion_rate = round(sum(conversions) / sum(sessions) * 100,1),
                    c = sum(conversions),
                    s = sum(sessions)) %>%

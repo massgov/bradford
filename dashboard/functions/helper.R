@@ -99,7 +99,8 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1){
   grouped.df = df %>% 
     dplyr::group_by_(.dots = group.col) %>% 
     dplyr::summarise_(total = paste('sum( ', data.col,")")) %>%
-    dplyr::arrange(., desc(total)) %>% dplyr::rename_(group = paste(group.col)) %>% 
+    dplyr::arrange(., desc(total)) %>% 
+    dplyr::rename_(group = paste(group.col)) %>% 
     dplyr::filter(ifelse(is.na(group), F, T))
   
   # Make cumulative column
@@ -107,11 +108,11 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1){
   
   
   if(percent){
-    data.total <- sum(grouped.df$total)
-    grouped.df$total <- grouped.df$total / data.total * 100
-    grouped.df$cumul <- cumsum(grouped.df$total)
+    data.total = sum(grouped.df$total)
+    grouped.df$total = grouped.df$total / data.total * 100
+    grouped.df$cumul = cumsum(grouped.df$total)
   }
   
-  grouped.df <- grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
+  grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
   
 }

@@ -21,10 +21,7 @@ paste(" SELECT ",
       "FROM", node.table, 
       "WHERE is_disabled = False") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  {
-    saveRDS(., "dashboard/data/drupal_node_metadata.RDS")
-    drupal.node.metadata <<- .
-  }
+  saveRDS(., "dashboard/data/drupal_node_metadata.RDS")
   
 
 drupal.node.descendants <- paste("SELECT ",
@@ -57,27 +54,18 @@ drupal.node.descendants <- paste("SELECT ",
 drupal.node.with.descendants$`Section Landing` %>%
   dplyr::bind_rows() %>%
   dplyr::rename(site_section = title) %>%
-  {
-    saveRDS(., "dashboard/data/section_landing_node_ids.RDS")
-    section.landing.ids <<- . 
-  }
-
+  saveRDS(., "dashboard/data/section_landing_node_ids.RDS")
+  
 drupal.node.with.descendants$Topic %>%
   dplyr::bind_rows() %>%
   dplyr::rename(topic = title) %>%
-  {
-    saveRDS(., "dashboard/data/topic_node_ids.RDS")
-    topic.ids <<- .
-  }
- 
+  saveRDS(., "dashboard/data/topic_node_ids.RDS")
+  
 drupal.node.with.descendants$Subtopic %>%
   dplyr::bind_rows() %>%
   dplyr::rename(subtopic = title) %>%
-  {
-    saveRDS(., "dashboard/data/subtopic_node_ids.RDS")
-    subtopic.ids <<- .
-  }
-
+  saveRDS(., "dashboard/data/subtopic_node_ids.RDS")
+  
 # Google analytics
 ga.sessions <- paste(" SELECT page_path,",
               "features.session_id,",
@@ -114,7 +102,29 @@ ga.sessions %>%
   dplyr::inner_join(ga.conversions, by = c("session_id" = "session_id", "page_path" = "page_path")) %>%
   dplyr::inner_join(drupal.node.metadata, by = "node_id") %>%
   unique() %>%
-  {
-    saveRDS(., "dashboard/data/ga_master_conversions.RDS")
-    ga.master.conversions <<- .
-  }
+  saveRDS(., "dashboard/data/ga_master_conversions.RDS")
+
+# Macro View query
+
+grouped.sessions.query <- "SELECT parent_info.content_type as parent_type, 
+              parent_info.title as parent_title,
+              des_info.content_type as des_content, 
+              des_info.title as des_title,
+              count(DISTINCT s.session_id) AS sessions,
+              sum(c.conversions) AS conversions
+              FROM drupal_node_descendants_new as d
+              INNER JOIN drupal_nodes AS des_info on d.descendant_id = des_info.node_id
+              INNER JOIN drupal_nodes AS parent_info on d.node_id = parent_info.node_id
+              RIGHT OUTER JOIN ga_session AS s ON s.node_id = des_info.node_id
+              LEFT OUTER JOIN  (SELECT session_id, 1 AS conversions
+              FROM ga_events
+              WHERE event_category = 'Conversion') AS c
+              ON c.session_id = s.session_id
+              GROUP BY parent_info.content_type, parent_info.title, d.node_id, d.descendant_id, des_info.content_type,
+              des_info.title"
+
+# Get dataframe and fill na conversions and sessions with 0
+dbGetQuery(db.connection, grouped.sessions.query)  %>% 
+  mutate(conversions = ifelse(is.na(conversions), 0, conversions),
+         sessions = ifelse(is.na(sessions), 0, sessions)) %>%
+    saveRDS(., "dashboard/data/grouped.sessions.conversions.RDS")

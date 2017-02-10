@@ -77,7 +77,7 @@ sudo mkdir ~/bradford/dashboard/data/
 sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
 
 # get the connection creds
-sudo /home/ubuntu/.local/bin/aws s3 cp s3://massgov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+sudo /home/ubuntu/.local/bin/aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
 
 # run the query
 Rscript ~/bradford/dashboard/get_data/query.R

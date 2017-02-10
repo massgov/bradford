@@ -83,6 +83,7 @@ shinyServer(function(input, output) {
   
   # reactively create aggregate data frame sans timeseries 
   visitor.success.aggregate.data <- reactive({
+
     if (is.null(input$visitor.success.group.by)) {  # if nothing selected pass an empty df
       data.frame()
     } else {
@@ -106,6 +107,7 @@ shinyServer(function(input, output) {
                                MARGIN = 1, FUN = paste, collapse = " - ")
       return(dat)
     }
+
   })
   
   # REACTIVE UI
@@ -135,8 +137,8 @@ shinyServer(function(input, output) {
     },
     content = function(file) {
       readr::write_csv(visitor.success.timeseries.data(), file)
-      }
-    )
+    }
+  )
   
   output$visitor.success.download.aggregate <- downloadHandler(
     filename = function() {
@@ -204,19 +206,19 @@ shinyServer(function(input, output) {
   output$visitor.success.grouped.timeseries <- renderPlotly({
     if (is.null(input$visitor.success.group.by)) {  # if we are grouping on nothing show the raw trend
       visitor.success.timeseries.data() %>%
-        {
-          if (input$visitor.success.units == "percent") {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "percent_success",
-                                  fill = NULL)
-          } else {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "n",
-                                  fill = NULL)
-          }
-        } %>%
+      {
+        if (input$visitor.success.units == "percent") {
+          makeGroupedTimeseries(df = .,
+                                x = "hit_timestamp",
+                                y = "percent_success",
+                                fill = NULL)
+        } else {
+          makeGroupedTimeseries(df = .,
+                                x = "hit_timestamp",
+                                y = "n",
+                                fill = NULL)
+        }
+      } %>%
         printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
@@ -269,6 +271,7 @@ shinyServer(function(input, output) {
           }
         } %>%
         printGGplotly(.)
+
     }
   })
   
@@ -281,9 +284,9 @@ shinyServer(function(input, output) {
         global.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]  # subset the date vector
       
       makeBreakoutPlot(df = dat, breakouts = breakouts,
-                              x = "timestamp", y = "prop_affirmative", 
-                              plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
-      printGGplotly()
+                       x = "timestamp", y = "prop_affirmative", 
+                       plot.title = "Improvement in Satisfaction (Yes Rate) Over Time") %>%
+        printGGplotly()
     } else {
       dat = data.frame(site.summary.frames[[as.numeric(input$funnel.slot.number)]]) %>%
         dplyr::filter(site == input$funnel.name)
@@ -292,8 +295,8 @@ shinyServer(function(input, output) {
         site.summary.frames[[as.numeric(input$funnel.slot.number)]]$timestamp[.]
       
       makeBreakoutPlot(df = dat, breakouts = breakouts,
-                              x = "timestamp", y = "prop_affirmative") %>%
-      printGGplotly() # print the output of ggplotly
+                       x = "timestamp", y = "prop_affirmative") %>%
+        printGGplotly() # print the output of ggplotly
     }
   }) 
   
@@ -314,7 +317,7 @@ shinyServer(function(input, output) {
         dplyr::count()
     }
     makeVolumeBarPlot(df = dat, x = "timestamp", y = "n", ylab = "Response Count") %>%
-    printGGplotly()
+      printGGplotly()
   })
   
   output$formstack.volume.plot.funnel.endpoints <- renderPlotly({
@@ -394,7 +397,7 @@ shinyServer(function(input, output) {
     }
     dat %>%
       makeAffirmativeBarPlot(x = "info_found", y = "n", plot.title = "Info Found?") %>%
-    printGGplotly()
+      printGGplotly()
   })
   
   output$formstack.table.funnel <- renderDataTable(
@@ -410,5 +413,42 @@ shinyServer(function(input, output) {
       pageLength = 5,
       autoWidth = TRUE,
       dom = 'tp')
-    )
+  )
+  
+  output$topic.conversions <- renderPlotly({
+    
+    grouped.sessions.conversions %>% 
+      dplyr::filter(., parent_type == 'Topic') %>%
+      groupAndOrder(.,group.col = 'parent_title', data.col = 'conversions',percent = input$success.rate.percent, top.pct = .8) %>%
+      buildParetoChart(grouped.df = .,x.lab = 'Topics',y.lab = 'Conversions',
+                       title = "Conversions on Top Topics",cumul.line = TRUE) %>%
+      printGGplotly()
+  })
+  
+  output$topic.conversion.rate <- renderPlotly({
+    
+    plt <- grouped.sessions.conversions %>% 
+              dplyr::filter(., parent_type == 'Topic') %>%
+              dplyr::group_by(parent_title) %>%
+                dplyr::summarise(.,
+                   conversion_rate = round(sum(conversions) / sum(sessions) * 100,1),
+                   c = sum(conversions),
+                   s = sum(sessions)) %>%
+                dplyr::arrange(., desc(s)) %>% 
+                dplyr::filter(s > quantile(s, .2)) %>% # Top 80% based on sessions
+                ggplot(., aes(x = parent_title, y = conversion_rate)) + geom_bar(stat = 'identity') + theme_bw() + 
+                  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+                  labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Conversion Rate for Top Topics')
+      printGGplotly(plt)
+  })
+  
+  output$topic.sessions <- renderPlotly({
+    
+    grouped.sessions.conversions %>% dplyr::filter(., parent_type == 'Topic') %>%
+      groupAndOrder(.,group.col = 'parent_title', data.col = 'sessions',percent = input$success.rate.percent, top.pct = .8) %>%
+      buildParetoChart(grouped.df = .,x.lab = 'Topics',y.lab = 'Sessions',
+                       title = "Conversions on Top Topics",cumul.line = TRUE) %>%
+      printGGplotly()
+  })
+  
   })

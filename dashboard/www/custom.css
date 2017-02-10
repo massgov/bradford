@@ -204,6 +204,13 @@ input[type="checkbox"]:checked:before {
   fieldset[disabled] .form-control {
     cursor: not-allowed; }
 
+.selectize-input.input-active{
+  border-radius: 0;
+}
+.selectize-control{
+  width: 40%;
+  position: absolute;
+}
 // .selectize-control.single .selectize-input:after {
 //   font-family: "Glyphicons Halflings";
 //   content: "\e094";

@@ -125,6 +125,6 @@ c("SELECT parent_info.content_type as parent_type,
    des_info.title;") %>%
   # Get dataframe and fill na conversions and sessions with 0
   RPostgreSQL::dbGetQuery(statement = ., db.connection) %>%
-  mutate(conversions = ifelse(is.na(conversions), 0, conversions),
-         sessions = ifelse(is.na(sessions), 0, sessions)) %>%
+  dplyr::mutate(conversions = ifelse(is.na(conversions), 0, conversions),
+                sessions = ifelse(is.na(sessions), 0, sessions)) %>%
   saveRDS(., "dashboard/data/grouped.sessions.conversions.RDS")

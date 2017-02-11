@@ -288,18 +288,18 @@ shinyServer(function(input, output) {
 
   output$topic.conversion.rate <- renderPlotly({
     plt = grouped.sessions.conversions %>%
-              dplyr::filter(., parent_type == 'Topic') %>%
-              dplyr::group_by(parent_title) %>%
-              dplyr::summarise(.,
-                               conversion_rate = round(sum(conversions) / sum(sessions) * 100, 1),
-                               c = sum(conversions),
-                               s = sum(sessions)) %>%
-              dplyr::arrange(., desc(s)) %>%
-              dplyr::filter(s > quantile(s, .2)) %>% # Top 80% based on sessions
-              ggplot(., aes(x = parent_title, y = conversion_rate)) +
-                geom_bar(stat = 'identity') + theme_bw() +
-                theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-                labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Conversion Rate for Top Topics')
+      dplyr::filter(., parent_type == 'Topic') %>%
+      dplyr::group_by(parent_title) %>%
+      dplyr::summarise(.,
+                       conversion_rate = round(sum(conversions) / sum(sessions) * 100, 1),
+                       c = sum(conversions),
+                       s = sum(sessions)) %>%
+      dplyr::arrange(., desc(s)) %>%
+      dplyr::filter(s > quantile(s, .2)) %>% # Top 80% based on sessions
+      ggplot(., aes(x = parent_title, y = conversion_rate)) +
+      geom_bar(stat = 'identity') + theme_bw() +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Conversion Rate for Top Topics')
 
     printGGplotly(plt)
   })

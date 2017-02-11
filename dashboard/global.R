@@ -9,16 +9,7 @@ source("functions/read_data.R")
 source("functions/make_plots.R")
 source("functions/helper.R")
 
-# color blind palette
-cb.palette <- c("#999999",
-                "#E69F00",
-                "#56B4E9",
-                "#009E73",
-                "#F0E442",
-                "#0072B2",
-                "#D55E00",
-                "#CC79A7")
-
+# set the scientific notation
 options(scipen = 10000000)
 
 yesterday <- as.character(lubridate::today(tzone = "America/New_York") - lubridate::days(1))

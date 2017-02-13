@@ -82,7 +82,7 @@ fluidPage(
         )
       )
     )
-
+   )
   ),
 
   #### SUCCESS RATE ####

@@ -2,7 +2,7 @@ library(testthat)
 library(methods)
 source("../functions/helper.R")
 
-context("helper functions within dashboard/functions/helper.R")
+context("Helper functions")
 
 test_that("factorPercentage fails on incorrect input", {
   factor.vec <- factor(c("cats", "cats", "dogs", "rabbits"))

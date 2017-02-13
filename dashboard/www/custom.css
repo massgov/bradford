@@ -215,21 +215,12 @@ input[type="checkbox"]:checked:before {
 //   font-family: "Glyphicons Halflings";
 //   content: "\e094";
 //   border: none;
-//   position: absolute;
-//   top: 20%;
-//   right: 17px;
-//   margin-top: -3px;
 // }
-
 
 // .selectize-input.dropdown-active::before {
 //   font-family: "Glyphicons Halflings";
 //   content: "\e093";
 //   border: none;
-//   position: absolute;
-//   top: 20%;
-//   right: 17px;
-//   margin-top: -3px;
 // }
 
 .dropdown-menu, .selectize-dropdown, .well,
@@ -242,3 +233,6 @@ input[type="checkbox"]:checked:before {
   border-bottom-left-radius:0;
 }
 
+.main-svg{
+  margin: 40px 0 0;
+}

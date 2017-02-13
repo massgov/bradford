@@ -232,7 +232,3 @@ input[type="checkbox"]:checked:before {
   border-top-left-radius:0;
   border-bottom-left-radius:0;
 }
-
-.main-svg{
-  margin: 40px 0 0;
-}

@@ -70,3 +70,22 @@ test_that("flagIncompleteTimeperiod outputs the correct answer", {
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "week")))
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "day")))
 })
+
+test_that("groupAndOrder errors on incorrect input", {
+  test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
+                        b = c(1, 1, 1, 1), 
+                        c = c("A", "A", "B", "C"))
+  expect_error(groupAndOrder(df = test.df, group.col = "a", data.col = "c"))
+  expect_error(groupAndOrder(df = test.df, group.col = "b", data.col = "b"))
+  expect_error(groupAndOrder(df = test.df, group.col = "a", data.col = "b", top.pct = 2))
+})
+
+test_that("groupAndOrder outputs the correct answer", {
+  test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
+                        b = c(1, 1, 1, 1), 
+                        c = c("A", "A", "B", "C"))
+  expect_equal(groupAndOrder(df = test.df, group.col = "a", data.col = "b", top.pct = 1), 
+               data.frame(group = factor(c("A", "B", "C")), 
+                          total = c(50, 25, 25), 
+                          cumul = c(50, 75, 100)))
+})

@@ -245,29 +245,29 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   # x and y lab: labels for x and y axes
   # percent: Show metrics as % of total
   # cumul.line: Show cumulative line
-  
-  
-  # Rename columns
-  grouped.df$group = grouped.df[[group.col]]
-  grouped.df$total = grouped.df[[data.col]]
-  grouped.df$cumul = grouped.df[[cumul.col]]
-  
-  # Reorder factors largest to smallest
-  grouped.df = transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
-  
-  plt = ggplot(grouped.df, aes(x=group, y = total)) +
-            geom_bar(stat="identity", colour = "black") + 
-            labs(x = paste0(x.lab), title = title, y = y.lab) +
-            expand_limits(y=0) + 
-            theme_bw() + 
-            theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  
-  if(cumul.line){
-    plt = plt + 
+  if (nrow(grouped.df) == 0) {
+    makeBlankPlot()
+  } else {
+    # Rename columns
+    grouped.df$group = grouped.df[[group.col]]
+    grouped.df$total = grouped.df[[data.col]]
+    grouped.df$cumul = grouped.df[[cumul.col]]
+    
+    # Reorder factors largest to smallest
+    grouped.df = transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
+    
+    plt = ggplot(grouped.df, aes(x=group, y = total)) +
+      geom_bar(stat="identity", colour = "black") + 
+      labs(x = paste0(x.lab), title = title, y = y.lab) +
+      expand_limits(y=0) + 
+      theme_bw() + 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    
+    if(cumul.line){
+      plt = plt + 
         geom_line(aes(x=group, y=cumul, group = 1), colour = "black") + 
-            scale_colour_manual(values = c("Cumulative Graph"))
+        scale_colour_manual(values = c("Cumulative Graph"))
+    }
+    return(plt) 
   }
-  
-  return(plt)
-          
 }

@@ -9,6 +9,7 @@ shinyUI(navbarPage(
   #### VISITOR SUCCESS ####
   tabPanel(
     "Visitor Success",
+fluidPage(
     fluidRow(
       sidebarLayout( 
         sidebarPanel(
@@ -73,18 +74,20 @@ shinyUI(navbarPage(
           shinyURL.ui(display = T, copyURL = T, tinyURL = T)
         ),
         mainPanel(
-          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           br(),
-          downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
-          plotlyOutput("visitor.success.grouped.timeseries")
+          plotlyOutput("visitor.success.grouped.timeseries"),
+          downloadButton("visitor.success.download.timeseries", "Download Plot Data")
         )
       )
     )
-  ),
+  )
+),
  
     #### VISITOR SUCCESS ####
     tabPanel(title = "Success Rate",
+             fluidPage(
              radioButtons(
                inputId = "success.rate.percent", 
                label = "Select Unit", 
@@ -93,13 +96,14 @@ shinyUI(navbarPage(
                selected = FALSE, 
                inline = T
              ),
+             tags$hr(),
              fluidRow(
                splitLayout(
                  cellWidths = c("50%", "50%"),
              plotlyOutput("topic.sessions"),
              plotlyOutput("topic.conversions"))),
              br(),
-             plotlyOutput("topic.conversion.rate")),
+             plotlyOutput("topic.conversion.rate"))),
   #### ANALYST ####
   navbarMenu(
     "Analyst",
@@ -109,6 +113,7 @@ shinyUI(navbarPage(
     "",
     tabPanel(
       "User Satisfaction",
+      fluidPage(
       fluidRow(
         splitLayout(
           cellWidths = c("50%", "50%"),
@@ -132,6 +137,8 @@ shinyUI(navbarPage(
             selected = "show.all"
           )
         ),
+        br(),
+        br(),
         plotlyOutput("formstack.response.plot.funnels"),
         plotlyOutput("formstack.volume.plot.funnel.bar"),
         splitLayout(
@@ -145,5 +152,6 @@ shinyUI(navbarPage(
       )
     )
   )
+)
 ))
 

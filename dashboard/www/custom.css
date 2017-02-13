@@ -215,19 +215,20 @@ input[type="checkbox"]:checked:before {
 //   font-family: "Glyphicons Halflings";
 //   content: "\e094";
 //   border: none;
-//   position: absolute;
-//   top: 20%;
-//   right: 17px;
-//   margin-top: -3px;
 // }
-
 
 // .selectize-input.dropdown-active::before {
 //   font-family: "Glyphicons Halflings";
 //   content: "\e093";
 //   border: none;
-//   position: absolute;
-//   top: 20%;
-//   right: 17px;
-//   margin-top: -3px;
 // }
+
+.dropdown-menu, .selectize-dropdown, .well,
+.datepicker table tr td, .datepicker table tr th, .datepicker table tr td span, 
+.input-daterange input:first-child, .input-daterange input:last-child,
+.pagination>li:first-child>a, .pagination>li:last-child>a
+{
+  border-radius: 0;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+}

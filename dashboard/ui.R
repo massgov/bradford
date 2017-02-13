@@ -74,13 +74,11 @@ fluidPage(
           shinyURL.ui(display = T, copyURL = T, tinyURL = T)
         ),
         mainPanel(
-          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           br(),
-          br(),
-          br(),
-          downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
-          plotlyOutput("visitor.success.grouped.timeseries")
+          plotlyOutput("visitor.success.grouped.timeseries"),
+          downloadButton("visitor.success.download.timeseries", "Download Plot Data")
         )
       )
     )

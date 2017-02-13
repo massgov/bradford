@@ -3,11 +3,13 @@ library(shinydashboard)
 library(shinyURL)
 
 shinyUI(navbarPage(
+  theme = "custom.css",
   # Application title
   title = "KPI Dashboard",
   #### VISITOR SUCCESS ####
   tabPanel(
     "Visitor Success",
+fluidPage(
     fluidRow(
       sidebarLayout(
         sidebarPanel(
@@ -75,11 +77,14 @@ shinyUI(navbarPage(
           downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
           br(),
+          br(),
+          br(),
           downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.timeseries")
         )
       )
     )
+
   ),
 
   #### SUCCESS RATE ####

@@ -11,8 +11,18 @@ test_that("printGGplotly errors on incorrect input" ,{
   expect_error(printGGplotly(plt))
 })
 
-context("Plotting functions")
+test_that("padXlim errors on incorrect input", {
+  expect_error(padXlim(plot.item.count = "8", item.limit = 1, offset = .2))
+  expect_error(padXlim(plot.item.count = 10, item.limit = "2", offset = .1))
+  expect_error(padXlim(plot.item.count = 10, item.limit = 2, offset = ".1"))
+})
 
+test_that("padXlim outputs the correct answer", {
+  expect_equal(padXlim(plot.item.count = 10, item.limit = 2, offset = .5), 10.5)
+  expect_equal(padXlim(plot.item.count = 10, item.limit = 11, offset = .5), 10)
+})
+
+context("Plotting functions")
 test_that("makeBlankPlot takes no args and outputs a ggplot object", {
   plt = makeBlankPlot()
   expect_true(is.ggplot(plt))

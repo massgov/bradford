@@ -231,3 +231,14 @@ input[type="checkbox"]:checked:before {
 //   right: 17px;
 //   margin-top: -3px;
 // }
+
+.dropdown-menu, .selectize-dropdown, .well,
+.datepicker table tr td, .datepicker table tr th, .datepicker table tr td span, 
+.input-daterange input:first-child, .input-daterange input:last-child,
+.pagination>li:first-child>a, .pagination>li:last-child>a
+{
+  border-radius: 0;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+}
+

@@ -5,13 +5,13 @@ factorPercentage <- function(factor.vec = "", factor.value = "") {
   # calculates the percentage of a vector that a given factor level represents
   # Args:
   #   factor.vec - a factor vector
-  #   factor.value - a level of factor.vec for which the percentage will be calculated 
+  #   factor.value - a level of factor.vec for which the percentage will be calculated
   #   is.percent.points - boolean indicating whether input is in percentage points(T) or not (F)
   #                       if F then we coerce num * 100
   # Returns:
   #   a scalar in percentage points
-  if (!is.factor(factor.vec)) { 
-   stop("factor.vec must be of class factor!")
+  if (!is.factor(factor.vec)) {
+    stop("factor.vec must be of class factor!")
   }
   if (factor.value %in% factor.vec == F) {
     stop("factor level not found in vector")
@@ -30,13 +30,13 @@ prettyPercent <- function(num, round.n = 1, is.percent.points = T) {
   #   an atomic character vector
   if (!is.numeric(num) | !is.numeric(round.n)) {
     stop("num and round.n must be of class numeric!")
-  } 
+  }
   if (round.n < 0) {
     stop("round.n must be greater than or equal to 0")
   }
   if (num > 100) {
     warning("num > 100")
-  } 
+  }
   if (is.percent.points) {
     paste(as.character(round(num, round.n)), "%")
   } else {
@@ -51,7 +51,7 @@ meanCount <- function(grouped.df, round.n = 0) {
   #   grouped.df = a grouped data frame created via dplyr::group_by()
   #   round.n = a scalar which will round the mean to the nth digit
   # Returns:
-  #   a scalar 
+  #   a scalar
   if (!dplyr::is.grouped_df(grouped.df)) {
     stop("grouped.df must be a grouped data frame. see ?dplyr::group_by")
   }
@@ -74,20 +74,19 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
   #   reference.vector = a vector of class date to floor and check for incomplete time periods
   #   time.unit = the unit arg to floor_date, the period to floor the reference.vector to
   # Returns:
-  #   a vector of booleans indicating which entries are part of a complete time period (TRUE) 
+  #   a vector of booleans indicating which entries are part of a complete time period (TRUE)
   if (!lubridate::is.Date(reference.vector) & !lubridate::is.POSIXct(reference.vector)) {
     stop("reference.vector must be of class date or POSIXct!")
-  } 
+  }
   if (!any(time.unit %in% c("day", "week", "month"))) {
     stop("unit can only be day, week, or month. If a more granular view is needed please file an issue.")
   }
   if (time.unit == "day") {
     reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit)
   } else {
-   reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
+    reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
 }
-
 groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE){
   
   # Returns dataframe grouped by group.col with data.col as a sum and ordered
@@ -131,7 +130,7 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
     grouped.df$total = grouped.df$total / data.total * 100
     grouped.df$cumul = cumsum(grouped.df$total)
   }
-  
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
+
   return(grouped.df)
 }

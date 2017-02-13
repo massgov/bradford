@@ -74,13 +74,11 @@ fluidPage(
           shinyURL.ui(display = T, copyURL = T, tinyURL = T)
         ),
         mainPanel(
-          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           br(),
-          br(),
-          br(),
-          downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
-          plotlyOutput("visitor.success.grouped.timeseries")
+          plotlyOutput("visitor.success.grouped.timeseries"),
+          downloadButton("visitor.success.download.timeseries", "Download Plot Data")
         )
       )
     )
@@ -89,6 +87,7 @@ fluidPage(
  
     #### VISITOR SUCCESS ####
     tabPanel(title = "Success Rate",
+             fluidPage(
              radioButtons(
                inputId = "success.rate.percent", 
                label = "Select Unit", 
@@ -97,13 +96,14 @@ fluidPage(
                selected = FALSE, 
                inline = T
              ),
+             tags$hr(),
              fluidRow(
                splitLayout(
                  cellWidths = c("50%", "50%"),
              plotlyOutput("topic.sessions"),
              plotlyOutput("topic.conversions"))),
              br(),
-             plotlyOutput("topic.conversion.rate")),
+             plotlyOutput("topic.conversion.rate"))),
   #### ANALYST ####
   navbarMenu(
     "Analyst",
@@ -137,6 +137,8 @@ fluidPage(
             selected = "show.all"
           )
         ),
+        br(),
+        br(),
         plotlyOutput("formstack.response.plot.funnels"),
         plotlyOutput("formstack.volume.plot.funnel.bar"),
         splitLayout(

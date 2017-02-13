@@ -48,7 +48,7 @@ fluidPage(
                         "Event Type" = "event_action",
                         "Referrer" = "source",
                         "Page Type" = "content_type"),
-            selected = NULL, 
+            selected = "site_section", 
             inline = F
           ),
           br(),
@@ -76,6 +76,7 @@ fluidPage(
         mainPanel(
           downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.pareto"),
+          br(),
           downloadButton("visitor.success.download.timeseries", "Download Plot Data"),
           plotlyOutput("visitor.success.grouped.timeseries")
         )
@@ -83,6 +84,24 @@ fluidPage(
     )
   )
 ),
+ 
+    #### VISITOR SUCCESS ####
+    tabPanel(title = "Success Rate",
+             radioButtons(
+               inputId = "success.rate.percent", 
+               label = "Select Unit", 
+               choices = c("Percent" = TRUE, 
+                           "Number" = FALSE),
+               selected = FALSE, 
+               inline = T
+             ),
+             fluidRow(
+               splitLayout(
+                 cellWidths = c("50%", "50%"),
+             plotlyOutput("topic.sessions"),
+             plotlyOutput("topic.conversions"))),
+             br(),
+             plotlyOutput("topic.conversion.rate")),
   #### ANALYST ####
   navbarMenu(
     "Analyst",

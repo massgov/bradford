@@ -9,6 +9,7 @@ shinyUI(navbarPage(
   #### VISITOR SUCCESS ####
   tabPanel(
     "Visitor Success",
+fluidPage(
     fluidRow(
       sidebarLayout( 
         sidebarPanel(
@@ -80,7 +81,8 @@ shinyUI(navbarPage(
         )
       )
     )
-  ),
+  )
+),
   #### ANALYST ####
   navbarMenu(
     "Analyst",
@@ -90,6 +92,7 @@ shinyUI(navbarPage(
     "",
     tabPanel(
       "User Satisfaction",
+      fluidPage(
       fluidRow(
         splitLayout(
           cellWidths = c("50%", "50%"),
@@ -126,5 +129,6 @@ shinyUI(navbarPage(
       )
     )
   )
+)
 ))
 

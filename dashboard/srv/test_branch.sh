@@ -18,11 +18,16 @@ else
   git pull || exit 255
 fi
 
+# run the query so we have up to date data
+Rscript ~/bradford/dashboard/get_data/query.R
+
 test_dir=$dir_name"_TEST"
 
 # create test dir if it does not exist
 if [ ! -d "/srv/shiny-server/$test_dir" ]; then
   sudo mkdir /srv/shiny-server/$test_dir/
+else
+  sudo rm -rf /srv/shiny-server/$test_dir/
 fi
 
 sudo cp -r ~/$dir_name/dashboard /srv/shiny-server/$test_dir/

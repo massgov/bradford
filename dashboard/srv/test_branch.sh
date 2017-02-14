@@ -22,7 +22,7 @@ fi
 sudo aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
 
 # run the query so we have up to date data
-Rscript ~/bradford/dashboard/get_data/query.R
+sudo Rscript ~/bradford/dashboard/get_data/query.R
 
 test_dir=$dir_name"_TEST"
 
@@ -36,3 +36,6 @@ fi
 sudo cp -r ~/$dir_name/dashboard /srv/shiny-server/$test_dir/
 # restart the server
 sudo systemctl restart shiny-server
+
+# hack per https://github.com/ropensci/plotly/issues/494 to get shiny + plotly to play nicely
+sudo chown -R shiny:shiny /srv/shiny-server

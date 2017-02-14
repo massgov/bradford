@@ -18,6 +18,9 @@ else
   git pull || exit 255
 fi
 
+# get the connection creds
+sudo /home/ubuntu/.local/bin/aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+
 # run the query so we have up to date data
 Rscript ~/bradford/dashboard/get_data/query.R
 

@@ -24,7 +24,7 @@ sudo aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connec
 # run the query so we have up to date data
 sudo Rscript ~/bradford/dashboard/get_data/query.R
 
-test_dir=$dir_name"_TEST"
+test_dir=$dir_name"_test"
 
 # create test dir if it does not exist
 if [ ! -d "/srv/shiny-server/$test_dir" ]; then

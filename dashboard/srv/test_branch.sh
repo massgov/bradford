@@ -17,6 +17,7 @@ else
   git checkout $branch
   git pull || exit 255
 fi
+
 test_dir=$dir_name"_TEST"
 
 # create test dir if it does not exist
@@ -26,4 +27,4 @@ fi
 
 sudo cp -r ~/$dir_name/dashboard /srv/shiny-server/$test_dir/
 # restart the server
-sudo restart shiny-server
+sudo systemctl restart shiny-server

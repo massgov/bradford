@@ -126,7 +126,7 @@ shinyServer(function(input, output) {
       }
     }
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicbable)",
+                label = "Filter By Type",
                 choices = c("all", unique.subtypes))
   })
   

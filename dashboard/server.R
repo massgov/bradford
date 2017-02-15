@@ -94,7 +94,7 @@ shinyServer(function(input, output) {
         dplyr::count() %>%
         dplyr::arrange(desc(n)) %>%
         dplyr::ungroup() %>%
-        dplyr::mutate(percent_success = round(n / sum(n), 3) * 100,
+        dplyr::mutate(percent_success = round(n / sum(n), 3),
                       cum_percent = cumsum(percent_success))
 
       dat$group_factor = apply(dat[, c(input$visitor.success.group.by)],
@@ -149,49 +149,52 @@ shinyServer(function(input, output) {
     if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
-    } else if (input$visitor.success.top.bottom == "top") {
-      slice.to = as.numeric(input$visitor.success.select.k)
-
-      top.groups = visitor.success.aggregate.data() %>%
-        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
-        dplyr::slice(1:slice.to)
-
-      visitor.success.aggregate.data() %>%
-        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-            buildParetoChart(grouped.df = .,
-                 group.col = 'group_factor',
-                 data.col = 'percent_success',
-                 cumul.col = 'cum_percent',
-                 x.lab = '',
-                 y.lab = '',
-                 title = "",
-                 cumul.line = TRUE,
-                 percent = input$success.rate.percent) %>%
-        printGGplotly(.)
-    } else {
-      slice.to = as.numeric(input$visitor.success.select.k)
+    }
+      slice.to = as.numeric(input$visitor.success.select.k)   
+    
+    if (input$visitor.success.top.bottom == "bottom") {
+      
 
       top.groups = visitor.success.aggregate.data() %>%
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::slice(1:slice.to)
 
+    } else if (input$visitor.success.top.bottom == "top"){
+      
+
+
+      top.groups = visitor.success.aggregate.data() %>%
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
+        dplyr::slice(1:slice.to)
+      }
+       
+
       visitor.success.aggregate.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
-          if (input$visitor.success.units == "percent") {
-            makeGroupedPareto(df = .,
-                              x = "group_factor",
-                              y = "percent_success",
-                              cumul.line = "cum_percent")
+          if (input$visitor.success.units) {
+            df.data.col = 'percent_success'
+            is.percent = TRUE
+            is.cumul = TRUE
+            
           } else {
-            makeGroupedPareto(df = .,
-                              x = "group_factor",
-                              y = "n")
+            df.data.col = 'n'
+            is.percent = FALSE
+            is.cumul = FALSE
           }
+          buildParetoChart(grouped.df = .,
+                 group.col = 'group_factor',
+                 data.col = df.data.col,
+                 cumul.col = 'cum_percent',
+                 x.lab = '',
+                 y.lab = '',
+                 title = "",
+                 cumul.line = is.cumul,
+                 percent = is.percent)
+
         } %>%
         printGGplotly(.)
-    }
-  })
+    })
 
   # grouped timeseries
   output$visitor.success.grouped.timeseries <- renderPlotly({

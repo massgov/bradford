@@ -135,45 +135,6 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   }
 }
 
-makeGroupedPareto <- function(df, x, y, cumul.line = NULL, plot.title = "", xlab = "", ylab = "") {
-  # makes a bar chart and optionally adds a pareto line
-  # Args:
-  #   df = a data frame of counts and categorical values
-  #   x = the vector of categoricals to plot along the x axis
-  #   y = the vector of values to plot along the y axis
-  #   cumul.line = the vector of values which are a cumumlative sum of percentages to plot, NULL returns no line
-  #   plot.title = the title of the plot to be applied
-  #   xlab = the label for the x axis
-  #   ylab = the label for the y axis
-  # Returns:
-  #   a ggplot object
-  if (nrow(df) == 0) {
-    makeBlankPlot()
-  } else if (is.null(cumul.line)) {
-    df %>%
-      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
-      geom_bar(stat = "identity") +
-      theme_bw() +
-      xlab(xlab) +
-      ylab(ylab) +
-      labs(fill = "",
-           color = "") +
-      ggtitle(plot.title)
-  } else {
-    df %>%
-      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
-      geom_line(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line, group = 1)) +
-      geom_point(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line)) +
-      geom_bar(stat = "identity") +
-      theme_bw() +
-      xlab(xlab) +
-      ylab(ylab) +
-      labs(fill = "",
-           color = "") +
-      ggtitle(plot.title)
-  }
-}
-
 makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
   # makes a grouped time series chart
   # Args:
@@ -233,7 +194,7 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   grouped.df = transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))
 
   plt = ggplot(grouped.df, aes(x = group, y = total)) +
-    geom_bar(stat = "identity", colour = "black") +
+    geom_bar(stat = "identity", colour = "black", fill = "black") +
     labs(x = paste0(x.lab), title = title, y = y.lab) +
     expand_limits(y = 0) +
     theme_bw() +

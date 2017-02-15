@@ -3,7 +3,7 @@ library(DBI)
 library(RPostgreSQL)
 
 # Source creds
-source("dashboard/get_data/db_connect.R")
+#source("dashboard/get_data/db_connect.R")
 
 db.driver <- dbDriver("PostgreSQL")
 
@@ -14,7 +14,7 @@ db.connection <- dbConnect(db.driver, dbname = db.name,
 
 #### Queries ####
 # Drupal
-paste(" SELECT ",
+paste("SELECT",
       "node_id,",
       "content_type,",
       "title",
@@ -28,9 +28,9 @@ paste(" SELECT ",
 
 
 
-drupal.node.descendants <- paste("SELECT ",
+drupal.node.descendants <- paste("SELECT",
                                  "descendants.node_id,",
-                                 "descendant_list,",
+                                 "descendants.descendant_id,",
                                  "meta.content_type,",
                                  "meta.title",
                                  "FROM", descendants, "AS descendants",
@@ -82,28 +82,31 @@ ga.conversions <- paste(" SELECT ",
                         "WHERE event_category = 'Conversion'") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection)
 
-paste(" SELECT page_path,",
+paste("SELECT session.page_path,",
       "features.session_id,",
       "hit_timestamp,",
-      "node_id,",
       "client.client_id,",
       "features.medium,",
       "features.device_category,",
       "features.operating_system,",
       "features.source,",
-      "features.browser",
+      "features.browser,",
+      "n.node_id,",
+      "n.content_type,",
+      "n.title",
       "FROM ", session.table, "AS session",
       "INNER JOIN ", client.table, "AS client",
       "ON session.session_id = client.session_id",
       "INNER JOIN ", session.feature.table, "AS features",
-      "ON client.session_id = features.session_id;") %>%
+      "ON client.session_id = features.session_id",
+      "INNER JOIN", node.table, "AS n",
+      "ON n.node_id = session.node_id",
+      "INNER JOIN ", event.table, "AS e",
+      "ON e.session_id = session.session_id AND e.page_path = session.page_path",
+      "WHERE e.event_category = 'Conversion';") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
   dplyr::mutate(hit_timestamp = lubridate::ymd_hms(hit_timestamp, tz = "UTC"),
                 hit_timestamp_eastern = lubridate::with_tz(hit_timestamp, tz = "America/New_York")) %>%
-  dplyr::ungroup() %>%
-  dplyr::inner_join(ga.conversions, by = c("session_id" = "session_id", "page_path" = "page_path")) %>%
-  dplyr::inner_join(drupal.node.metadata, by = "node_id") %>%
-  unique() %>%
   saveRDS(., "dashboard/data/ga_master_conversions.RDS")
 
 # Macro View query

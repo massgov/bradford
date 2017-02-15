@@ -33,7 +33,7 @@ else
   sudo rm -rf /srv/shiny-server/$test_dir/
 fi
 
-sudo cp -r ~/$dir_name/dashboard /srv/shiny-server/$test_dir/
+sudo cp -r ~/$dir_name/dashboard/ /srv/shiny-server/$test_dir/
 # restart the server
 sudo systemctl restart shiny-server
 

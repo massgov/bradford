@@ -158,27 +158,15 @@ shinyServer(function(input, output) {
 
       visitor.success.aggregate.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-        {
-          if (input$visitor.success.units == "percent") {
             buildParetoChart(grouped.df = .,
                  group.col = 'group_factor',
                  data.col = 'percent_success',
-                 cumul.col = 'cum_percent'
+                 cumul.col = 'cum_percent',
                  x.lab = '',
                  y.lab = '',
                  title = "",
                  cumul.line = TRUE,
-                 percent = input$success.rate.percent)
-            makeGroupedPareto(df = .,
-                              x = "group_factor",
-                              y = "percent_success",
-                              cumul.line = "cum_percent")
-          } else {
-            makeGroupedPareto(df = .,
-                              x = "group_factor",
-                              y = "n")
-          }
-        } %>%
+                 percent = input$success.rate.percent) %>%
         printGGplotly(.)
     } else {
       slice.to = as.numeric(input$visitor.success.select.k)

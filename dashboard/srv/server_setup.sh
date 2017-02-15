@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# **** IMPORTANT ****
+# In order for the setup script to work you must first install the aws cli and configure it
+# such that it has access to the necessary bucket in order to fetch data base credentials
+
 # Add new R CRAN
 echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
 
@@ -71,7 +76,7 @@ sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
 # get the necessary data from s3'
 sudo mkdir ~/bradford/dashboard/data/
-sudo /home/ubuntu/.local/bin/aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+sudo aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
 
 # run the query
 Rscript ~/bradford/dashboard/get_data/query.R

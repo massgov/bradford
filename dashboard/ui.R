@@ -21,16 +21,8 @@ fluidPage(
             startview = "month"
           ),
           radioButtons(
-            inputId = "visitor.success.units", 
-            label = "Select Unit", 
-            choices = c("Percent" = "percent", 
-                        "Number" = "number"),
-            selected = "percent", 
-            inline = T
-          ),
-          radioButtons(
             inputId = "visitor.success.type", 
-            label =  "Filter C1s to Visualize",
+            label =  "Filter C1s",
             choices = c("All" = "all",
                         "Page Type" = "page.type",
                         "Service Type" = "service.type",
@@ -39,9 +31,11 @@ fluidPage(
             inline = T
           ),
           uiOutput("type.selection.options"),
+          br(),
+          br(),
           checkboxGroupInput(
             inputId = "visitor.success.group.by",
-            label = "Group by:", 
+            label = "Group By", 
             choices = c("Site Section Landing" = "site_section",
                         "Topic" = "topic",
                         "Sub-Topic" = "subtopic",
@@ -51,24 +45,30 @@ fluidPage(
             selected = "site_section", 
             inline = F
           ),
-          br(),
-          h5("Only Display"),
           splitLayout(
             cellWidths = c("50%", "50%"),
             selectInput(
               inputId = "visitor.success.top.bottom", 
-              label = NULL, 
+              label = "Display Order",
               choices = c("Top" = "top",
                           "Bottom" = "bottom"),
               selected = "top"
             ),
             numericInput(
               inputId = "visitor.success.select.k",
-              label = NULL, 
+              label = br(),
               value = 5, 
               min = 1, 
               max = 5
             )
+          ),
+          radioButtons(
+            inputId = "visitor.success.units", 
+            label = "Display Unit", 
+            choices = c("Percent" = "percent", 
+                        "Number" = "number"),
+            selected = "percent", 
+            inline = T
           ),
           # URL generator
           shinyURL.ui(display = T, copyURL = T, tinyURL = T)
@@ -119,14 +119,14 @@ fluidPage(
           cellWidths = c("50%", "50%"),
           selectInput(
             "funnel.slot.number",
-            "Time Frame:",
+            "Time Frame",
             c("Weekly" = 2,
               "Monthly" = 1),
             selected = 2
           ),
           selectInput(
             "funnel.name",
-            "Funnel:",
+            "Funnel",
             c(
               "All" = "show.all",
               "Admin and Finance" = "anf",
@@ -138,7 +138,7 @@ fluidPage(
           )
         ),
         br(),
-        br(),
+        hr(),
         plotlyOutput("formstack.response.plot.funnels"),
         plotlyOutput("formstack.volume.plot.funnel.bar"),
         splitLayout(

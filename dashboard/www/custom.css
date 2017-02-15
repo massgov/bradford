@@ -232,3 +232,16 @@ input[type="checkbox"]:checked:before {
   border-top-left-radius:0;
   border-bottom-left-radius:0;
 }
+
+
+.control-label, .shiny-input-container > label{
+  color: #43956f;
+  font-weight: 300;
+  font-size: .8em;
+  text-transform: uppercase;
+}
+
+// .g-gtitle > .gtitle{
+//   font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
+//   font-size: 2em;
+// }

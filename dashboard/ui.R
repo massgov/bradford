@@ -95,6 +95,7 @@ shinyUI(navbarPage(
              selected = FALSE,
              inline = T
            ),
+           hr(),
            fluidRow(
              splitLayout(
                cellWidths = c("50%", "50%"),

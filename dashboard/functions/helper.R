@@ -99,6 +99,8 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
   #   top.pct = a numeric which filters all entries in total <= top.pct
   
   # guardrails
+
+  
   if (is.numeric(df[[data.col]]) == F) {
     stop("data.col must be numeric")
   } 
@@ -127,7 +129,7 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
   
   if(percent){
     data.total = sum(grouped.df$total)
-    grouped.df$total = grouped.df$total / data.total * 100
+    grouped.df$total = grouped.df$total / data.total
     grouped.df$cumul = cumsum(grouped.df$total)
   }
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]

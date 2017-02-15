@@ -203,7 +203,7 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
 }
 
 buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total', cumul.col = 'cumul',
-                             x.lab = "Groups", y.lab = "Total", title = "TITLE", cumul.line = TRUE) {
+                             x.lab = "Groups", y.lab = "Total", title = "TITLE", cumul.line = TRUE, percent = TRUE) {
 
   # Draws a bar chart based off grouped data in a specific column displaying the highest value categories descending, includes
   # an option to draw a cumulative traffic line
@@ -216,6 +216,10 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   # percent: Show metrics as % of total
   # cumul.line: Show cumulative line
 
+  if (nrow(grouped.df) == 0) {
+    return(makeBlankPlot())
+    
+  }
 
   # Rename columns
   grouped.df$group = grouped.df[[group.col]]
@@ -234,8 +238,11 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
 
   if (cumul.line) {
     plt = plt +
-      geom_line(aes(x = group, y = cumul, group = 1), colour = "black") +
-      scale_colour_manual(values = c("Cumulative Graph"))
+      geom_line(aes(x = group, y = cumul, group = 1), colour = "black")
+  }
+
+  if (percent){
+    plt = plt + scale_y_continuous(labels=scales::percent)
   }
   return(plt)
 }

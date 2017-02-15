@@ -1,12 +1,12 @@
 #!/bin/bash
 # Add new R CRAN
-echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
+echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
 
 # add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
 # Add ssl reference for install
-sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
+sudo echo "deb http://security.ubuntu.com/ubuntu xenial-security main" >> /etc/apt/sources.list
 
 # Update and upgrade system
 sudo apt -y update
@@ -69,14 +69,8 @@ done
 wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
 sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
-# get the bradford repo
-git clone https://github.com/massgov/bradford ~/
-
 # get the necessary data from s3'
 sudo mkdir ~/bradford/dashboard/data/
-sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
-
-# get the connection creds
 sudo /home/ubuntu/.local/bin/aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
 
 # run the query

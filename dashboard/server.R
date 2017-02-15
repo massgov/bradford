@@ -163,11 +163,15 @@ shinyServer(function(input, output) {
             makeGroupedPareto(df = .,
                               x = "group_factor",
                               y = "percent_success",
-                              cumul.line = "cum_percent")
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n")
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
           }
         } %>%
         printGGplotly(.)
@@ -185,11 +189,15 @@ shinyServer(function(input, output) {
             makeGroupedPareto(df = .,
                               x = "group_factor",
                               y = "percent_success",
-                              cumul.line = "cum_percent")
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n")
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
           }
         } %>%
         printGGplotly(.)

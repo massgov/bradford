@@ -120,7 +120,7 @@ shinyServer(function(input, output) {
       }
     }
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicbable)",
+                label = "Filter by Type (if applicable)",
                 choices = c("all", unique.subtypes))
   })
 
@@ -163,11 +163,15 @@ shinyServer(function(input, output) {
             makeGroupedPareto(df = .,
                               x = "group_factor",
                               y = "percent_success",
-                              cumul.line = "cum_percent")
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n")
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
           }
         } %>%
         printGGplotly(.)
@@ -185,11 +189,15 @@ shinyServer(function(input, output) {
             makeGroupedPareto(df = .,
                               x = "group_factor",
                               y = "percent_success",
-                              cumul.line = "cum_percent")
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
           } else {
             makeGroupedPareto(df = .,
                               x = "group_factor",
-                              y = "n")
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
           }
         } %>%
         printGGplotly(.)
@@ -205,24 +213,28 @@ shinyServer(function(input, output) {
           makeGroupedTimeseries(df = .,
                                 x = "hit_timestamp",
                                 y = "percent_success",
+                                ylab = "% of Total",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         } else {
           makeGroupedTimeseries(df = .,
                                 x = "hit_timestamp",
                                 y = "n",
+                                ylab = "Count",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         }
       } %>%
         printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
-
+      
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
-
+      
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -230,25 +242,29 @@ shinyServer(function(input, output) {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "percent_success",
+                                  ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
+                                  ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%
         printGGplotly(.)
     } else {
       slice.to = as.numeric(input$visitor.success.select.k)
-
+      
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::ungroup() %>%
         dplyr::slice(1:slice.to)
-
+      
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -256,19 +272,23 @@ shinyServer(function(input, output) {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "percent_success",
+                                  ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
+                                  ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%
         printGGplotly(.)
-
+      
     }
   })
-
+  
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({
     grouped.sessions.conversions %>%

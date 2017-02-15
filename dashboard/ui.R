@@ -52,7 +52,7 @@ shinyUI(navbarPage(
               inline = F
             ),
             br(),
-            h5("Only Display"),
+            h5("Limit groups displayed to:"),
             splitLayout(
               cellWidths = c("50%", "50%"),
               selectInput(

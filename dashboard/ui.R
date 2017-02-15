@@ -21,14 +21,6 @@ fluidPage(
             startview = "month"
           ),
           radioButtons(
-            inputId = "visitor.success.units", 
-            label = "Select Unit", 
-            choices = c("Percent" = "percent", 
-                        "Number" = "number"),
-            selected = "percent", 
-            inline = T
-          ),
-          radioButtons(
             inputId = "visitor.success.type", 
             label =  "Filter C1s",
             choices = c("All" = "all",
@@ -64,11 +56,19 @@ fluidPage(
             ),
             numericInput(
               inputId = "visitor.success.select.k",
-              label = "Display Number",
+              label = br(),
               value = 5, 
               min = 1, 
               max = 5
             )
+          ),
+          radioButtons(
+            inputId = "visitor.success.units", 
+            label = "Display Unit", 
+            choices = c("Percent" = "percent", 
+                        "Number" = "number"),
+            selected = "percent", 
+            inline = T
           ),
           # URL generator
           shinyURL.ui(display = T, copyURL = T, tinyURL = T)

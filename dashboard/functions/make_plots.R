@@ -224,7 +224,10 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   # Rename columns
   grouped.df$group = grouped.df[[group.col]]
   grouped.df$total = grouped.df[[data.col]]
-  grouped.df$cumul = grouped.df[[cumul.col]]
+
+  if (cumul.line){
+    grouped.df$cumul = grouped.df[[cumul.col]]
+  }
 
   # Reorder factors largest to smallest
   grouped.df = transform(grouped.df, group = reorder(group, order(total, decreasing = TRUE)))

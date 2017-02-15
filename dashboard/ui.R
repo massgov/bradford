@@ -23,9 +23,9 @@ shinyUI(navbarPage(
             radioButtons(
               inputId = "visitor.success.units",
               label = "Select Unit",
-              choices = c("Percent" = "percent",
-                          "Number" = "number"),
-              selected = "percent",
+              choices = c("Percent" = TRUE,
+                          "Number" = FALSE),
+              selected = TRUE,
               inline = T
             ),
             radioButtons(

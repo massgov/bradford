@@ -120,7 +120,7 @@ shinyServer(function(input, output) {
       }
     }
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicbable)",
+                label = "Filter by Type (if applicable)",
                 choices = c("all", unique.subtypes))
   })
 
@@ -214,12 +214,14 @@ shinyServer(function(input, output) {
                                 x = "hit_timestamp",
                                 y = "percent_success",
                                 ylab = "% of Total",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         } else {
           makeGroupedTimeseries(df = .,
                                 x = "hit_timestamp",
                                 y = "n",
                                 ylab = "Count",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         }
       } %>%
@@ -241,12 +243,14 @@ shinyServer(function(input, output) {
                                   x = "hit_timestamp",
                                   y = "percent_success",
                                   ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
                                   ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%
@@ -269,12 +273,14 @@ shinyServer(function(input, output) {
                                   x = "hit_timestamp",
                                   y = "percent_success",
                                   ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
                                   ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%

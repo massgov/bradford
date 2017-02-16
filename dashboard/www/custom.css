@@ -241,7 +241,6 @@ input[type="checkbox"]:checked:before {
   text-transform: uppercase;
 }
 
-// .g-gtitle > .gtitle{
-//   font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
-//   font-size: 2em;
-// }
+.checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
+    margin: 0 10px 0 0;
+}

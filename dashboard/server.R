@@ -33,19 +33,6 @@ shinyServer(function(input, output) {
     }
   })
 
-  # get ids for current group by selections
-  type.group.by <- reactive({
-    if ("site_section" %in% input$visitor.success.group.by) {
-      return(section.landing.ids)
-    } else if ("topic" %in% input$visitor.success.group.by) {
-      return(topic.ids)
-    } else if ("subtopic" %in% input$visitor.success.group.by) {
-      return(subtopic.ids)
-    } else {
-      return(NULL)
-    }
-  })
-
   # creates data frame of conversions (grouped or not) by date
   visitor.success.timeseries.data <- reactive({
     # add additional group_by hit_timestamp
@@ -284,9 +271,10 @@ shinyServer(function(input, output) {
                        c = sum(conversions),
                        s = sum(sessions)) %>%
       dplyr::arrange(., desc(s)) %>%
-      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top 80% based on sessions
+      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
       ggplot(., aes(x = parent_title, y = conversion_rate)) +
-      geom_bar(stat = 'identity') + theme_bw() +
+      geom_bar(stat = 'identity') + 
+      theme_bw() +
       theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
       labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics')
 

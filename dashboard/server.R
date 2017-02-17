@@ -271,12 +271,13 @@ shinyServer(function(input, output) {
                        c = sum(conversions),
                        s = sum(sessions)) %>%
       dplyr::arrange(., desc(s)) %>%
-      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
+      dplyr::filter(s > quantile(s, 1 - as.numeric(input$pct.cutoffs))) %>% # Top X% based on sessions
       ggplot(., aes(x = parent_title, y = conversion_rate)) +
       geom_bar(stat = 'identity') + 
       theme_bw() +
       theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics')
+      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics') + 
+      scale_y_continuous(labels=scales::percent)
 
     printGGplotly(plt)
   })

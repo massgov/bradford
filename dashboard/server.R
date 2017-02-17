@@ -94,7 +94,7 @@ shinyServer(function(input, output) {
         dplyr::count() %>%
         dplyr::arrange(desc(n)) %>%
         dplyr::ungroup() %>%
-        dplyr::mutate(percent_success = round(n / sum(n), 3),
+        dplyr::mutate(percent_success = round(n / sum(n), 3) * 100,
                       cum_percent = cumsum(percent_success))
 
       dat$group_factor = apply(dat[, c(input$visitor.success.group.by)],

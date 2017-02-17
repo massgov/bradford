@@ -159,15 +159,12 @@ shinyServer(function(input, output) {
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::slice(1:slice.to)
 
-    } else if (input$visitor.success.top.bottom == "top"){
-      
-
+    } else if (input$visitor.success.top.bottom == "top"){    
 
       top.groups = visitor.success.aggregate.data() %>%
         dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
       }
-       
 
       visitor.success.aggregate.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
@@ -213,61 +210,51 @@ shinyServer(function(input, output) {
                                 fill = NULL)
         }
       } %>%
-        printGGplotly(.)
-    } else if (input$visitor.success.top.bottom == "top") {
-      slice.to = as.numeric(input$visitor.success.select.k)
-
-      top.groups = visitor.success.timeseries.data() %>%
-        dplyr::group_by(group_factor) %>%
-        dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
-        dplyr::slice(1:slice.to)
-
-      visitor.success.timeseries.data() %>%
-        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-        {
-          if (input$visitor.success.units == "percent") {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "percent_success",
-                                  fill = "group_factor")
-          } else {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "n",
-                                  fill = "group_factor")
-          }
-        } %>%
-        printGGplotly(.)
+          printGGplotly(.)
     } else {
-      slice.to = as.numeric(input$visitor.success.select.k)
 
-      top.groups = visitor.success.timeseries.data() %>%
-        dplyr::group_by(group_factor) %>%
-        dplyr::summarise(n = sum(n)) %>%
-        dplyr::arrange(n) %>%  # arrange low to high
-        dplyr::ungroup() %>%
-        dplyr::slice(1:slice.to)
+              slice.to = as.numeric(input$visitor.success.select.k)
 
-      visitor.success.timeseries.data() %>%
-        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
-        {
-          if (input$visitor.success.units == "percent") {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "percent_success",
-                                  fill = "group_factor")
-          } else {
-            makeGroupedTimeseries(df = .,
-                                  x = "hit_timestamp",
-                                  y = "n",
-                                  fill = "group_factor")
-          }
-        } %>%
-        printGGplotly(.)
+              if (input$visitor.success.top.bottom == "top") {
+                        
 
-    }
-  })
+                        top.groups = visitor.success.timeseries.data() %>%
+                          dplyr::group_by(group_factor) %>%
+                          dplyr::summarise(n = sum(n)) %>%
+                          dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
+                          dplyr::slice(1:slice.to)
+
+                
+              } else if (input$visitor.success.top.bottom == "top"){
+
+                        top.groups = visitor.success.timeseries.data() %>%
+                          dplyr::group_by(group_factor) %>%
+                          dplyr::summarise(n = sum(n)) %>%
+                          dplyr::arrange(n) %>%  # arrange low to high
+                          dplyr::slice(1:slice.to)
+              }
+
+              visitor.success.timeseries.data() %>%
+                  dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+                  {
+                    if (input$visitor.success.units == "percent") {
+                      makeGroupedTimeseries(df = .,
+                                            x = "hit_timestamp",
+                                            y = "percent_success",
+                                            fill = "group_factor")
+                    } else {
+                      makeGroupedTimeseries(df = .,
+                                            x = "hit_timestamp",
+                                            y = "n",
+                                            fill = "group_factor")
+                    }
+                  } %>%
+                    
+                    printGGplotly(.)
+
+              }
+            
+            })
 
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({

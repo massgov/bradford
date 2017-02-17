@@ -3,7 +3,7 @@ library(DBI)
 library(RPostgreSQL)
 
 # Source creds
-#source("dashboard/get_data/db_connect.R")
+source("dashboard/get_data/db_connect.R")
 
 db.driver <- dbDriver("PostgreSQL")
 
@@ -30,7 +30,7 @@ paste("SELECT",
 
 drupal.node.descendants <- paste("SELECT",
                                  "descendants.node_id,",
-                                 "descendants.descendant_id,",
+                                 "descendants.descendant_id ,",
                                  "meta.content_type,",
                                  "meta.title",
                                  "FROM", descendants, "AS descendants",

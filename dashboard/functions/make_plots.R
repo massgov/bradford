@@ -155,6 +155,8 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
       geom_line(group = 1) +
       geom_point() +
       theme_bw() +
+      scale_fill_manual(values = c("#03A9F4", "#4CAF50", "#FFC107", "#FF5722", "#607D8B")) +
+      scale_color_manual(values = c("#03A9F4", "#4CAF50", "#FFC107", "#FF5722", "#607D8B")) +
       xlab(xlab) +
       ylab(ylab) +
       labs(fill = "",

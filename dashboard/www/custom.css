@@ -232,3 +232,15 @@ input[type="checkbox"]:checked:before {
   border-top-left-radius:0;
   border-bottom-left-radius:0;
 }
+
+
+.control-label, .shiny-input-container > label{
+  color: #43956f;
+  font-weight: 300;
+  font-size: .8em;
+  text-transform: uppercase;
+}
+
+.checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
+    margin: 0 10px 0 0;
+}

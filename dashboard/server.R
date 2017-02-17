@@ -120,7 +120,7 @@ shinyServer(function(input, output) {
       }
     }
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicbable)",
+                label = "Filter By Type",
                 choices = c("all", unique.subtypes))
   })
 
@@ -159,9 +159,27 @@ shinyServer(function(input, output) {
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::slice(1:slice.to)
 
-    } else if (input$visitor.success.top.bottom == "top"){
-      
-
+      visitor.success.aggregate.data() %>%
+        dplyr::filter(group_factor %in% top.groups$group_factor) %>%
+        {
+          if (input$visitor.success.units == "percent") {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "percent_success",
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
+          } else {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
+          }
+        } %>%
+        printGGplotly(.)
+    } else {
+      slice.to = as.numeric(input$visitor.success.select.k)
 
       top.groups = visitor.success.aggregate.data() %>%
         dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
@@ -172,15 +190,20 @@ shinyServer(function(input, output) {
       visitor.success.aggregate.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
-          if (input$visitor.success.units) {
-            df.data.col = 'percent_success'
-            is.percent = TRUE
-            is.cumul = TRUE
-            
+          if (input$visitor.success.units == "percent") {
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "percent_success",
+                              ylab = "% of Total",
+                              cumul.line = "cum_percent",
+                              plot.title = "Success by Group")
           } else {
-            df.data.col = 'n'
-            is.percent = FALSE
-            is.cumul = FALSE
+            makeGroupedPareto(df = .,
+                              x = "group_factor",
+                              y = "n",
+                              ylab = "Count",
+                              plot.title = "Success by Group")
+
           }
           buildParetoChart(grouped.df = .,
                  group.col = 'group_factor',
@@ -205,24 +228,28 @@ shinyServer(function(input, output) {
           makeGroupedTimeseries(df = .,
                                 x = "hit_timestamp",
                                 y = "percent_success",
+                                ylab = "% of Total",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         } else {
           makeGroupedTimeseries(df = .,
                                 x = "hit_timestamp",
                                 y = "n",
+                                ylab = "Count",
+                                plot.title = "Success Over Time",
                                 fill = NULL)
         }
       } %>%
         printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
-
+      
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
-
+      
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -230,25 +257,29 @@ shinyServer(function(input, output) {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "percent_success",
+                                  ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
+                                  ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%
         printGGplotly(.)
     } else {
       slice.to = as.numeric(input$visitor.success.select.k)
-
+      
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::ungroup() %>%
         dplyr::slice(1:slice.to)
-
+      
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -256,19 +287,23 @@ shinyServer(function(input, output) {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "percent_success",
+                                  ylab = "% of Total",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           } else {
             makeGroupedTimeseries(df = .,
                                   x = "hit_timestamp",
                                   y = "n",
+                                  ylab = "Count",
+                                  plot.title = "Success Over Time",
                                   fill = "group_factor")
           }
         } %>%
         printGGplotly(.)
-
+      
     }
   })
-
+  
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({
     

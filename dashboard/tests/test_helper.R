@@ -86,6 +86,6 @@ test_that("groupAndOrder outputs the correct answer", {
                         c = c("A", "A", "B", "C"))
   expect_equal(groupAndOrder(df = test.df, group.col = "a", data.col = "b", top.pct = 1), 
                data.frame(group = factor(c("A", "B", "C")), 
-                          total = c(50, 25, 25), 
-                          cumul = c(50, 75, 100)))
+                          total = c(.5, .25, .25), 
+                          cumul = c(.50, .75, 1)))
 })

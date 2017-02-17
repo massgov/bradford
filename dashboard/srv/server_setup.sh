@@ -1,12 +1,21 @@
 #!/bin/bash
+
+# **** IMPORTANT ****
+# this is meant as a setup script for aws ubuntu ec2 instances, not as a local setup script
+# In order for the setup script to work you must follow these steps:
+# 1. install the aws cli, ie pip install awscli
+# 2. configure the cli with an id and secret which has access to the mass.gov-analytics bucket
+# 3. clone the repo into the home directory of the server you want to set up
+# 4. run this script
+
 # Add new R CRAN
-echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
+echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
 
 # add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
 # Add ssl reference for install
-sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
+sudo echo "deb http://security.ubuntu.com/ubuntu xenial-security main" >> /etc/apt/sources.list
 
 # Update and upgrade system
 sudo apt -y update
@@ -26,7 +35,6 @@ declare -a ubuntu_packages=('r-base'
                             'libmariadb-client-lgpl-dev'
                             'libcairo2-dev'
                             'r-cran-slam'
-                            'awscli'
                             )
 for package_name in ${ubuntu_packages[@]}; do
   sudo apt install -y $package_name
@@ -70,15 +78,9 @@ done
 wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
 sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
 
-# get the bradford repo
-git clone https://github.com/massgov/bradford ~/
-
 # get the necessary data from s3'
 sudo mkdir ~/bradford/dashboard/data/
-sudo /home/ubuntu/.local/bin/aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
-
-# get the connection creds
-sudo /home/ubuntu/.local/bin/aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+sudo aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
 
 # run the query
 Rscript ~/bradford/dashboard/get_data/query.R

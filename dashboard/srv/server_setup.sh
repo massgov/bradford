@@ -31,7 +31,6 @@ declare -a ubuntu_packages=('r-base'
                             'libmariadb-client-lgpl-dev'
                             'libcairo2-dev'
                             'r-cran-slam'
-                            'awscli'
                             )
 for package_name in ${ubuntu_packages[@]}; do
   sudo apt install -y $package_name

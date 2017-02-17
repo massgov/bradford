@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # **** IMPORTANT ****
-# In order for the setup script to work you must first install the aws cli and configure it
-# such that it has access to the necessary bucket in order to fetch data base credentials
+# this is meant as a setup script for aws ubuntu ec2 instances, not as a local setup script
+# In order for the setup script to work you must follow these steps:
+# 1. install the aws cli, ie pip install awscli
+# 2. configure the cli with an id and secret which has access to the mass.gov-analytics bucket
+# 3. clone the repo into the home directory of the server you want to set up
+# 4. run this script
 
 # Add new R CRAN
 echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list

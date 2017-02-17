@@ -205,15 +205,6 @@ shinyServer(function(input, output) {
                               plot.title = "Success by Group")
 
           }
-          buildParetoChart(grouped.df = .,
-                 group.col = 'group_factor',
-                 data.col = df.data.col,
-                 cumul.col = 'cum_percent',
-                 x.lab = '',
-                 y.lab = '',
-                 title = "",
-                 cumul.line = is.cumul,
-                 percent = is.percent)
 
         } %>%
         printGGplotly(.)

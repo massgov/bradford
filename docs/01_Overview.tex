@@ -1,0 +1,19 @@
+% Section 1, Subsection 2
+\subsection*{Project Overview}
+For the ongoing \texttt{mass.gov} redesign project, we aim to provide better resources for users and optimize findability of those resources. We can assess our progress towards this goal by considering users' feedback through Formstack survey responses. In particular, we hope to see our efforts result in a greater proportion of users reporting that they were able to find desired information or services on the site. We believe that the use of Formstack response data will be effective in our efforts to model user satisfaction with the site.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 1, Subsection 2(a)
+
+\textbf{Formstack Data in Relation to Our Goals}
+
+For those organizations participating with Formstack, we have gathered data for each submitted response, including submission time, whether or not desired content was found, a brief description (100 or fewer characters) if desired content was not found, site, referral site, content and child-content authors, as well as user location, IP address, web browser, and operating system.
+
+As content is migrating from the old Percussion site to the new Drupal site, we monitor how new pages are performing relative to previous versions, but we can only measure differences for pages with page redirects. The new feedback module must remain consistent with the old version so that our redesign work is ensured to be the primary contributor to changes in survey data and undesired effects are not unintentionally incorporated. Depending on the task at hand, we may restrict our attention to a single page or a single department's set of pages on \texttt{mass.gov}. Apart from this allowing us to gain insight into user satisfaction trends over time for a given set of pages, this also allows us to determine the top-performing and under-performing pages, which should be helpful in determining additional avenues for site improvement.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 1, Subsection 2(b)
+
+\textbf{Methodology}
+
+We will use a few different methods to analyze Formstack data, and these methods along with their theoretical foundations will be described further in the following sections. We implement a generalized linear model to determine the relationship between organizations, site content and child-content authors,  and users' operating systems, with respect to users' abilities to find desired content. We believe that these attributes have an inherent relationship with the general level of effort required to find desired content, and fitting a linear model would be effective in quantitatively describing this relationship.
+
+Because only a small amount of data exists for the new Drupal site, we use Bayesian inference to estimate the proportion of users who are able to find desired content. Consider a new baseball player and his/her batting average. We expect this average to be more informative over time and usually do not place so much emphasis on it in the beginning of his/her career. Likewise, given data for the first month of the new \texttt{mass.gov} site, we cannot conclude from a sample of 100 users that 40\% of \textit{all} users are able to navigate to desired content; we need more survey responses to safely make such an assertion. As we observe new data, we use Bayesian inference to update our beliefs of the true population proportion.

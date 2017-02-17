@@ -1,0 +1,94 @@
+% Do not delete this empty line.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 2, Subsection 1(b)
+
+\textbf{Bayesian Inference}
+
+In the previous section, we discussed why our data and scenario are best modeled by a binomial distribution. In order to understand user satisfaction better, we require the true (population) parameter $p$, which we cannot in practice obtain. So now, we are tasked with finding an appropriate estimate $\theta$ of $p$, by using our (sample) data and \href{https://en.wikipedia.org/wiki/Conditional_probability}{conditional probability}, \href{https://en.wikipedia.org/wiki/Bayesian_statistics}{Bayesian statistics} and \href{https://en.wikipedia.org/wiki/Credible_interval}{credible intervals}. Given our current state of knowledge (current sample data), we have some idea of what our parameter estimate $\theta$ looks like. As we observe more trials (new incoming sample data), we update our beliefs of $\theta$ and our user population. The reader might ask why this is necessary when we could easily find the proportion of \textit{Yes} responses in our sample data. However, given that we are considering a narrower range of dates for the new Drupal site, doing so would not paint an accurate picture of our user population. It is important to remember that more evidence (data) is required in order to make such strong assertions about our user population.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 2, Subsection 1(b) - Example BEGIN
+
+\textbf{. . . . .}
+
+To help introduce some concepts, we will consider another coin toss experiment example. Suppose that we have four coins, one of which is biased with $P(\{\textit{Heads}\}) = 0.8$ and $P(\{\textit{Tails}\}) = 0.2$. Imagine we are asked to select a coin and toss that coin 20 times, counting the number of times \textit{Heads} is observed.
+
+Assuming that each coin is equally likely to be selected, then the probability that we select a fair coin is 3/4 = 0.75. Therefore, the probability that we select the unfair coin is 1/4 = 0.25. Given information about which coin is chosen, we can report the \href{https://en.wikipedia.org/wiki/Conditional_probability}{conditional probability} that we observe \textit{Heads} or \textit{Tails} for any given trial. Specifically, $P(\{\textit{Heads}\} | \{\textit{Fair coin selected}\}) = 0.5 = P(\{\textit{Tails}\} | \{\textit{Fair coin selected}\})$, while $P(\{\textit{Heads}\} | \{\textit{Biased coin selected}\}) = 0.8$ and $P(\{\textit{Tails}\} | \{\textit{Biased coin selected}\}) = 0.2$. Here we know the explicit values for these probabilities, but in general, if we do not know these values, we can compute them via the following formula: $P(A | B) = P(A \cap B)/P(B)$, for any events $A$ and $B$. 
+
+But what if we wanted to find the probability that we selected the biased coin, given that we observed \textit{Heads}? This is a straightforward computation given the above formula since $P(A \cap B) = P(A|B)P(B)$. Note also that for \href{https://en.wikipedia.org/wiki/Mutual_exclusivity}{disjoint events} (events without intersection) $A$ and $B$, the probability of their union is simply the sum of the individual probabilities, i.e., $P(A \cup B) = P(A) + P(B)$. Using these results, we obtain:
+\begin{align*}
+    P(\{\textit{Biased}\} | \{\textit{Heads}\}) &=  P(\{\textit{Heads}\} \cap \{\textit{Biased}\})/P(\{\textit{Heads}\}) \\
+    &= \frac{P(\{\textit{Heads}\} | \{\textit{Biased}\}) \cdot P(\{\textit{Biased}\})}{P(\{\textit{Heads}\})} \\
+   &= \frac{(0.8\cdot0.25)}{P((\{\textit{Heads}\}\cap\{\textit{Biased}\}) \cup (\{\textit{Heads}\}\cap\{\textit{Fair}\}))} \\
+    &= \frac{0.2}{P(\{\textit{Heads}\}\cap\{\textit{Biased}\}) + P(\{\textit{Heads}\}\cap\{\textit{Fair}\})} \\
+    &= \frac{0.2}{P(\{\textit{Heads}\} | \{\textit{Biased}\}) \cdot P(\{\textit{Biased}\}) + P(\{\textit{Heads}\} | \{\textit{Fair}\}) \cdot P(\{\textit{Fair}\})} \\
+    &= \frac{0.2}{(0.8\cdot0.25 + 0.5\cdot0.75)} = \frac{0.2}{(0.2 + 0.375)} = \frac{0.2}{0.575} \approx 34.78\%
+\end{align*}
+
+In \href{https://en.wikipedia.org/wiki/Bayesian_inference}{Bayesian inference}, we perform this type of computation often. We use it in this coin flip experiment to update our beliefs about which coin we selected. After each trial, we have new observational data helping to form our beliefs about whether we have been tossing a biased or fair coin. The computation above shows how our beliefs changed after seeing \textit{Heads} after the first trial. If we start to see \textit{Heads} much more than half of the time, we might become suspicious and be more inclined to believe that we chose the biased coin.
+
+For each trial, we use the principle of \href{https://en.wikipedia.org/wiki/Bayes'_theorem}{Bayes' Theorem}, which states that for any events $A$ and $B$, we have the property $P(A | B) = P(A \cap B)/P(B) = P(B|A)P(A)/P(B)$. We observed as an application of this theorem how to quantitatively describe our belief about whether a fair or biased coin was selected after observing the first trial's outcome. For any trial thereafter, to model how this belief changes given our current state of knowledge (current trial outcome), we make use of the \textit{structure} of Bayes' formula. It is important to make this distinction between the \textit{structure} of Bayes' formula and Bayes' formula itself. This notion will be illustrated more clearly in the outline below of computations and variable reassignments for each trial.
+
+We now define some terms (variable names). Consider the equation $P(A|B) = P(B|A)P(A)/P(B)$. Let the $P(A|B)$ term be the \href{https://en.wikipedia.org/wiki/Posterior_probability}{posterior probability} variable describing our current belief in hypothesis $A$, updated after observing each trial's outcome $B$. We define the \href{https://en.wikipedia.org/wiki/Likelihood_function}{likelihood} that we observe $B$ given $A$ occurred to be the $P(B|A)$ term. The $P(A)$ term is our \href{https://en.wikipedia.org/wiki/Prior_probability}{prior} belief in event $A$, and the $P(B)$ term is the current \href{https://en.wikipedia.org/wiki/Marginal_likelihood}{evidence}. For each iteration (trial), we use the formula \textbf{posterior = (likelihood $\cdot$ prior)/evidence}, which implies that \textbf{posterior $\propto$ likelihood $\cdot$ prior}. We now walk through the first few steps of our model applied to the coin toss experiment to illustrate how our belief in the original coin selection changes across trials.
+
+\vspace{3 mm}
+\underline{\textbf{Trial 1}}
+\newline
+Before trial 1, we have no observational data. We only know that we have a 25\% chance of selecting the biased coin (in which case, \textit{Heads} occurs with 80\% probability) and a 75\% chance of selecting a fair coin. Thus, it seems reasonable to initialize our value for \texttt{prior} with the odds of selecting the biased coin, 0.25. We already have the correct \texttt{likelihood} value given by $P(\{\textit{Heads}\}|\{\textit{Biased coin chosen}\}) = 0.8$. We also found the value for \texttt{evidence} in our first computation on page 3: \texttt{evidence} = $P(\{\textit{Heads}\}) = 0.575$. 
+\begin{align*}
+    &\texttt{prior = 0.25} &&\leftarrow P(\{\textit{Biased}\}) \\
+    &\texttt{likelihood = 0.8} &&\leftarrow P(\{\textit{Heads}\} | \{\textit{Biased}\}) \\
+    &\texttt{evidence = 0.25 * 0.8 + 0.75 * 0.5} &&\leftarrow P(\{\textit{Heads}\}) = 0.575 \\
+    &\texttt{posterior = (likelihood * prior) / evidence} &&\leftarrow P(\{\textit{Biased}\} | \{\textit{Heads}\}) \approx 0.3478 \hspace{18 mm} 
+\end{align*}
+
+\underline{\textbf{Trial 2}}
+\newline
+After observing another \textit{Heads} outcome, we use the \texttt{posterior} value obtained in trial 1 as our new \texttt{prior} value for trial 2, which we use to update the current \texttt{evidence} supporting our beliefs, and therefore, the resultant \texttt{posterior} value for trial 2. Notice we are more likely to believe we chose the biased coin.
+\begin{align*}
+    &\texttt{prior = posterior} &&\leftarrow P(\{\textit{Biased}\} | \{\textit{Heads}\}) \approx 0.3478 \\
+    &\texttt{likelihood = 0.8} &&\leftarrow P(\{\textit{Heads}\} | \{\textit{Biased}\}) \\
+    &\texttt{evidence = prior * 0.8 + (1 - prior) * 0.5} &&\leftarrow \textnormal{ Belief of } P(\{\textit{Heads}\}) \approx 0.6043 \\
+    &\texttt{posterior = (likelihood * prior) / evidence} &&\leftarrow \textnormal{ Belief of } P(\{\textit{Biased}\} | \{\textit{2 Heads}\}) \approx 0.4604
+\end{align*}
+
+\underline{\textbf{Trial 3}}
+\newline
+If we observe another \textit{Heads} outcome, we will be more inclined to believe that we originally selected the biased coin. We update our \texttt{prior} belief that we have the biased coin, as well as the current \texttt{evidence} supporting this belief. Coupling this information with our \texttt{likelihood}, we form our new \texttt{posterior} belief.
+\begin{align*}
+    &\texttt{prior = posterior} &&\leftarrow \textnormal{ Belief of } P(\{\textit{Biased}\} | \{\textit{2 Heads}\}) \approx 0.4604 \\
+    &\texttt{likelihood = 0.8} &&\leftarrow P(\{\textit{Heads}\} | \{\textit{Biased}\}) \\
+    &\texttt{evidence = prior * 0.8 + (1 - prior) * 0.5} &&\leftarrow \textnormal{ Belief of } P(\{\textit{Heads}\}) \approx 0.6381 \\
+    &\texttt{posterior = (likelihood * prior) / evidence} &&\leftarrow \textnormal{ Belief of } P(\{\textit{Biased}\} | \{\textit{3 Heads}\}) \approx 0.5772
+\end{align*}
+\hspace{25 mm} \textbf{$\vdots$}
+
+Continue this process for all 20 trials.
+
+% Pseudocode for generalized method
+\begin{framed}
+\underline{\textbf{General Algorithm: Bayesian Inference for Coin Toss Experiment}}
+
+\textbf{Input:} \texttt{prior, likelihood, evidence, n, p, q}
+\newline
+\textbf{Output:} \texttt{posterior}
+\begin{verbatim}
+
+    for trials in 1:n
+        if trial == 1
+            posterior = likelihood * prior / evidence;
+        else
+            prior = posterior;
+            evidence = prior * p + (1 - prior) * q;
+            posterior = likelihood * prior / evidence;
+        end
+    end
+    
+    return posterior
+    
+\end{verbatim}
+\end{framed}
+\textbf{. . . . .}
+% Section 2, Subsection 1(b) - Example END
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Notice that after the first trial, we adopt the notation of ``Belief of $P(\{Event\})$" to emphasize the fact that these values are not true probabilities. Rather, they are values between 0 and 1 that quantitatively describe our beliefs of the probabilities of these events given our current state of knowledge. This is why it is particularly important to make clear the distinction between utilizing the \textit{structure} of Bayes' formula and utilizing Bayes' formula itself. Bayesian inference models make use of both, but after the first trial, we manipulate the formula that resembles the structure of Bayes' formula.

@@ -8,6 +8,7 @@ data.dir <- "data/"
 source("functions/read_data.R")
 source("functions/make_plots.R")
 source("functions/helper.R")
+source("functions/constants.R")
 
 # set the scientific notation
 options(scipen = 10000000)
@@ -21,13 +22,6 @@ drupal.node.descendants <- readRDS(paste0(data.dir, "drupal_node_descendants.RDS
 
 # Converions
 ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS"))
-
-# node id join tables
-section.landing.ids <- readRDS(paste0(data.dir, "section_landing_node_ids.RDS"))
-
-topic.ids <- readRDS(paste0(data.dir, "topic_node_ids.RDS"))
-
-subtopic.ids <- readRDS(paste0(data.dir, "subtopic_node_ids.RDS"))
 
 # SUCCESS RATE
 grouped.sessions.conversions <- readRDS(paste0(data.dir,"grouped.sessions.conversions.RDS"))

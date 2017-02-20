@@ -10,26 +10,53 @@ shinyServer(function(input, output) {
   # subset by timeseries start and end
   visitor.success.subset.timeseries <- reactive({  # creates data frame subset by time selection
     ga.conversions %>%
-      dplyr::filter(lubridate::date(hit_timestamp_eastern) >= input$visitor.success.daterange[1],
-                    lubridate::date(hit_timestamp_eastern) <= input$visitor.success.daterange[2])
+      dplyr::filter(lubridate::date(date) >= input$visitor.success.daterange[1],
+                    lubridate::date(date) <= input$visitor.success.daterange[2])
   })
 
   # subset by radio button selector
-  visitor.success.subset.data <- reactive({
-    visitor.success.subset.timeseries() %>%
-    {
-      # anon function to filter by service_type
-      if ("all" %in% c(input$visitor.success.type, input$visitor.success.type.selector)) {
-        return(.)
-      } else if (input$visitor.success.type == "page.type") {
-        dplyr::filter(., content_type == input$visitor.success.type.selector) %>%
-          return(.)
-      } else if (input$visitor.success.type == "event.type") {
-        dplyr::filter(., event_action == input$visitor.success.type.selector) %>%
-          return(.)
+  visitor.success.aggregate <- reactive({
+
+    # @connor I know this isn't properly functional, but it feels cleaner this way, can refactor if needed
+    df = visitor.success.subset.timeseries()
+      
+    # Filter by dropdown
+    if (input$visitor.success.type %in% COL.SELECT.TYPES) {
+
+          filtered.df = dplyr::filter_(df , paste0(input$visitor.success.type," == '",input$visitor.success.type.selector,"'"))       
+      
       } else {
-        return(.)
+
+        filtered.df = df
       }
+
+    for (group.by in input$visitor.success.group.by){
+
+      # Requires use of parents
+      if (group.by %in% NON.COL.GROUP){
+
+          join.df = drupal.node.descendants %>% dplyr::filter_(paste0(PARENT.TYPE," == '", group.by,"'"))
+          filtered.df = dplyr::left_join(filtered.df, join.df, by = c("page_id" = "descendant_id")) %>%
+                          dplyr::select(-content_type)
+
+
+          names(filtered.df)[names(filtered.df) == 'title'] = group.by
+      }
+
+    }
+
+
+  })
+
+  type.group.by <- reactive({
+    if ("site_section" %in% input$visitor.success.group.by) {
+      return(section.landing.ids)
+    } else if ("topic" %in% input$visitor.success.group.by) {
+      return(topic.ids)
+    } else if ("subtopic" %in% input$visitor.success.group.by) {
+      return(subtopic.ids)
+    } else {
+      return(NULL)
     }
   })
 
@@ -68,7 +95,9 @@ shinyServer(function(input, output) {
   visitor.success.aggregate.data <- reactive({
     if (is.null(input$visitor.success.group.by)) {  # if nothing selected pass an empty df
       data.frame()
-    } else {
+    } 
+
+    else {
       dat = visitor.success.subset.data() %>%
       {
         if (is.null(type.group.by())) {  # if we have no types to join on don't join
@@ -93,23 +122,21 @@ shinyServer(function(input, output) {
 
   # REACTIVE UI
   #   filter by type
+
   output$type.selection.options <- renderUI({
     unique.subtypes <- visitor.success.subset.timeseries() %>%  # data which is 2 vector data frame 1) every type and 2) corresponding subtypes
     {
-      if (input$visitor.success.type == "page.type") {
-        unique(.$content_type) %>%
-          return(.)
-      } else if (input$visitor.success.type == "event.type") {
-        unique(.$event_action) %>%
+      if (input$visitor.success.type %in% COL.SELECT.TYPES) {
+        unique(.[[input$visitor.success.type]]) %>%
           return(.)
       } else {
         return(NULL)
       }
     }
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicbable)",
-                choices = c("all", unique.subtypes))
-  })
+                label = "Filter by Type (if applicable)",
+                choices = c("All", unique.subtypes))
+})
 
   # FILE DOWNLOADS
   output$visitor.success.download.timeseries <- downloadHandler(
@@ -137,7 +164,9 @@ shinyServer(function(input, output) {
       makeBlankPlot() %>%
         printGGplotly(.)
     }
-      slice.to = as.numeric(input$visitor.success.select.k)   
+    
+
+    slice.to = as.numeric(input$visitor.success.select.k)   
     
     if (input$visitor.success.top.bottom == "bottom") {
       
@@ -267,11 +296,11 @@ shinyServer(function(input, output) {
       dplyr::filter(., parent_type == 'Topic') %>%
       dplyr::group_by(parent_title) %>%
       dplyr::summarise(.,
-                       conversion_rate = round(sum(conversions) / sum(sessions) * 100, 1),
+                       conversion_rate = round(sum(conversions) / sum(sessions), 1),
                        c = sum(conversions),
                        s = sum(sessions)) %>%
       dplyr::arrange(., desc(s)) %>%
-      dplyr::filter(s > quantile(s, 1 - as.numeric(input$pct.cutoffs))) %>% # Top X% based on sessions
+      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
       ggplot(., aes(x = parent_title, y = conversion_rate)) +
       geom_bar(stat = 'identity') + 
       theme_bw() +

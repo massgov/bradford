@@ -254,4 +254,5 @@ input[type="checkbox"]:checked:before {
 
 .js-plotly-plot .plotly .main-svg {
   padding-left: 6px;
+  overflow: visible;
 }

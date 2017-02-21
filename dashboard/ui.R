@@ -1,6 +1,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinyURL)
+library(shinyjs)
 
 shinyUI(navbarPage(
   theme = "custom.css",
@@ -10,6 +11,7 @@ shinyUI(navbarPage(
   tabPanel(
     "Visitor Success",
     fluidPage(
+      useShinyjs(),  # Include shinyjs
       fluidRow(
         sidebarLayout(
           sidebarPanel(
@@ -20,22 +22,26 @@ shinyUI(navbarPage(
               end = yesterday,  # sourced from global.R
               startview = "month"
             ),
-            radioButtons(
-              inputId = "visitor.success.type",
-            label =  "Filter C1s",
-              choices = c("All" = "all",
-                          "Page Type" = "page.type",
-                          "Service Type" = "service.type",
-                          "Event Type" = "event.type"),
-              selected = "all",
-              inline = T
+            splitLayout(
+            cellWidths = c("50%", "50%"),
+              div(selectInput(
+                inputId = "visitor.success.type",
+                label =  "Filter C1s",
+                choices = c("All" = "all",
+                            "Page Type" = "page.type",
+                            "Service Type" = "service.type",
+                            "Event Type" = "event.type"),
+                selected = "all"
+              ),
+              br(),
+              br()),
+              shinyjs::hidden(div(
+                id = "advanced",
+                uiOutput("type.selection.options")))
             ),
-            uiOutput("type.selection.options"),
-          br(),
-          br(),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
-            label = "Group By", 
+            label = "Group By",
               choices = c("Site Section Landing" = "site_section",
                           "Topic" = "topic",
                           "Sub-Topic" = "subtopic",
@@ -63,11 +69,11 @@ shinyUI(navbarPage(
               )
             ),
           radioButtons(
-            inputId = "visitor.success.units", 
-            label = "Display Unit", 
-            choices = c("Percent" = "percent", 
+            inputId = "visitor.success.units",
+            label = "Display Unit",
+            choices = c("Percent" = "percent",
                         "Number" = "number"),
-            selected = "percent", 
+            selected = "percent",
             inline = T
           ),
             # URL generator
@@ -84,9 +90,10 @@ shinyUI(navbarPage(
       )
     )
   ),
-  
+
   #### SUCCESS RATE ####
   tabPanel(title = "Success Rate",
+    fluidPage(
            fluidRow(column(6,
                            selectInput("pct.cutoffs", "View Top X% of Topics by Visits", pct.cutoffs, selected = 80)),
               radioButtons(
@@ -100,10 +107,9 @@ shinyUI(navbarPage(
            hr(),
            fluidRow(
              splitLayout(
-               cellWidths = c("50%", "50%"),
+               cellWidths = c("49%", "49%"),
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),
            plotlyOutput("topic.conversion.rate"))
 )))
-

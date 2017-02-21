@@ -112,4 +112,4 @@ shinyUI(navbarPage(
                plotlyOutput("topic.conversions"))),
            br(),
            plotlyOutput("topic.conversion.rate"))
-)))
+))))

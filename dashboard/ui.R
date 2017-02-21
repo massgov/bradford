@@ -46,8 +46,8 @@ shinyUI(navbarPage(
               choices = c("Site Section Landing" = SITE.SECTION,
                           "Topic" = TOPIC,
                           "Sub-Topic" = SUB.TOPIC,
-                          "Event Type" = "event_action",
-                          "Referrer" = "source",
+                          "Event Type" = EVENT.TYPE,
+                          "Referrer" = REFERRER,
                           "Page Type" = PAGE.TYPE),
               selected = "site_section",
               inline = F
@@ -59,8 +59,8 @@ shinyUI(navbarPage(
               selectInput(
                 inputId = "visitor.success.top.bottom",
                 label = NULL,
-                choices = c("Top" = "top",
-                            "Bottom" = "bottom"),
+                choices = c("Top" = TRUE,
+                            "Bottom" = FALSE),
                 selected = "top"
               ),
               numericInput(

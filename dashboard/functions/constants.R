@@ -1,7 +1,7 @@
 # Distinct Column
 PAGE.TYPE <- 'child_type'
 EVENT.TYPE <- 'action'
-REFERER <- "referer"
+REFERRER <- "referer"
 
 SERVICE.TYPE <- NULL
 

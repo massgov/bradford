@@ -25,9 +25,6 @@ paste("SELECT parent.content_type,
         drupal.node.descendants <<- . 
       }
 
-# Google analytics
-# perhaps the retults of this pipeline should be written to a table for easier access to source of record re: conversions?
-# Conversion logic not solid re: multiple conversion sessions and where in a session a conversion can occur
 
 paste("SELECT page_id,
           date,

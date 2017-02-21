@@ -87,7 +87,7 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
     reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
 }
-groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE){
+groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE, top.k = NULL, get.top.k = TRUE){
   
   # Returns dataframe grouped by group.col with data.col as a sum and ordered
   #   returned dataframe includes columns named total, cumul and group
@@ -105,9 +105,15 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
   if (top.pct > 1) {
     stop("top.pct cannot be > 1")
   }
+
+  if (top.pct < 1 & get.top.k == FALSE){
+    stop("filtering and taking from the bottom")
+  }
+ 
   if (class(df[[group.col]]) %in% c("factor", "character") == F) {
     stop("group.col must be character or factor")
   }
+  
   
   grouped.df = df %>% 
     dplyr::group_by_(.dots = group.col) %>% 
@@ -131,6 +137,20 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
     grouped.df$cumul = cumsum(grouped.df$total)
   }
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
+
+  if(is.null(top.k) == FALSE){
+
+    if (get.top.k){
+    
+    # Get top k
+    grouped.df = grouped.df %>% dplyr::slice(1:top.k)
+
+    }
+    else{
+
+      grouped.df = dplyr::arrange(., desc(-total)) %>% dplyr::slice(1:top.k)
+    }
+  }
 
   return(grouped.df)
 }

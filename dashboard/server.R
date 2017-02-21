@@ -1,10 +1,23 @@
 library(shiny)
 library(shinyURL)
+library(shinyjs)
 
 #options(shiny.trace = TRUE)
 
 shinyServer(function(input, output) {
   shinyURL.server()
+  useShinyjs()  # Include shinyjs
+
+   observe({
+     if (input$visitor.success.type == "service.type") {
+       shinyjs::hide(id = "advanced")
+     }else if(input$visitor.success.type == "all"){
+       shinyjs::hide(id = "advanced")
+     }else(
+       shinyjs::show(id = "advanced")
+       )
+   })
+
   #### VISITOR SUCCESS ####
   # DATA MUNGING
   # subset by timeseries start and end
@@ -104,6 +117,7 @@ shinyServer(function(input, output) {
 
   })
 
+
   # REACTIVE UI
   #   filter by type
   output$type.selection.options <- renderUI({
@@ -119,6 +133,7 @@ shinyServer(function(input, output) {
         return(NULL)
       }
     }
+
     selectInput(inputId = "visitor.success.type.selector",
                 label = "Filter By Type",
                 choices = c("all", unique.subtypes))
@@ -149,11 +164,14 @@ shinyServer(function(input, output) {
     if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
-    } else if (input$visitor.success.top.bottom == "top") {
-      slice.to = as.numeric(input$visitor.success.select.k)
+    }
+      slice.to = as.numeric(input$visitor.success.select.k)   
+    
+    if (input$visitor.success.top.bottom == "bottom") {
+      
 
       top.groups = visitor.success.aggregate.data() %>%
-        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
+        dplyr::arrange(n) %>%  # arrange low to high
         dplyr::slice(1:slice.to)
 
       visitor.success.aggregate.data() %>%
@@ -179,8 +197,10 @@ shinyServer(function(input, output) {
       slice.to = as.numeric(input$visitor.success.select.k)
 
       top.groups = visitor.success.aggregate.data() %>%
-        dplyr::arrange(n) %>%  # arrange low to high
+        dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
+      }
+       
 
       visitor.success.aggregate.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
@@ -198,11 +218,12 @@ shinyServer(function(input, output) {
                               y = "n",
                               ylab = "Count",
                               plot.title = "Success by Group")
+
           }
+
         } %>%
         printGGplotly(.)
-    }
-  })
+    })
 
   # grouped timeseries
   output$visitor.success.grouped.timeseries <- renderPlotly({
@@ -228,13 +249,13 @@ shinyServer(function(input, output) {
         printGGplotly(.)
     } else if (input$visitor.success.top.bottom == "top") {
       slice.to = as.numeric(input$visitor.success.select.k)
-      
+
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(dplyr::desc(n)) %>%  # arrange high to low
         dplyr::slice(1:slice.to)
-      
+
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -257,14 +278,14 @@ shinyServer(function(input, output) {
         printGGplotly(.)
     } else {
       slice.to = as.numeric(input$visitor.success.select.k)
-      
+
       top.groups = visitor.success.timeseries.data() %>%
         dplyr::group_by(group_factor) %>%
         dplyr::summarise(n = sum(n)) %>%
         dplyr::arrange(n) %>%  # arrange low to high
         dplyr::ungroup() %>%
         dplyr::slice(1:slice.to)
-      
+
       visitor.success.timeseries.data() %>%
         dplyr::filter(group_factor %in% top.groups$group_factor) %>%
         {
@@ -285,24 +306,26 @@ shinyServer(function(input, output) {
           }
         } %>%
         printGGplotly(.)
-      
+
     }
   })
-  
+
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({
+    
     grouped.sessions.conversions %>%
       dplyr::filter(., parent_type == 'Topic') %>%
       groupAndOrder(.,
                     group.col = 'parent_title',
                     data.col = 'conversions',
                     percent = input$success.rate.percent,
-                    top.pct = .8) %>%
+                    top.pct = (as.numeric(input$pct.cutoffs) / 100)) %>%
       buildParetoChart(grouped.df = .,
                        x.lab = 'Topics',
                        y.lab = 'Conversions',
-                       title = "Conversions on Top Topics",
-                       cumul.line = TRUE) %>%
+                       title = "Successes on Top Topics",
+                       cumul.line = TRUE,
+                       percent = input$success.rate.percent) %>%
       printGGplotly()
   })
 
@@ -315,28 +338,30 @@ shinyServer(function(input, output) {
                        c = sum(conversions),
                        s = sum(sessions)) %>%
       dplyr::arrange(., desc(s)) %>%
-      dplyr::filter(s > quantile(s, .2)) %>% # Top 80% based on sessions
+      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top 80% based on sessions
       ggplot(., aes(x = parent_title, y = conversion_rate)) +
       geom_bar(stat = 'identity') + theme_bw() +
       theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Conversion Rate for Top Topics')
+      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics')
 
     printGGplotly(plt)
   })
 
   output$topic.sessions <- renderPlotly({
+
     grouped.sessions.conversions %>%
       dplyr::filter(., parent_type == 'Topic') %>%
       groupAndOrder(.,
                     group.col = 'parent_title',
                     data.col = 'sessions',
                     percent = input$success.rate.percent,
-                    top.pct = .8) %>%
+                    top.pct = (as.numeric(input$pct.cutoffs) / 100)) %>%
       buildParetoChart(grouped.df = .,
                        x.lab = 'Topics',
                        y.lab = 'Sessions',
-                       title = "Sessions on Top Topics",
-                       cumul.line = TRUE) %>%
+                       title = "Visits on Top Topics",
+                       cumul.line = TRUE,
+                       percent = input$success.rate.percent) %>%
       printGGplotly()
   })
 })

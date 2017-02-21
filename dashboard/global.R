@@ -32,3 +32,5 @@ subtopic.ids <- readRDS(paste0(data.dir, "subtopic_node_ids.RDS"))
 # SUCCESS RATE
 grouped.sessions.conversions <- readRDS(paste0(data.dir,"grouped.sessions.conversions.RDS"))
 
+pct.cutoffs <- c(seq(60, 90, 10), seq(91, 100, 1))
+

@@ -89,3 +89,24 @@ test_that("groupAndOrder outputs the correct answer", {
                           total = c(.5, .25, .25), 
                           cumul = c(.50, .75, 1)))
 })
+
+test_that("getTopOrBottomK accepts correct input", {
+  test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
+                        b = c(1, 1, 1, 1), 
+                        c = c("A", "A", "B", "C"))
+  expect_error(getTopOrBottomK(df = test.df, group.col = "a", data.col = "b", k = 'd', get.top = TRUE))
+  expect_error(getTopOrBottomK(df = test.df, group.col = "a", data.col = "b", k = 4, get.top = 'test'))
+  expect_error(getTopOrBottomK(df = test.df, group.col = "a", data.col = "c", k = 4, get.top = FALSE))
+  expect_error(getTopOrBottomK(df = test.df, group.col = "b", data.col = "c", k = 4, get.top = FALSE))
+})
+
+test_that("getTopOrBottomK returns correct values", {
+  test.df <- data.frame(a = factor(c("A", "A", "B", "C","D","C")), 
+                        b = c(1, 1, 1, 1, 2, 4))
+  expect_equal(getTopOrBottomK(df = test.df, group.col = "a", data.col = "b", k = 1, get.top = TRUE), 
+               data.frame(a = c('C','C'), 
+                          b = c(1,4)))
+  #expect_error(getTopOrBottomK(df = test.df, group.col = "a", data.col = "b", k = 4, get.top = 'test'))
+  #expect_error(getTopOrBottomK(df = test.df, group.col = "a", data.col = "c", k = 4, get.top = FALSE))
+})
+

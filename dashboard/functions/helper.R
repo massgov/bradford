@@ -87,6 +87,52 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
     reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
 }
+
+getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
+
+  if (is.numeric(df[[data.col]]) == F) {
+    stop("data.col must be numeric")
+  }
+
+  if (class(df[[group.col]]) %in% c("factor", "character") == F) {
+    stop("group.col must be character or factor")
+  }
+  
+  if(class(k) != 'numeric'){
+    stop("k must be numeric")
+  }
+  if(class(get.top) != 'logical'){
+    stop("get top must be a boolean")
+  }
+
+ groups = df %>% dplyr::group_by_(group.col) %>%
+            dplyr::rename_(n = paste(data.col), group = paste(group.col)) %>%
+            dplyr::summarise(n = sum(n)) %>%
+            dplyr::arrange(dplyr::desc(n))
+ 
+ if(k > nrow(groups)){
+  
+   k = nrow(groups)
+   
+ }
+       if(get.top){
+         slice.from = 1
+         slice.to = k
+       } else{
+         slice.from = nrow(groups) - k + 1
+         slice.to = nrow(groups)
+       }
+ 
+  top.groups = groups %>% 
+                    dplyr::slice(slice.from:slice.to) %>%
+                    select(group) %>%
+                    unlist(.)
+  
+  # Return data frame with only certain columns
+  df[df[[group.col]] %in% top.groups,]
+
+}
+
 groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE, top.k = NULL, get.top.k = TRUE){
   
   # Returns dataframe grouped by group.col with data.col as a sum and ordered
@@ -136,7 +182,9 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
     grouped.df$total = grouped.df$total / data.total
     grouped.df$cumul = cumsum(grouped.df$total)
   }
+
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
+
 
   if(is.null(top.k) == FALSE){
 

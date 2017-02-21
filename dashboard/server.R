@@ -61,13 +61,13 @@ shinyServer(function(input, output) {
         }
         else{
 
-          filtered.df$group_factor = filtered.df[[renamed.cols]]
+          filtered.df$group_factor <- filtered.df[[renamed.cols]]
 
         }
         
       }
       
-      filtered.df %>%
+     filtered.df %>%
         dplyr::group_by(date, group_factor) %>%
         dplyr::summarise(conversions = sum(conversions)) %>%
         return(.)
@@ -172,23 +172,23 @@ shinyServer(function(input, output) {
       })
 
   # grouped timeseries
-  # output$visitor.success.grouped.timeseries <- renderPlotly({
+  output$visitor.success.grouped.timeseries <- renderPlotly({
   #   if (is.null(input$visitor.success.group.by)) {  # if we are grouping on nothing show the raw trend
-  #     visitor.success.timeseries.data() %>%
-  #     {
-  #       if (input$visitor.success.units == "percent") {
-  #         makeGroupedTimeseries(df = .,
-  #                               x = "hit_timestamp",
-  #                               y = "percent_success",
-  #                               fill = NULL)
-  #       } else {
-  #         makeGroupedTimeseries(df = .,
-  #                               x = "hit_timestamp",
-  #                               y = "n",
-  #                               fill = NULL)
-  #       }
-  #     } %>%
-  #         printGGplotly(.)
+      visitor.success.aggregate.data() %>%
+      {
+        if (input$visitor.success.units) {
+          makeGroupedTimeseries(df = .,
+                                x = CONVERSION.DATE,
+                                y = "percent_success",
+                                fill = 'group_factor')
+        } else {
+          makeGroupedTimeseries(df = .,
+                                x = CONVERSION.DATE,
+                                y = 'conversions',
+                                fill = 'group_factor')
+        }
+      } %>%
+          printGGplotly(.)})
   #   } else {
 
   #             slice.to = as.numeric(input$visitor.success.select.k)

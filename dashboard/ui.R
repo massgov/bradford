@@ -93,6 +93,7 @@ shinyUI(navbarPage(
 
   #### SUCCESS RATE ####
   tabPanel(title = "Success Rate",
+    fluidPage(
            fluidRow(column(6,
                            selectInput("pct.cutoffs","View Top X% of Topics by Visits",pct.cutoffs, selected = 80)),
               radioButtons(
@@ -106,7 +107,7 @@ shinyUI(navbarPage(
            hr(),
            fluidRow(
              splitLayout(
-               cellWidths = c("50%", "50%"),
+               cellWidths = c("49%", "49%"),
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),

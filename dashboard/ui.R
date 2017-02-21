@@ -1,6 +1,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinyURL)
+library(shinyjs)
 
 shinyUI(navbarPage(
   theme = "custom.css",
@@ -10,6 +11,7 @@ shinyUI(navbarPage(
   tabPanel(
     "Visitor Success",
     fluidPage(
+      useShinyjs(),  # Include shinyjs
       fluidRow(
         sidebarLayout(
           sidebarPanel(
@@ -20,19 +22,23 @@ shinyUI(navbarPage(
               end = yesterday,  # sourced from global.R
               startview = "month"
             ),
-            radioButtons(
-              inputId = "visitor.success.type",
-            label =  "Filter C1s",
-              choices = c("All" = "all",
-                          "Page Type" = "page.type",
-                          "Service Type" = "service.type",
-                          "Event Type" = "event.type"),
-              selected = "all",
-              inline = T
+            splitLayout(
+            cellWidths = c("50%", "50%"),
+              div(selectInput(
+                inputId = "visitor.success.type",
+                label =  "Filter C1s",
+                choices = c("All" = "all",
+                            "Page Type" = "page.type",
+                            "Service Type" = "service.type",
+                            "Event Type" = "event.type"),
+                selected = "all"
+              ),
+              br(),
+              br()),
+              shinyjs::hidden(div(
+                id = "advanced",
+                uiOutput("type.selection.options")))
             ),
-            uiOutput("type.selection.options"),
-          br(),
-          br(),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
             label = "Group By",
@@ -106,4 +112,4 @@ shinyUI(navbarPage(
                plotlyOutput("topic.conversions"))),
            br(),
            plotlyOutput("topic.conversion.rate"))
-))))
+)))

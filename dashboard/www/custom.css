@@ -256,3 +256,9 @@ input[type="checkbox"]:checked:before {
   padding-left: 6px;
   overflow: visible;
 }
+
+#topic\.conversions{
+  padding-left: 2px;
+  overflow-x: hidden;;
+  width: 80%;
+}

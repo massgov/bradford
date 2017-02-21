@@ -35,7 +35,7 @@ shinyUI(navbarPage(
           br(),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
-            label = "Group By", 
+            label = "Group By",
               choices = c("Site Section Landing" = "site_section",
                           "Topic" = "topic",
                           "Sub-Topic" = "subtopic",
@@ -63,11 +63,11 @@ shinyUI(navbarPage(
               )
             ),
           radioButtons(
-            inputId = "visitor.success.units", 
-            label = "Display Unit", 
-            choices = c("Percent" = "percent", 
+            inputId = "visitor.success.units",
+            label = "Display Unit",
+            choices = c("Percent" = "percent",
                         "Number" = "number"),
-            selected = "percent", 
+            selected = "percent",
             inline = T
           ),
             # URL generator
@@ -101,7 +101,7 @@ shinyUI(navbarPage(
            hr(),
            fluidRow(
              splitLayout(
-               cellWidths = c("50%", "50%"),
+               cellWidths = c("49%", "49%"),
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),

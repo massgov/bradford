@@ -88,7 +88,7 @@ shinyUI(navbarPage(
   #### SUCCESS RATE ####
   tabPanel(title = "Success Rate",
            fluidRow(column(6,
-                           selectInput("pct.cutoffs","View Top X% of Topics by Visits",pct.cutoffs, selected = 80)),
+                           selectInput("pct.cutoffs", "View Top X% of Topics by Visits", pct.cutoffs, selected = 80)),
               radioButtons(
              inputId = "success.rate.percent",
              label = "Select Unit",

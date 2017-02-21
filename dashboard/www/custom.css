@@ -161,7 +161,7 @@ input[type="checkbox"]:checked:before {
   background-color: #14558f;
   border-color: transparent;
   box-shadow: 0 0.25rem 0.5rem rgba(1, 1, 1, 0.25);
-  color: white; 
+  color: white;
   border-radius: 0; }
   .btn-default:hover {
     background-color: rgba(20, 85, 143, 0.75); }
@@ -170,7 +170,7 @@ input[type="checkbox"]:checked:before {
 .selectize-input{
   display: block;
   width: 100%;
-  height: auto; 
+  height: auto;
   padding: 8px 12px;
   font-size: 16px;
   line-height: 1.42857;
@@ -224,7 +224,7 @@ input[type="checkbox"]:checked:before {
 // }
 
 .dropdown-menu, .selectize-dropdown, .well,
-.datepicker table tr td, .datepicker table tr th, .datepicker table tr td span, 
+.datepicker table tr td, .datepicker table tr th, .datepicker table tr td span,
 .input-daterange input:first-child, .input-daterange input:last-child,
 .pagination>li:first-child>a, .pagination>li:last-child>a
 {
@@ -243,4 +243,22 @@ input[type="checkbox"]:checked:before {
 
 .checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
     margin: 0 10px 0 0;
+}
+
+.g-ytitle{
+  transform: translate(5px,0);
+-ms-transform: translate(5px,0);
+-webkit-transform: translate(5px,0)
+-moz-transform: translate(5px,0);
+}
+
+.js-plotly-plot .plotly .main-svg {
+  padding-left: 6px;
+  overflow: visible;
+}
+
+#topic\.conversions{
+  padding-left: 2px;
+  overflow-x: hidden;;
+  width: 80%;
 }

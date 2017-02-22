@@ -219,8 +219,8 @@ shinyServer(function(input, output) {
 
   output$topic.conversion.rate <- renderPlotly({
     plt = topic.conversions %>% 
-            dplyr::inner_join(., topic.sessions) %>%
-            dplyr::mutate(conversion_rate = round(conversions / sessions,1) * 100) %>%   
+            dplyr::inner_join(., topic.sessions,by = "topic_title") %>%
+            dplyr::mutate(conversion_rate = round(conversions / sessions,3)) %>%   
             dplyr::arrange(., desc(sessions)) %>%
             dplyr::filter(sessions > quantile(sessions, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
             ggplot(., aes_string(x = RATE.GROUP.COL, y = 'conversion_rate')) +

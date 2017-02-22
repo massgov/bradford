@@ -2,7 +2,7 @@ library(testthat)
 library(methods)
 source("../functions/helper.R")
 
-context("Helper functions")
+context("helper functions within dashboard/functions/helper.R")
 
 test_that("factorPercentage fails on incorrect input", {
   factor.vec <- factor(c("cats", "cats", "dogs", "rabbits"))
@@ -69,24 +69,4 @@ test_that("flagIncompleteTimeperiod outputs the correct answer", {
   flag.vector <- seq.Date(from = from, to = to, by = "day")
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "week")))
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "day")))
-})
-
-
-test_that("groupAndOrder errors on incorrect input", {
-  test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
-                        b = c(1, 1, 1, 1), 
-                        c = c("A", "A", "B", "C"))
-  expect_error(groupAndOrder(df = test.df, group.col = "a", data.col = "c"))
-  expect_error(groupAndOrder(df = test.df, group.col = "b", data.col = "b"))
-  expect_error(groupAndOrder(df = test.df, group.col = "a", data.col = "b", top.pct = 2))
-})
-
-test_that("groupAndOrder outputs the correct answer", {
-  test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
-                        b = c(1, 1, 1, 1), 
-                        c = c("A", "A", "B", "C"))
-  expect_equal(groupAndOrder(df = test.df, group.col = "a", data.col = "b", top.pct = 1), 
-               data.frame(group = factor(c("A", "B", "C")), 
-                          total = c(.5, .25, .25), 
-                          cumul = c(.50, .75, 1)))
 })

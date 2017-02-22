@@ -1,5 +1,7 @@
 library(magrittr)
 library(RGoogleAnalytics)
+library(ggplot2)
+library(plotly)
 
 # TODO: 1. investigate source of NA values after joins.
 #          Seems like some sessions have nothing associated with them except their session ID. These
@@ -22,7 +24,7 @@ ga.dims.user <- c("ga:dimension1", "ga:medium", "ga:deviceCategory", "ga:operati
 ga.metrics.user <- c("ga:sessionDuration")
 
 start.date <- "2016-12-14"
-end.date <-  as.character(lubridate::ymd(Sys.Date()))
+end.date <- "2016-12-28"
 
 # authorize with GA
 load("data/GA_token/pilot_token")
@@ -45,7 +47,7 @@ ga.master.sessions <- RGoogleAnalytics::Init(start.date = start.date,
                                            max.results = 99999,
                                            table.id = "ga:132193522") %>%
   RGoogleAnalytics::QueryBuilder() %>%
-  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = T)
+  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = F)
 
 ga.master.user <- RGoogleAnalytics::Init(start.date = start.date,
                                             end.date = end.date,

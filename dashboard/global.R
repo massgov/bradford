@@ -3,34 +3,50 @@ library(magrittr)
 library(ggplot2)
 library(plotly)
 
-data.dir <- "data/"
+DATA.DIR <- "data/"
 
 source("functions/read_data.R")
 source("functions/make_plots.R")
 source("functions/helper.R")
 
-# set the scientific notation
+# color blind palette
+cb.palette <- c("#999999",
+                "#E69F00",
+                "#56B4E9",
+                "#009E73",
+                "#F0E442",
+                "#0072B2",
+                "#D55E00",
+                "#CC79A7")
 
 options(scipen = 10000000)
 
-yesterday <- as.character(lubridate::today(tzone = "America/New_York") - lubridate::days(1))
-
 #### READ IN DATA ####
-# VISITOR SUCCESS
-# Node descendants
-drupal.node.descendants <- readRDS(paste0(data.dir, "drupal_node_descendants.RDS"))
+# User Satisfaction
+formstack.master <- readRDS(paste0(DATA.DIR, "formstack_master.RDS"))
+
+referrer.breakouts.monthly <- readRDS(paste0(DATA.DIR, "referrer.breakouts.monthly.RDS"))
+
+referrer.summary.monthly <- readRDS(paste0(DATA.DIR, "referrer.summary.monthly.RDS"))
+
+global.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.summary",
+                                      gsub.pattern = ".RDS")
+
+site.summary.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.summary",
+                                    gsub.pattern = ".RDS")
+
+global.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^global.breakouts",
+                                       gsub.pattern = ".RDS")
+
+site.breakout.frames <- readIntoList(data.dir = DATA.DIR, pattern = "^site.breakouts",
+                                     gsub.pattern = ".RDS")
 
 # Converions
-ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS"))
+ga.conversions <- readRDS(paste0(DATA.DIR, "ga_master_conversions.RDS"))
 
-# node id join tables
-section.landing.ids <- readRDS(paste0(data.dir, "section_landing_node_ids.RDS"))
+conversion.metrics <- readRDS(paste0(DATA.DIR, "no_conversion_metrics.RDS"))
 
-topic.ids <- readRDS(paste0(data.dir, "topic_node_ids.RDS"))
+# Funnel Performance
+ga.path.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_path_hashes_top_20.RDS"))
 
-subtopic.ids <- readRDS(paste0(data.dir, "subtopic_node_ids.RDS"))
-
-# SUCCESS RATE
-grouped.sessions.conversions <- readRDS(paste0(data.dir,"grouped.sessions.conversions.RDS"))
-
-pct.cutoffs <- c(seq(60, 90, 10), seq(91, 100, 1))
+ga.session.hashes.top20 <- readRDS(paste0(DATA.DIR, "ga_session_hashes_top_20.RDS"))

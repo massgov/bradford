@@ -159,6 +159,7 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1,
   }
  
   if (class(df[[group.col]]) %in% c("factor", "character") == F) {
+    print(group.col)
     stop("group.col must be character or factor")
   }
   

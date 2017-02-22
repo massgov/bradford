@@ -25,8 +25,7 @@ GROUP BY
 
 -- SELECT sum(conversions) FROM conversions == SELECT count(*) FROM ga_events, there might be some differences for dates
 
-SELECT s.session_id, 
-       s.node_id, 
+SELECT s.node_id as page_id, 
        count(s.node_id) / cast(totals.total_views as FLOAT) as sessions,
        min(cast(s.hit_timestamp + INTERVAL '1 hour' * s.offset_h as DATE)) as date,
        feature.medium, 
@@ -41,7 +40,7 @@ FROM ga_session as s
 INNER JOIN (SELECT session_id, count(*) as total_views FROM ga_session GROUP BY session_id) as totals ON totals.session_id = s.session_id
 LEFT OUTER JOIN ga_session_features AS feature ON s.session_id = feature.session_id
 LEFT OUTER JOIN drupal_nodes AS node_info ON node_info.node_id = s.node_id
-GROUP BY s.session_id, s.node_id, 
+GROUP BY s.node_id, 
         totals.total_views, node_info.content_type, node_info.title,
         feature.medium, feature.device_category, feature.operating_system, feature.source, feature.browser
 

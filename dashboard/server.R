@@ -100,7 +100,18 @@ shinyServer(function(input, output) {
       paste("vs-timeseries-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
-      readr::write_csv(visitor.success.timeseries.data(), file)
+      visitor.success.aggregate.data() %>%
+        
+        getTopOrBottomK(., 
+                        group.col = 'group_factor',
+                        data.col = 'conversions',
+                        k = as.numeric(input$visitor.success.select.k),
+                        get.top = input$visitor.success.top.bottom) %>%
+        dplyr::group_by(date) %>% 
+        dplyr::mutate(day_pct = conversions / sum(conversions)) %>%
+        dplyr::ungroup() %>%
+
+      readr::write_csv(., file)
     }
   )
 
@@ -109,7 +120,16 @@ shinyServer(function(input, output) {
       paste("vs-aggregate-", lubridate::today(tzone = "America/New_York"), ".csv", sep = "")
     },
     content = function(file) {
-      readr::write_csv(visitor.success.aggregate.data(), file)
+      
+      visitor.success.aggregate.data() %>%
+          groupAndOrder(.,
+                        group.col = 'group_factor',
+                        data.col = 'conversions',
+                        percent = input$visitor.success.units,
+                        top.k = as.numeric(input$visitor.success.select.k),
+                        get.top.k = input$visitor.success.top.bottom,
+                        filter.na = FALSE) %>%
+          readr::write_csv(., file)
     }
   )
 
@@ -182,9 +202,7 @@ shinyServer(function(input, output) {
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({
     
-    ga.conversions %>%
-
-      dplyr::filter(., parent_type == 'Topic') %>%
+    topic.conversions %>%
       groupAndOrder(.,
                     group.col = RATE.GROUP.COL,
                     data.col = 'conversions',
@@ -200,29 +218,24 @@ shinyServer(function(input, output) {
   })
 
   output$topic.conversion.rate <- renderPlotly({
-    plt = grouped.sessions.conversions %>%
-      dplyr::filter(., parent_type == 'Topic') %>%
-      dplyr::group_by(parent_title) %>%
-      dplyr::summarise(.,
-                       conversion_rate = round(sum(conversions) / sum(sessions), 1),
-                       c = sum(conversions),
-                       s = sum(sessions)) %>%
-      dplyr::arrange(., desc(s)) %>%
-      dplyr::filter(s > quantile(s, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
-      ggplot(., aes(x = parent_title, y = conversion_rate)) +
-      geom_bar(stat = 'identity') + 
-      theme_bw() +
-      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-      labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics') + 
-      scale_y_continuous(labels=scales::percent)
+    plt = topic.conversions %>% 
+            dplyr::inner_join(., topic.sessions) %>%
+            dplyr::mutate(conversion_rate = round(conversions / sessions,1) * 100) %>%   
+            dplyr::arrange(., desc(sessions)) %>%
+            dplyr::filter(sessions > quantile(sessions, 1 - (as.numeric(input$pct.cutoffs) / 100))) %>% # Top X% based on sessions
+            ggplot(., aes_string(x = RATE.GROUP.COL, y = 'conversion_rate')) +
+            geom_bar(stat = 'identity') + 
+            theme_bw() +
+            theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+            labs(x = 'Topics', y = 'Conversion Rate (%)', title = 'Success Rate for Top Topics') + 
+            scale_y_continuous(labels=scales::percent)
 
     printGGplotly(plt)
   })
 
   output$topic.sessions <- renderPlotly({
 
-    grouped.sessions.conversions %>%
-      dplyr::filter(., parent_type == 'Topic') %>%
+    topic.sessions %>%
       groupAndOrder(.,
                     group.col = RATE.GROUP.COL,
                     data.col = 'sessions',

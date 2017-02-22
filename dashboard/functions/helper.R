@@ -11,7 +11,7 @@ factorPercentage <- function(factor.vec = "", factor.value = "") {
   # Returns:
   #   a scalar in percentage points
   if (!is.factor(factor.vec)) {
-   stop("factor.vec must be of class factor!")
+    stop("factor.vec must be of class factor!")
   }
   if (factor.value %in% factor.vec == F) {
     stop("factor level not found in vector")
@@ -75,7 +75,6 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
   #   time.unit = the unit arg to floor_date, the period to floor the reference.vector to
   # Returns:
   #   a vector of booleans indicating which entries are part of a complete time period (TRUE)
-  now = lubridate::now()
   if (!lubridate::is.Date(reference.vector) & !lubridate::is.POSIXct(reference.vector)) {
     stop("reference.vector must be of class date or POSIXct!")
   }
@@ -85,6 +84,55 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
   if (time.unit == "day") {
     reference.vector > lubridate::floor_date(now, unit = time.unit)
   } else {
-   reference.vector >= lubridate::floor_date(now, unit = time.unit)
+
+    reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
+}
+groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE){
+  
+  # Returns dataframe grouped by group.col with data.col as a sum and ordered
+  #   returned dataframe includes columns named total, cumul and group
+  # Args:
+  #   df = dataframe
+  #   group.col = column that will be grouped along x-axis
+  #   data.col = numeric column
+  #   percent = boolean indicating whether total should be a percentage or not
+  #   top.pct = a numeric which filters all entries in total <= top.pct
+  
+  # guardrails
+  if (is.numeric(df[[data.col]]) == F) {
+    stop("data.col must be numeric")
+  } 
+  if (top.pct > 1) {
+    stop("top.pct cannot be > 1")
+  }
+  if (class(df[[group.col]]) %in% c("factor", "character") == F) {
+    stop("group.col must be character or factor")
+  }
+  
+  grouped.df = df %>% 
+    dplyr::group_by_(.dots = group.col) %>% 
+    dplyr::summarise_(total = paste('sum( ', data.col,")")) %>%
+    dplyr::arrange(., desc(total)) %>% 
+    dplyr::rename_(group = paste(group.col)) %>% 
+    {
+      if (filter.na) {
+        dplyr::filter(., ifelse(is.na(group), F, T))  # filter nas if filter.na is true
+      } else {
+        return(.)
+      }
+    }
+  
+  # Make cumulative column
+  grouped.df$cumul <- cumsum(grouped.df$total)
+  
+  if(percent){
+    data.total = sum(grouped.df$total)
+    grouped.df$total = grouped.df$total / data.total
+    grouped.df$cumul = cumsum(grouped.df$total)
+  }
+  grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
+
+  return(grouped.df)
+
 }

@@ -1,17 +1,27 @@
 #!/bin/bash
+
+# **** IMPORTANT ****
+# this is meant as a setup script for aws ubuntu ec2 instances, not as a local setup script
+# In order for the setup script to work you must follow these steps:
+# 1. install the aws cli, ie pip install awscli
+# 2. configure the cli with an id and secret which has access to the mass.gov-analytics bucket
+# 3. clone the repo into the home directory of the server you want to set up
+# 4. run this script
+
 # Add new R CRAN
-echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" | sudo tee -a /etc/apt/sources.list
+echo "deb http://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee -a /etc/apt/sources.list
 
 # add key for r-base download
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 
 # Add ssl reference for install
-sudo echo "deb http://security.ubuntu.com/ubuntu lucid-security main" >> /etc/apt/sources.list
+sudo echo "deb http://security.ubuntu.com/ubuntu xenial-security main" >> /etc/apt/sources.list
 
 # Update and upgrade system
-sudo apt-get -y update
-sudo apt-get -y dist-upgrade
+sudo apt -y update
+sudo apt -y dist-upgrade
 
+# install packages both for linux and R
 declare -a ubuntu_packages=('r-base'
                             'r-cran-xml'
                             'libcurl4-gnutls-dev'
@@ -27,22 +37,8 @@ declare -a ubuntu_packages=('r-base'
                             'r-cran-slam'
                             )
 for package_name in ${ubuntu_packages[@]}; do
-  sudo apt-get install -y $package_name
+  sudo apt install -y $package_name
 done
-
-# get and install shiny-server
-wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
-sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
-
-# get pip and the aws-cli
-curl -O https://bootstrap.pypa.io/get-pip.py
-sudo python get-pip.py
-rm get-pip.py
-pip install awscli 
-
-# get the necessary data from s3
-sudo mkdir ~/bradford/dashboard/data/
-sudo aws s3 sync s3://mass.gov-analytics/dashboards/bradford/data ~/bradford/dashboard/data/
 
 # Install packages
 declare -a packages=('shiny'
@@ -63,15 +59,34 @@ declare -a packages=('shiny'
                      'purrr'
                      'lubridate'
                      'shinydashboard'
+                     'BreakoutDetection'
+                     'devtools'
+                     'readr'
+                     'shinyjs'
                      )
 
-for package_name in "${packages[@]}"; do
+for package_name in ${packages[@]}; do
   sudo su - -c "R -e \"install.packages('$package_name', repos='https://cran.rstudio.com/', dependencies = TRUE)\""
 done
 
-# restart the server
-sudo systemctl restart shiny-server
+declare -a git_packages=('aoles/shinyURL')
 
+for package_name in ${git_packages[@]}; do
+  sudo su - -c "R -e \"devtools::install_github('$package_name')\""
+done
+
+# get and install shiny-server
+wget -O ~/shiny-server-1.5.1.834-amd64.deb https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.5.1.834-amd64.deb
+sudo gdebi --non-interactive ~/shiny-server-1.5.1.834-amd64.deb
+
+# get the necessary data from s3'
+sudo mkdir ~/bradford/dashboard/data/
+sudo aws s3 cp s3://mass.gov-analytics/dashboards/bradford/query_creds/db_connect.R ~/bradford/dashboard/get_data/
+
+# run the query
+Rscript ~/bradford/dashboard/get_data/query.R
+
+# create the bradford app dir
 sudo mkdir /srv/shiny-server/bradford
 
 # move the dashboard to the shiny-server directory

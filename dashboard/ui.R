@@ -1,79 +1,17 @@
 library(shiny)
 library(shinydashboard)
+library(shinyURL)
+library(shinyjs)
 
 shinyUI(navbarPage(
+  theme = "custom.css",
   # Application title
-  title = "Bradford Test Dash",
-  #### HOME ####
-  tabPanel("Home",
-           fluidRow(
-             selectInput(
-               "global.slot.number.home",
-               "Time Frame:",
-               c(
-                 "Weekly" = 2,
-                 "Monthly" = 1
-                 ),
-               selected = 2
-             ),
-             splitLayout(
-               cellWidths = c("25%", "25%", "25%", "25%"),
-               valueBoxOutput("user.satisfaction.total"),
-               valueBoxOutput("conversions.valuebox.home"),
-               valueBoxOutput("home.client.count.valuebox"),
-               valueBoxOutput("home.session.count.valuebox")
-             ),
-               #put a plot re: conversions over time here
-             plotlyOutput("formstack.response.plot.global.home"),
-             splitLayout(
-               cellWidths = c("50%", "50%"),
-               plotlyOutput("formstack.volume.plot.global.area"),
-               plotlyOutput("formstack.volume.plot.home.bar")
-             )
-           )),
-  #### USER SATISFACTION ####
-  tabPanel("User Satisfaction",
-           fluidRow(
-             splitLayout(
-               cellWidths = c("50%", "50%"),
-               selectInput(
-                 "exec.slot.number",
-                 "Time Frame:",
-                 c("Weekly" = 2,
-                   "Monthly" = 1),
-                 selected = 2
-               ),
-               selectInput(
-                 "exec.funnel.name",
-                 "Funnel:",
-                 c(
-                   "All" = "show.all",
-                   "Admin and Finance" = "anf",
-                   "Courts" = "courts",
-                   "Dept of Revenue" = "dor",
-                   "Education" = "edu"
-                 ),
-                 selected = "show.all"
-               )
-             ),
-             splitLayout(
-               cellWidths = c("25%", "25%", "25%", "25%"),
-               valueBoxOutput("user.satisfaction.funnel"),
-               valueBoxOutput("mean.submission.formstack")
-               ),
-             plotlyOutput("formstack.response.plot.exec"),
-             splitLayout(
-               cellWidths = c("50%", "30%", "18%"),
-               plotlyOutput("formstack.volume.plot.exec.endpoints"),
-               plotlyOutput("formstack.os.plot.exec"),
-               plotlyOutput("formstack.affirmative.plot.exec")
-             )
-           )),
-  #### CONVERSIONS ####
-  tabPanel("Conversions",
-    fluidRow(
-      splitLayout(
-        cellWidths = c("50%", "50%"),
+  title = "KPI Dashboard",
+  #### VISITOR SUCCESS ####
+  tabPanel(
+    "Visitor Success",
+    fluidPage(
+      useShinyjs(),  # Include shinyjs
         selectInput(
           "conversion.time.window",
           "Time Frame:",
@@ -156,40 +94,103 @@ shinyUI(navbarPage(
     tabPanel(
       "User Satisfaction",
       fluidRow(
-        splitLayout(
-          cellWidths = c("50%", "50%"),
-          selectInput(
-            "funnel.slot.number",
-            "Time Frame:",
-            c("Weekly" = 2,
-              "Monthly" = 1),
-            selected = 2
-          ),
-          selectInput(
-            "funnel.name",
-            "Funnel:",
-            c(
-              "All" = "show.all",
-              "Admin and Finance" = "anf",
-              "Courts" = "courts",
-              "Dept of Revenue" = "dor",
-              "Education" = "edu"
+        sidebarLayout(
+          sidebarPanel(
+            dateRangeInput(
+              inputId = "visitor.success.daterange",
+              label = "Select a Date Range",
+              start = "2017-01-01",
+              end = yesterday,  # sourced from global.R
+              startview = "month"
             ),
-            selected = "show.all"
+            splitLayout(
+            cellWidths = c("50%", "50%"),
+              div(selectInput(
+                inputId = "visitor.success.type",
+                label =  "Filter C1s",
+                choices = c("All" = "all",
+                            "Page Type" = "page.type",
+                            "Service Type" = "service.type",
+                            "Event Type" = "event.type"),
+                selected = "all"
+              ),
+              br(),
+              br()),
+              shinyjs::hidden(div(
+                id = "advanced",
+                uiOutput("type.selection.options")))
+            ),
+            checkboxGroupInput(
+              inputId = "visitor.success.group.by",
+            label = "Group By",
+              choices = c("Site Section Landing" = "site_section",
+                          "Topic" = "topic",
+                          "Sub-Topic" = "subtopic",
+                          "Event Type" = "event_action",
+                          "Referrer" = "source",
+                          "Page Type" = "content_type"),
+              selected = "site_section",
+              inline = F
+            ),
+            splitLayout(
+              cellWidths = c("50%", "50%"),
+              selectInput(
+                inputId = "visitor.success.top.bottom",
+              label = "Limit groups displayed to",
+                choices = c("Top" = "top",
+                            "Bottom" = "bottom"),
+                selected = "top"
+              ),
+              numericInput(
+                inputId = "visitor.success.select.k",
+              label = br(),
+                value = 5,
+                min = 1,
+                max = 5
+              )
+            ),
+          radioButtons(
+            inputId = "visitor.success.units",
+            label = "Display Unit",
+            choices = c("Percent" = "percent",
+                        "Number" = "number"),
+            selected = "percent",
+            inline = T
+          ),
+            # URL generator
+            shinyURL.ui(display = T, copyURL = T, tinyURL = T)
+          ),
+          mainPanel(
+            plotlyOutput("visitor.success.grouped.pareto"),
+            downloadButton("visitor.success.download.aggregate", "Download Plot Data"),
+            br(),
+            plotlyOutput("visitor.success.grouped.timeseries"),
+            downloadButton("visitor.success.download.timeseries", "Download Plot Data")
           )
-        ),
-        plotlyOutput("formstack.response.plot.funnels"),
-        plotlyOutput("formstack.volume.plot.funnel.bar"),
-        splitLayout(
-          cellWidths = c("50%", "30%", "18%"),
-          plotlyOutput("formstack.volume.plot.funnel.endpoints"),
-          plotlyOutput("formstack.os.plot.funnel"),
-          plotlyOutput("formstack.affirmative.plot.funnel")
-        ),
-        br(),
-        dataTableOutput("formstack.table.funnel")
+        )
       )
     )
-  )
-))
+  ),
 
+  #### SUCCESS RATE ####
+  tabPanel(title = "Success Rate",
+    fluidPage(
+           fluidRow(column(6,
+                           selectInput("pct.cutoffs", "View Top X% of Topics by Visits", pct.cutoffs, selected = 80)),
+              radioButtons(
+             inputId = "success.rate.percent",
+             label = "Select Unit",
+             choices = c("Percent" = TRUE,
+                         "Number" = FALSE),
+             selected = FALSE,
+             inline = T
+           ),
+           hr(),
+           fluidRow(
+             splitLayout(
+               cellWidths = c("49%", "49%"),
+               plotlyOutput("topic.sessions"),
+               plotlyOutput("topic.conversions"))),
+           br(),
+           plotlyOutput("topic.conversion.rate"))
+))))

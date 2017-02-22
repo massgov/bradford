@@ -47,7 +47,7 @@ ga.master.sessions <- RGoogleAnalytics::Init(start.date = start.date,
                                              max.results = 99999,
                                              table.id = "ga:132193522") %>%
   RGoogleAnalytics::QueryBuilder() %>%
-  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = F)
+  RGoogleAnalytics::GetReportData(token = token, split_daywise = F, paginate_query = T)
 
 ga.master.user <- RGoogleAnalytics::Init(start.date = start.date,
                                          end.date = end.date,
@@ -66,7 +66,7 @@ ga.conversion <- ga.master.events %>%
 ga.master.conversion <- ga.master.sessions %>%
   dplyr::group_by(dimension1) %>%  # group by session ID
   dplyr::mutate(hit_time_utc = lubridate::ymd_hms(dimension2)) %>%
-  dplyr::filter(hit_time_utc == max(hit_time_utc)) %>%
+  dplyr::filter(hit_time_utc == max(hit_time_utc)) %>%  # take the last page in each session
   dplyr::full_join(ga.master.user, by = "dimension1") %>%
   dplyr::full_join(ga.conversion, by = "dimension1") %>%
   dplyr::rename(sessionID = dimension1,  # naming which does not comply with style
@@ -119,4 +119,5 @@ saveRDS(ga.master.events, "dashboard/data/ga_master_events.RDS")
 saveRDS(ga.path.hashes.top20, "dashboard/data/ga_path_hashes_top_20.RDS")
 saveRDS(ga.session.hashes.top20, "dashboard/data/ga_session_hashes_top_20.RDS")
 
-system(command = "aws s3 sync dashboard/data/ s3://mass.gov-analytics/dashboards/bradford/data")
+# TODO add config for s3 bucket URI
+system(command = "aws s3 sync ~/Documents/GitHub/bradford/dashboard/data/ s3://mass.gov-analytics/dashboards/bradford/data")

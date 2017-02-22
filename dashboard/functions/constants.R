@@ -17,4 +17,5 @@ CONVERSION.TABLE <- 'conversions'
 CONVERSION.DATE <- 'date'
 
 PARENT.TYPE <- 'content_type'
+RATE.GROUP.COL <- 'topic_title'
 

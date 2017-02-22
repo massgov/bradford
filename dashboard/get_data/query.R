@@ -48,7 +48,18 @@ paste("SELECT page_id,
       saveRDS(., "../data/ga_master_conversions.RDS")
       ga.conversions <<- .
   }
-
+paste("SELECT title as topic_title,
+       sum(conversions) as conversions
+  FROM conversions as c
+  INNER JOIN drupal_node_descendants_new as des ON c.page_id = des.descendant_id
+  INNER JOIN drupal_nodes as parents ON des.node_id = parents.node_id
+  WHERE parents.content_type = 'Topic'
+  GROUP BY title") %>%
+  RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
+  {
+      saveRDS(., "../data/topic_conversions.RDS")
+      topic.conversions <<- .
+  }
 # Macro View query
 c("SELECT parent_info.content_type as parent_type,
    parent_info.title as parent_title,

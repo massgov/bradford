@@ -186,7 +186,7 @@ shinyServer(function(input, output) {
 
       dplyr::filter(., parent_type == 'Topic') %>%
       groupAndOrder(.,
-                    group.col = 'parent_title',
+                    group.col = RATE.GROUP.COL,
                     data.col = 'conversions',
                     percent = input$success.rate.percent,
                     top.pct = (as.numeric(input$pct.cutoffs) / 100)) %>%
@@ -224,7 +224,7 @@ shinyServer(function(input, output) {
     grouped.sessions.conversions %>%
       dplyr::filter(., parent_type == 'Topic') %>%
       groupAndOrder(.,
-                    group.col = 'parent_title',
+                    group.col = RATE.GROUP.COL,
                     data.col = 'sessions',
                     percent = input$success.rate.percent,
                     top.pct = (as.numeric(input$pct.cutoffs) / 100)) %>%

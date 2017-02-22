@@ -25,29 +25,6 @@ paste("SELECT parent.content_type,
         drupal.node.descendants <<- . 
       }
 
-
-paste("SELECT page_id,
-          date,
-          action,
-          category,
-          child_type,
-          child_title,",
-          REFERER,",",
-          "sum(conversions) as conversions
-          FROM ", CONVERSION.TABLE,
-          "GROUP BY 
-          page_id,
-          date,
-          child_title,
-          child_type,
-          action,
-          category,",
-          REFERER) %>%
-  RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  {
-      saveRDS(., "../data/ga_master_conversions.RDS")
-      ga.conversions <<- .
-  }
 paste("SELECT title as topic_title,
        sum(conversions) as conversions
   FROM conversions as c

@@ -27,5 +27,5 @@ ga.conversions <- readRDS(paste0(data.dir, "ga_master_conversions.RDS"))
 topic.conversions <- readRDS(paste0(data.dir,"topic_conversions.RDS"))
 topic.sessions <- readRDS(paste0(data.dir,"topic_sessions.RDS"))
 
-pct.cutoffs <- c(seq(60,90,10),seq(91,100,1))
+pct.cutoffs <- c(seq(10,90,10),seq(91,100,1))
 

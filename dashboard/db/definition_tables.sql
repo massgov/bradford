@@ -1,27 +1,32 @@
-SELECT
-        e.event_action as action,
-        e.event_category as category,
-        des_info.node_id as page_id,
-        des_info.content_type as child_type,
-        des_info.title as child_title,
-        concat(features.medium,'-',features.source) as referer,
-        cast(s.hit_timestamp + INTERVAL '1 hour' * s.offset_h as DATE) AS date,
-        count(DISTINCT e.session_id) AS conversions
- INTO conversions
- FROM ga_events AS e
- LEFT OUTER JOIN ga_session as s ON e.session_id = s.session_id AND e.page_path = s.page_path
- LEFT OUTER JOIN ga_session_features as features ON e.session_id = features.session_id
- LEFT OUTER JOIN drupal_nodes AS des_info ON replace(des_info.node_path, 'https://pilot.mass.gov', '') = e.page_path
-GROUP BY
-  e.event_action,
-  e.event_category,
-  e.page_path,
-  des_info.node_id,
-  des_info.content_type,
-  des_info.title,
-  cast(s.hit_timestamp + INTERVAL '1 hour' * s.offset_h as DATE),
-  features.medium,
-  features.source)
+SELECT cast(maxes.hit_timestamp + INTERVAL '1 hour' * maxes.offset_h as DATE) AS date,
+               concat(features.medium,'-',features.source) as referer,
+               des_info.node_id as page_id,
+               des_info.content_type as child_type,
+               des_info.title as child_title,
+               e.event_action as action,
+               e.event_category as category,
+               count(*) as conversions
+        INTO conversions
+        FROM (SELECT session_id,
+                     s.node_id,
+                     hit_timestamp,
+                     s.offset_h,
+                     s.page_path,
+                     max(hit_timestamp) OVER (PARTITION BY session_id ORDER BY hit_timestamp DESC) as max
+               FROM ga_session as s) AS maxes
+         LEFT OUTER JOIN ga_events AS e ON e.page_path = maxes.page_path AND e.session_id = maxes.session_id
+         LEFT OUTER JOIN ga_session_features as features ON maxes.session_id = features.session_id
+         LEFT OUTER JOIN drupal_nodes AS des_info ON replace(des_info.node_path, 'https://pilot.mass.gov', '') = maxes.page_path
+         WHERE maxes.max = maxes.hit_timestamp AND event_action IN ('FileDownload','Phone Number Link','QuickAction','Email Link')
+         GROUP BY e.event_action,
+                e.event_category,
+                e.page_path,
+                des_info.node_id,
+                des_info.content_type,
+                des_info.title,
+                cast(maxes.hit_timestamp + INTERVAL '1 hour' * maxes.offset_h as DATE),
+                features.medium,
+                features.source
 
 -- SELECT sum(conversions) FROM conversions == SELECT count(*) FROM ga_events, there might be some differences for dates
 

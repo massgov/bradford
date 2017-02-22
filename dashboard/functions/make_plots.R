@@ -32,6 +32,7 @@ makeBreakoutPlot <- function(df, breakouts, x, y, plot.title = "") {
   #   plot.title = atomic character or factor vector which will be the plot title
   # Returns:
   #   a ggplot object
+
   if (nrow(df) == 0) {
     makeBlankPlot()
   } else {
@@ -73,11 +74,13 @@ makeVolumeAreaPlot <- function(df, x, y, fill, plot.title = "", xlab = "", ylab 
   #   ylab = atomic character or factor vector which will be the y axis label
   # Returns:
   #   a ggplot object
+
   if (nrow(df) == 0) {
     makeBlankPlot()
   } else {
     df %>%
       ggplot(aes_string(x = x, y = y, fill = fill)) +
+
       geom_area() +
       theme_bw() +
       theme(legend.position = "none") +
@@ -215,6 +218,7 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
 
 
 #### PLOT HELPERS ####
+
 padXlim <- function(plot.item.count, item.limit = 4,  offset = .5) {
   # conditional logic function to pad xlim values in ggplot plot object creation
   # Args:

@@ -12,6 +12,87 @@ shinyUI(navbarPage(
     "Visitor Success",
     fluidPage(
       useShinyjs(),  # Include shinyjs
+        selectInput(
+          "conversion.time.window",
+          "Time Frame:",
+          c("Daily" = "day",
+            "Weekly" = "week",
+            "Monthly" = "month"
+            )
+        )
+      ),
+      splitLayout(
+        cellWidths = c("25%", "25%", "25%", "25%"),
+        valueBoxOutput("conversions.valuebox"),
+        valueBoxOutput("session.count.valuebox"),
+        valueBoxOutput("conversions.client.count.valuebox")
+        ),
+      plotlyOutput("conversion.timeseries.plot"),
+      splitLayout(
+        cellWidths = c("40%", "30%", "28%"),
+        plotlyOutput("conversion.device.plot"),
+        plotlyOutput("conversion.os.plot"),
+        plotlyOutput("conversion.browser.plot")
+      ),
+      splitLayout(
+        cellWidths = c("40%", "30%", "28%"),
+        plotlyOutput("volume.device.plot"),
+        plotlyOutput("volume.os.plot"),
+        plotlyOutput("volume.browser.plot")
+      )
+    )
+  ),
+  #### FUNNEL PERFORMANCE ####
+  tabPanel("Funnel Performance",
+    selectInput(
+      "funnel.slot.n",
+      "Top 20 Funnels:",
+       c("1" = 1,
+         "2" = 2,
+         "3" = 3,
+         "4" = 4,
+         "5" = 5,
+         "6" = 6,
+         "7" = 7,
+         "8" = 8,
+         "9" = 9,
+         "10" = 10,
+         "11" = 11,
+         "12" = 12,
+         "13" = 13,
+         "14" = 14,
+         "15" = 15,
+         "16" = 16,
+         "17" = 17,
+         "18" = 18,
+         "19" = 19,
+         "20" = 20),
+      selected = 1
+    ),
+    splitLayout(
+      cellWidths = c("25%", "25%", "25%", "25%"),
+      valueBoxOutput("funnel.conversion.rate.valuebox"),
+      valueBoxOutput("funnel.path.count.valuebox"),
+      valueBoxOutput("funnel.client.count.valuebox"),
+      valueBoxOutput("funnel.median.client.session.valuebox")
+    ),
+    plotOutput("funnel.path.plot"),
+    splitLayout(
+      cellWidths = c("33%", "33%", "33%"),
+      plotlyOutput("funnel.medium.plot"),
+      plotlyOutput("funnel.device.plot"),
+      plotlyOutput("funnel.browser.plot")
+    )
+  ),
+  #### ANALYST ####
+  navbarMenu(
+    "Analyst",
+    tabPanel("Info",
+             htmlOutput("help.html")),
+    "----",
+    "",
+    tabPanel(
+      "User Satisfaction",
       fluidRow(
         sidebarLayout(
           sidebarPanel(

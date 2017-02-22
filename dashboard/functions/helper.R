@@ -82,8 +82,9 @@ flagIncompleteTimeperiod <- function(reference.vector, time.unit) {
     stop("unit can only be day, week, or month. If a more granular view is needed please file an issue.")
   }
   if (time.unit == "day") {
-    reference.vector > lubridate::floor_date(lubridate::now(), unit = time.unit)
+    reference.vector > lubridate::floor_date(now, unit = time.unit)
   } else {
+
     reference.vector >= lubridate::floor_date(lubridate::now(), unit = time.unit)
   }
 }
@@ -133,4 +134,5 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
 
   return(grouped.df)
+
 }

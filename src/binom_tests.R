@@ -4,22 +4,23 @@ library(doParallel)
 
 #source functions
 source("src/funcs.R")
+source("src/creds.R")
 
 new.cols <- c("submit_time", "info_found", "problem_desc", "site", "content_author",
               "child_content_author", "referrer", "ip_addr", "id", "long", "lat",
               "browser", "os")
 
 MIN.RESPONSES <- 50
-CONF.LEVEL <- .975  # two-tailed
+CONF.LEVEL <- .975  # two tailed
 P.CUTOFF <- .05
 POWER.CUTOFF <- .8
 
 #### IMPORT DATA ####
-formstack.master <- readr::read_csv('data/formstack/formstack_master.csv') %>%
+formstack.master <- readr::read_csv("data/formstack/formstack_master.csv") %>%
   dplyr::rename_(.dots = setNames(object = paste0("`", names(.), "`"), nm = new.cols)) %>%
   purrr::map_if(is.character, stringr::str_trim) %>%
   data.frame() %>%
-  dplyr::filter(ip_addr != "^(146\\.243\\.\\d{1,3}|170\\.63\\.\\d{1,3}|170\\.154\\.\\d{1,3}|65\\.217\\.255\\.\\d{1,3}|4.36.198.102|65.118.148.102|204.166.193.130|204.130.104.10)",
+  dplyr::filter(ip_addr != ip.range,
                 info_found %in% c("Yes", "No"),
                 referrer != "http://<!--") %>%
   dplyr::mutate(info_found = droplevels(info_found),
@@ -65,7 +66,7 @@ registerDoParallel(cl)
 # orgs
 response.binom.site <- foreach(interest.site = iter(response.summary.site$site),
                            .packages = c("magrittr", "dplyr"),
-                           .combine = 'rbind'
+                           .combine = "rbind"
                            ) %dopar% {
   interest.pop = response.summary.site[response.summary.site$site == interest.site, ] # get metrics for pop of interest
   control.pop = formstack.master[formstack.master$site != interest.site, ] %>%  # create control population
@@ -97,7 +98,7 @@ response.binom.site <- foreach(interest.site = iter(response.summary.site$site),
 # pages
 response.binom.page <- foreach(interest.page = iter(response.summary.page$referrer),
                                .packages = c("magrittr", "dplyr"),
-                               .combine = 'rbind',
+                               .combine = "rbind",
                                .errorhandling = "remove"
                                ) %dopar% {
   interest.pop = response.summary.page[response.summary.page$referrer == interest.page, ]  # get metrics for pop of interest

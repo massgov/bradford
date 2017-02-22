@@ -71,6 +71,7 @@ test_that("flagIncompleteTimeperiod outputs the correct answer", {
   expect_true(any(flagIncompleteTimeperiod(reference.vector = flag.vector, time.unit = "day")))
 })
 
+
 test_that("groupAndOrder errors on incorrect input", {
   test.df <- data.frame(a = factor(c("A", "A", "B", "C")), 
                         b = c(1, 1, 1, 1), 

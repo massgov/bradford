@@ -1,7 +1,7 @@
 # Functions for the analysis of formstack data
 createTimeBucket <- function(x) {
   # takes a vector of hours in the range of 0-23 and creates categorical time of day factor vector
-  # Args: x = a numeric vector taking on values 0-23 
+  # Args: x = a numeric vector taking on values 0-23
   # Returns: a factor vector taking the values "Early AM", "AM", "Afternoon", "Evening", "Late Night"
   if (!is.numeric(x)) {
     stop("x must be numeric")
@@ -13,10 +13,10 @@ createTimeBucket <- function(x) {
     warning("the supplied vector contains values falling outside of 0-23, NAs will be returned")
   }
   factor(
-    ifelse(x <= 5 & x >= 0, "Early AM", 
+    ifelse(x <= 5 & x >= 0, "Early AM",
            ifelse(x >= 6 & x <= 11, "AM",
-                  ifelse(x > 11 & x <= 16, "Afternoon", 
-                         ifelse(x >= 17  & x <= 20, "Evening", 
+                  ifelse(x > 11 & x <= 16, "Afternoon",
+                         ifelse(x >= 17  & x <= 20, "Evening",
                                 ifelse(x < 24 & x > 0, "Late Night", NA
                                        )
                                 )
@@ -27,7 +27,7 @@ createTimeBucket <- function(x) {
 }
 
 # Bayesian funcs
-# perhaps create a calculateAlpha/calculateBeta function 
+# perhaps create a calculateAlpha/calculateBeta function
 betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n = "", prior = T) {
   # calculates the variance of a beta given a mean and "n". Can handle priors as well as posteriors given additional input
   # Args:
@@ -42,39 +42,39 @@ betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n
   } else {
     a = df[[affirm.n]] + (prior.n * prior.mean) - 1
     b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
-    a * b / ((a + b)^2 * (a + b + 1))
+    a * b / ( (a + b) ^ 2 * (a + b + 1))
   }
 }
 
 betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
-  # calculates an approximate beta posterior given the mean and n of a beta prior as well as 
-  # the n and n sucesses from a binomial 
-  # Args: 
+  # calculates an approximate beta posterior given the mean and n of a beta prior as well as
+  # the n and n sucesses from a binomial
+  # Args:
   #   df = a data frame which contains vectors of sample  sizes and number of successful trials
-  #   prior.mean = mean of the prior distribution 
+  #   prior.mean = mean of the prior distribution
   #   prior.n = support for the prior
   #   sample.n = n observations in the treatment population
   #   affirm.n = n successes in treatment population
-  # Returns: a data frame which approximates the posterior distribution 
+  # Returns: a data frame which approximates the posterior distribution
   a = df[[affirm.n]] + (prior.n * prior.mean) - 1
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   domain = seq(0, 1, 0.005)
   val = dbeta(domain, a, b)
-  data.frame("domain" = domain, 
+  data.frame("domain" = domain,
              "prob_dens" = val
              )
 }
 
 betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "") {
-  # calculates the mean of the beta posterior given the mean and n of a beta prior as well as 
-  # the n and n sucesses from a binomial 
+  # calculates the mean of the beta posterior given the mean and n of a beta prior as well as
+  # the n and n sucesses from a binomial
   # Args:
   #   df = a data frame which contains vectors of sample  sizes and number of successful trials
-  #   prior.mean = mean of the prior distribution 
+  #   prior.mean = mean of the prior distribution
   #   prior.n = support for the prior
   #   sample.n = n observations in the treatment population
   #   affirm.n = n successes in treatment population
-  # Returns: a float, the mean of the posterior 
+  # Returns: a float, the mean of the posterior
   a = df[[affirm.n]] + (prior.n * prior.mean) - 1
   b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
   a / (a + b)

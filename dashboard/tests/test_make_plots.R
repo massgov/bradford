@@ -1,10 +1,12 @@
 library(testthat)
 library(ggplot2)
+
 source("../functions/make_plots.R")
 
 context("Plotting helpers")
 
-test_that("printGGplotly errors on incorrect input" ,{
+
+test_that("printGGplotly errors on incorrect input", {
   x <- runif(100)
   y <- runif(100)
   plt <- plot(x = x, y = y)
@@ -38,4 +40,3 @@ test_that("plotting functions pass empty plots if given df with no rows", {
   expect_equal(makeGroupedTimeseries(df = data.frame()), blank.plt)
   expect_equal(buildParetoChart(grouped.df = data.frame()), blank.plt)
 })
-

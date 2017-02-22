@@ -10,6 +10,7 @@ source("functions/make_plots.R")
 source("functions/helper.R")
 
 # set the scientific notation
+
 options(scipen = 10000000)
 
 yesterday <- as.character(lubridate::today(tzone = "America/New_York") - lubridate::days(1))
@@ -33,4 +34,3 @@ subtopic.ids <- readRDS(paste0(data.dir, "subtopic_node_ids.RDS"))
 grouped.sessions.conversions <- readRDS(paste0(data.dir,"grouped.sessions.conversions.RDS"))
 
 pct.cutoffs <- c(seq(60, 90, 10), seq(91, 100, 1))
-

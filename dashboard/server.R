@@ -5,6 +5,7 @@ library(shinyjs)
 #options(shiny.trace = TRUE)
 
 shinyServer(function(input, output) {
+
   shinyURL.server()
   useShinyjs()  # Include shinyjs
 
@@ -310,6 +311,7 @@ shinyServer(function(input, output) {
     }
   })
 
+
   #### SUCCESS RATE ####
   output$topic.conversions <- renderPlotly({
     
@@ -365,3 +367,4 @@ shinyServer(function(input, output) {
       printGGplotly()
   })
 })
+     

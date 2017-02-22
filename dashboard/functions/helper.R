@@ -101,7 +101,8 @@ getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
   if(class(k) != 'numeric'){
     stop("k must be numeric")
   }
-  if(class(get.top) != 'logical'){
+  if(class(as.logical(get.top)) != 'logical'){
+    print(class(get.top))
     stop("get top must be a boolean")
   }
 
@@ -133,7 +134,8 @@ getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
 
 }
 
-groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, filter.na = TRUE, top.k = NULL, get.top.k = TRUE){
+groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, 
+                            filter.na = TRUE, top.k = NULL, get.top.k = TRUE){
   
   # Returns dataframe grouped by group.col with data.col as a sum and ordered
   #   returned dataframe includes columns named total, cumul and group
@@ -182,23 +184,16 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1, f
     grouped.df$total = grouped.df$total / data.total
     grouped.df$cumul = cumsum(grouped.df$total)
   }
-
+  
+  
   grouped.df = grouped.df[top.pct >= (grouped.df$cumul / sum(grouped.df$total)), ]
-
-
-  if(is.null(top.k) == FALSE){
-
-    if (get.top.k){
-    
-    # Get top k
-    grouped.df = grouped.df %>% dplyr::slice(1:top.k)
-
-    }
-    else{
-
-      grouped.df = dplyr::arrange(., desc(-total)) %>% dplyr::slice(1:top.k)
-    }
+  
+  if(is.null(top.k)){
+    return(grouped.df)
+  } else{
+   return(getTopOrBottomK(grouped.df, 'group', 'total', k = top.k, get.top = get.top.k))
   }
+                
 
-  return(grouped.df)
+  
 }

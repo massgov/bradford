@@ -12,7 +12,28 @@ db.driver <- dbDriver("PostgreSQL")
 db.connection <- dbConnect(db.driver, dbname = db.name,
                            host = host, port = port,
                            user = user, password = password)
-
+paste("SELECT page_id,
+          date,
+          action,
+          category,
+          child_type,
+          child_title,",
+          REFERRER,",",
+          "sum(conversions) as conversions
+          FROM ", CONVERSION.TABLE,
+          "GROUP BY 
+          page_id,
+          date,
+          child_title,
+          child_type,
+          action,
+          category,",
+          REFERRER) %>%
+  RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
+  {
+      saveRDS(., "../data/ga_master_conversions.RDS")
+      ga.conversions <<- .
+  }
 
 paste("SELECT parent.content_type, 
       parent.title, 

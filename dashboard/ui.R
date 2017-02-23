@@ -112,5 +112,12 @@ shinyUI(navbarPage(
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),
-           plotlyOutput("topic.conversion.rate"))
-))))
+           plotlyOutput("topic.conversion.rate")),
+  
+  #### FAQ ####
+  tabPanel(title = "FAQ and Help",
+           includeHTML("faq/test.html"))
+))
+
+
+

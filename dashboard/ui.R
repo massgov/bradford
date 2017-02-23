@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinyURL)
 library(shinyjs)
 
+
 shinyUI(navbarPage(
   theme = "custom.css",
   # Application title
@@ -117,5 +118,6 @@ shinyUI(navbarPage(
   tabPanel(title = "FAQ and Help",
            includeHTML("faq/test.html"))
 ))
+
 
 

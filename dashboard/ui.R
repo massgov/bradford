@@ -1,6 +1,8 @@
 library(shiny)
 library(shinydashboard)
 library(shinyURL)
+library(shinyjs)
+
 
 shinyUI(navbarPage(
   theme = "custom.css",
@@ -10,6 +12,7 @@ shinyUI(navbarPage(
   tabPanel(
     "Visitor Success",
     fluidPage(
+      useShinyjs(),  # Include shinyjs
       fluidRow(
         sidebarLayout(
           sidebarPanel(
@@ -20,26 +23,26 @@ shinyUI(navbarPage(
               end = yesterday,  # sourced from global.R
               startview = "month"
             ),
-            radioButtons(
-              inputId = "visitor.success.units",
-              label = "Select Unit",
-              choices = c("Percent" = TRUE,
-                          "Number" = FALSE),
-              selected = TRUE,
-              inline = T
+            splitLayout(
+            cellWidths = c("50%", "50%"),
+              div(selectInput(
+                inputId = "visitor.success.type",
+                label =  "Filter C1s",
+                choices = c("All" = "all",
+                            "Page Type" = "page.type",
+                            "Service Type" = "service.type",
+                            "Event Type" = "event.type"),
+                selected = "all"
+              ),
+              br(),
+              br()),
+              shinyjs::hidden(div(
+                id = "advanced",
+                uiOutput("type.selection.options")))
             ),
-            radioButtons(
-              inputId = "visitor.success.type",
-              label =  "Filter C1s to Visualize",
-              choices = c("All" = "all",
-                          "Page Type" = PAGE.TYPE,
-                          "Service Type" = SERVICE.TYPE,
-                          "Event Type" = EVENT.TYPE),
-              selected = "all"
-            ),
-            uiOutput("type.selection.options"),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
+
               label = "Group by:",
               choices = c("Site Section Landing" = SITE.SECTION,
                           "Topic" = TOPIC,
@@ -50,25 +53,31 @@ shinyUI(navbarPage(
               selected = "site_section",
               inline = F
             ),
-            br(),
-            h5("Only Display"),
             splitLayout(
               cellWidths = c("50%", "50%"),
               selectInput(
                 inputId = "visitor.success.top.bottom",
-                label = NULL,
+                label = "Limit groups displayed to",
                 choices = c("Top" = TRUE,
                             "Bottom" = FALSE),
                 selected = "top"
               ),
               numericInput(
                 inputId = "visitor.success.select.k",
-                label = NULL,
+              label = br(),
                 value = 5,
                 min = 1,
                 max = 5
               )
             ),
+          radioButtons(
+            inputId = "visitor.success.units",
+            label = "Display Unit",
+            choices = c("Percent" = "percent",
+                        "Number" = "number"),
+            selected = "percent",
+            inline = T
+          ),
             # URL generator
             shinyURL.ui(display = T, copyURL = T, tinyURL = T)
           ),
@@ -83,11 +92,12 @@ shinyUI(navbarPage(
       )
     )
   ),
-  
+
   #### SUCCESS RATE ####
   tabPanel(title = "Success Rate",
+    fluidPage(
            fluidRow(column(6,
-                           selectInput("pct.cutoffs","View Top X% of Topics by Visits",pct.cutoffs, selected = 80)),
+                           selectInput("pct.cutoffs", "View Top X% of Topics by Visits", pct.cutoffs, selected = 80)),
               radioButtons(
              inputId = "success.rate.percent",
              label = "Select Unit",
@@ -95,14 +105,20 @@ shinyUI(navbarPage(
                          "Number" = FALSE),
              selected = FALSE,
              inline = T
-           )
-          ),
+           ),
+           hr(),
            fluidRow(
              splitLayout(
-               cellWidths = c("50%", "50%"),
+               cellWidths = c("49%", "49%"),
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),
-           plotlyOutput("topic.conversion.rate"))
+           plotlyOutput("topic.conversion.rate")),
+  
+  #### FAQ ####
+  tabPanel(title = "FAQ and Help",
+           includeHTML("faq/test.html"))
 ))
+
+
 

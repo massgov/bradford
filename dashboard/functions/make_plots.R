@@ -155,6 +155,8 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
       geom_line(group = 1) +
       geom_point() +
       theme_bw() +
+      scale_fill_manual(values = c("#14558f", "#43956f", "#f6c51b", "#535353", "#9C27B0")) +
+      scale_color_manual(values = c("#14558f", "#43956f", "#f6c51b", "#535353", "#9C27B0")) +
       xlab(xlab) +
       ylab(ylab) +
       labs(fill = "",
@@ -238,4 +240,43 @@ printGGplotly <- function(plt) {
   # Returns:
   #   printed contents of the plotly object
   print(plotly::ggplotly(plt))
+}
+
+makeGroupedPareto <- function(df, x, y, cumul.line = NULL, plot.title = "", xlab = "", ylab = "") {
+  # makes a bar chart and optionally adds a pareto line
+  # Args:
+  #   df = a data frame of counts and categorical values
+  #   x = the vector of categoricals to plot along the x axis
+  #   y = the vector of values to plot along the y axis
+  #   cumul.line = the vector of values which are a cumumlative sum of percentages to plot, NULL returns no line
+  #   plot.title = the title of the plot to be applied
+  #   xlab = the label for the x axis
+  #   ylab = the label for the y axis
+  # Returns:
+  #   a ggplot object
+  if (nrow(df) == 0) {
+    makeBlankPlot()
+  } else if (is.null(cumul.line)) {
+    df %>%
+      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      xlab(xlab) +
+      ylab(ylab) +
+      labs(fill = "",
+           color = "") +
+      ggtitle(plot.title)
+  } else {
+    df %>%
+      ggplot(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = y)) +
+      geom_line(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line, group = 1)) +
+      geom_point(aes_string(x = paste0("reorder(", x, ", -", y, ")"), y = cumul.line)) +
+      geom_bar(stat = "identity") +
+      theme_bw() +
+      xlab(xlab) +
+      ylab(ylab) +
+      labs(fill = "",
+           color = "") +
+      ggtitle(plot.title)
+  }
 }

@@ -1,8 +1,21 @@
 library(shiny)
 library(shinyURL)
+library(shinyjs)
 
 shinyServer(function(input, output) {
   shinyURL.server()
+  useShinyjs()  # Include shinyjs
+
+   observe({
+     if (input$visitor.success.type == "service.type") {
+       shinyjs::hide(id = "advanced")
+     }else if(input$visitor.success.type == "all"){
+       shinyjs::hide(id = "advanced")
+     }else(
+       shinyjs::show(id = "advanced")
+       )
+   })
+
   #### VISITOR SUCCESS ####
   # DATA MUNGING
   # subset by timeseries start and end
@@ -53,7 +66,7 @@ shinyServer(function(input, output) {
         
         group.vars = c('hit_date')
       
-      } else{ 
+      } else { 
         
         renamed.cols = unlist(lapply(input$visitor.success.group.by, FUN = function(x) {gsub(' ','_',x)}))
         group.vars = unlist(c('hit_date', renamed.cols))
@@ -62,8 +75,7 @@ shinyServer(function(input, output) {
           if( length(renamed.cols) > 1){
             filtered.df$group_factor = apply(filtered.df[, renamed.cols],
                                  MARGIN = 1, FUN = paste, collapse = " - ")
-          }
-          else{
+          } else {
 
           filtered.df$group_factor <- filtered.df[[renamed.cols]]
 
@@ -78,6 +90,7 @@ shinyServer(function(input, output) {
       
   })
 
+
   # REACTIVE UI
   #   filter by type
 
@@ -91,8 +104,9 @@ shinyServer(function(input, output) {
         return(NULL)
       }
     }
+
     selectInput(inputId = "visitor.success.type.selector",
-                label = "Filter by Type (if applicable)",
+                label = "Filter by Type",
                 choices = c("All", unique.subtypes))
 })
 
@@ -133,10 +147,9 @@ shinyServer(function(input, output) {
     if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
-    }  
-    else{
-      visitor.success.aggregate.data() %>%
 
+    } else {
+      visitor.success.aggregate.data() %>%
           groupAndOrder(.,
                     group.col = 'group_factor',
                     data.col = 'conversions',
@@ -144,7 +157,6 @@ shinyServer(function(input, output) {
                     top.k = as.numeric(input$visitor.success.select.k),
                     get.top.k = input$visitor.success.top.bottom,
                     filter.na = FALSE) %>%
-
           buildParetoChart(grouped.df = .,
                        x.lab = 'Grouped',
                        y.lab = 'Conversion Count',
@@ -152,20 +164,17 @@ shinyServer(function(input, output) {
                        cumul.line = TRUE,
                        percent = input$visitor.success.units)
 
+
         } %>%
         printGGplotly(.)
       })
 
   # grouped timeseries
   output$visitor.success.grouped.timeseries <- renderPlotly({
-
-
     if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
-    }  
-    else{
-
+    } else {
       # Set Y col for percent
       if(input$visitor.success.units){
         y.col = 'day_pct'
@@ -174,7 +183,6 @@ shinyServer(function(input, output) {
         }
       
       visitor.success.aggregate.data() %>%
-
               getTopOrBottomK(., 
                                 group.col = 'group_factor',
                                 data.col = 'conversions',
@@ -190,7 +198,6 @@ shinyServer(function(input, output) {
 
           } %>%
         printGGplotly(.)
-
         })
 
   #### SUCCESS RATE ####

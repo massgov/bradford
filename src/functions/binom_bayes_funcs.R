@@ -40,8 +40,8 @@ betaVariance <- function(prior.mean, prior.n, df = NULL, sample.n = "", affirm.n
   if (prior) {
     prior.mean * (1 - prior.mean) / (1 + prior.n)
   } else {
-    a = df[[affirm.n]] + (prior.n * prior.mean) - 1
-    b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+    a = df[[affirm.n]] + (prior.n * prior.mean)
+    b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean))
     a * b / ( (a + b) ^ 2 * (a + b + 1))
   }
 }
@@ -56,8 +56,8 @@ betaPosterior <- function(df, prior.mean, prior.n, sample.n = "", affirm.n = "")
   #   sample.n = n observations in the treatment population
   #   affirm.n = n successes in treatment population
   # Returns: a data frame which approximates the posterior distribution
-  a = df[[affirm.n]] + (prior.n * prior.mean) - 1
-  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+  a = df[[affirm.n]] + (prior.n * prior.mean)
+  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean))
   domain = seq(0, 1, 0.005)
   val = dbeta(domain, a, b)
   data.frame("domain" = domain,
@@ -75,7 +75,7 @@ betaPosteriorMean <- function(df, prior.mean, prior.n, sample.n = "", affirm.n =
   #   sample.n = n observations in the treatment population
   #   affirm.n = n successes in treatment population
   # Returns: a float, the mean of the posterior
-  a = df[[affirm.n]] + (prior.n * prior.mean) - 1
-  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean)) - 1
+  a = df[[affirm.n]] + (prior.n * prior.mean)
+  b = df[[sample.n]] - df[[affirm.n]] + (prior.n * (1 - prior.mean))
   a / (a + b)
 }

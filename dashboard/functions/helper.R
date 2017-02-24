@@ -130,9 +130,7 @@ getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
                     unlist(.)
   
   # Return data frame with only certain columns
-  df = df[df[[group.col]] %in% top.groups,]
-  df = droplevels(df)
-  return(df)
+  df[df[[group.col]] %in% top.groups,]
   
 
 }

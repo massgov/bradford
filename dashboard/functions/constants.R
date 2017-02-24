@@ -14,7 +14,7 @@ SUB.TOPIC <- "Subtopic"
 NON.COL.GROUP <- c(SITE.SECTION, TOPIC, SUB.TOPIC)
 
 CONVERSION.TABLE <- 'conversions'
-CONVERSION.DATE <- 'date'
+CONVERSION.DATE <- 'hit_date'
 
 PARENT.TYPE <- 'content_type'
 RATE.GROUP.COL <- 'topic_title'

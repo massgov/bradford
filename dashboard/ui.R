@@ -38,8 +38,6 @@ shinyUI(navbarPage(
               selected = "all"
             ),
             uiOutput("type.selection.options"),
-            br(),
-            br(),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
               label = "Group by:",

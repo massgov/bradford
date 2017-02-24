@@ -111,11 +111,11 @@ getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
             dplyr::summarise(n = sum(n)) %>%
             dplyr::arrange(dplyr::desc(n))
  
- if(k > nrow(groups)){
+ 
   
-   k = nrow(groups)
+   k = min(nrow(groups),k)
    
- }
+ 
        if(get.top){
          slice.from = 1
          slice.to = k
@@ -126,11 +126,14 @@ getTopOrBottomK <- function(df, group.col, data.col, k, get.top = TRUE){
  
   top.groups = groups %>% 
                     dplyr::slice(slice.from:slice.to) %>%
-                    select(group) %>%
+                    dplyr::select(group) %>%
                     unlist(.)
   
   # Return data frame with only certain columns
-  df[df[[group.col]] %in% top.groups,]
+  df = df[df[[group.col]] %in% top.groups,]
+  df = droplevels(df)
+  return(df)
+  
 
 }
 
@@ -159,8 +162,8 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1,
   }
  
   if (class(df[[group.col]]) %in% c("factor", "character") == F) {
-    print(group.col)
-    stop("group.col must be character or factor")
+    
+    stop(paste(group.col,"group.col must be character or factor"))
   }
   
   

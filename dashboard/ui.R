@@ -42,13 +42,14 @@ shinyUI(navbarPage(
             ),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
-            label = "Group By",
-              choices = c("Site Section Landing" = "site_section",
-                          "Topic" = "topic",
-                          "Sub-Topic" = "subtopic",
-                          "Event Type" = "event_action",
-                          "Referrer" = "source",
-                          "Page Type" = "content_type"),
+
+              label = "Group by:",
+              choices = c("Site Section Landing" = SITE.SECTION,
+                          "Topic" = TOPIC,
+                          "Sub-Topic" = SUB.TOPIC,
+                          "Event Type" = EVENT.TYPE,
+                          "Referrer" = REFERRER,
+                          "Page Type" = PAGE.TYPE),
               selected = "site_section",
               inline = F
             ),
@@ -56,9 +57,9 @@ shinyUI(navbarPage(
               cellWidths = c("50%", "50%"),
               selectInput(
                 inputId = "visitor.success.top.bottom",
-              label = "Limit groups displayed to",
-                choices = c("Top" = "top",
-                            "Bottom" = "bottom"),
+                label = "Limit groups displayed to",
+                choices = c("Top" = TRUE,
+                            "Bottom" = FALSE),
                 selected = "top"
               ),
               numericInput(

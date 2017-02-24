@@ -28,11 +28,11 @@ shinyUI(navbarPage(
               div(selectInput(
                 inputId = "visitor.success.type",
                 label =  "Filter C1s",
-                choices = c("All" = "all",
-                            "Page Type" = "page.type",
+                choices = c("All" = "All",
+                            "Page Type" = PAGE.TYPE,
                             "Service Type" = "service.type",
-                            "Event Type" = "event.type"),
-                selected = "all"
+                            "Event Type" = EVENT.TYPE),
+                selected = "All"
               ),
               br(),
               br()),
@@ -50,7 +50,7 @@ shinyUI(navbarPage(
                           "Event Type" = EVENT.TYPE,
                           "Referrer" = REFERRER,
                           "Page Type" = PAGE.TYPE),
-              selected = "site_section",
+              selected = SITE.SECTION,
               inline = F
             ),
             splitLayout(
@@ -60,7 +60,7 @@ shinyUI(navbarPage(
                 label = "Limit groups displayed to",
                 choices = c("Top" = TRUE,
                             "Bottom" = FALSE),
-                selected = "top"
+                selected = TRUE
               ),
               numericInput(
                 inputId = "visitor.success.select.k",
@@ -73,9 +73,9 @@ shinyUI(navbarPage(
           radioButtons(
             inputId = "visitor.success.units",
             label = "Display Unit",
-            choices = c("Percent" = "percent",
-                        "Number" = "number"),
-            selected = "percent",
+            choices = c("Percent" = TRUE,
+                        "Number" = FALSE),
+            selected = TRUE,
             inline = T
           ),
             # URL generator
@@ -118,7 +118,7 @@ shinyUI(navbarPage(
   #### FAQ ####
   tabPanel(title = "FAQ and Help",
            includeHTML("faq/test.html"))
-))
+))))
 
 
 

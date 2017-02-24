@@ -180,7 +180,7 @@ groupAndOrder <- function(df, group.col, data.col, percent = TRUE,top.pct = 1,
   
   # Make cumulative column
   grouped.df$cumul <- cumsum(grouped.df$total)
-  
+
   if(percent){
     data.total = sum(grouped.df$total)
     grouped.df$total = grouped.df$total / data.total

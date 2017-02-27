@@ -18,4 +18,5 @@ CONVERSION.DATE <- 'hit_date'
 
 PARENT.TYPE <- 'content_type'
 RATE.GROUP.COL <- 'topic_title'
+DESCENDANT_TABLE <- 'drupal_node_descendants'
 

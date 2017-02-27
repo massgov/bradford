@@ -1,3 +1,4 @@
+CREATE OR REPLACE VIEW conversions AS
 SELECT
       cast(maxes.hit_timestamp::TIMESTAMP WITHOUT TIME ZONE AT TIME ZONE 'America/New_York' AS DATE) as hit_date,
       concat(features.medium, '-', features.source) AS referer,
@@ -7,7 +8,6 @@ SELECT
       e.event_action                                AS action,
       e.event_category                              AS category,
       count(*)                                      AS conversions
-    INTO conversions
     FROM (SELECT session_id,
            s.node_id,
           hit_timestamp,
@@ -31,6 +31,7 @@ SELECT
 
 -- SELECT sum(conversions) FROM conversions == SELECT count(*) FROM ga_events, there might be some differences for dates
 
+CREATE OR REPLACE VIEW sessions AS
 SELECT s.node_id as node_id, 
        count(s.node_id) / cast(totals.total_views as FLOAT) as sessions,
        cast(s.hit_timestamp::TIMESTAMP WITHOUT TIME ZONE AT TIME ZONE 'America/New_York' AS DATE) as hit_date,

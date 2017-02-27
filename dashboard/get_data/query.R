@@ -36,7 +36,7 @@ paste("SELECT node_id,
 paste("SELECT parent.content_type, 
       parent.title, 
       d.descendant_id
-      FROM drupal_node_descendants_new as d
+      FROM ",DESCENDANT_TABLE," as d
       INNER JOIN drupal_nodes AS parent ON d.node_id = parent.node_id") %>%
       RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
       saveRDS(., "../data/drupal_node_descendants.RDS")
@@ -45,7 +45,7 @@ paste("SELECT parent.content_type,
 paste("SELECT title as topic_title,
        sum(conversions) as conversions
   FROM conversions as c
-  INNER JOIN drupal_node_descendants_new as des ON c.node_id = des.descendant_id
+  INNER JOIN ", DESCENDANT_TABLE, " as des ON c.node_id = des.descendant_id
   INNER JOIN drupal_nodes as parents ON des.node_id = parents.node_id
   WHERE parents.content_type = 'Topic' and c.category = 'Conversion'
   GROUP BY title") %>%
@@ -56,7 +56,7 @@ paste("SELECT title as topic_title,
   paste("SELECT parents.title as topic_title,
           sum(sessions) as sessions
           FROM sessions as s
-          INNER JOIN drupal_node_descendants_new as des ON s.node_id = des.descendant_id
+          INNER JOIN ",DESCENDANT_TABLE," as des ON s.node_id = des.descendant_id
           INNER JOIN drupal_nodes as parents ON des.node_id = parents.node_id
           WHERE parents.content_type = 'Topic'
           GROUP BY parents.title") %>%

@@ -158,7 +158,7 @@ shinyServer(function(input, output) {
                     get.top.k = input$visitor.success.top.bottom,
                     filter.na = FALSE) %>%
           buildParetoChart(grouped.df = .,
-                       x.lab = 'Grouped',
+                       x.lab = '',
                        y.lab = 'Conversion Count',
                        title = "Successes",
                        cumul.line = TRUE,

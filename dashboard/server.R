@@ -9,7 +9,7 @@ shinyServer(function(input, output) {
    observe({
      if (input$visitor.success.type == "service.type") {
        shinyjs::hide(id = "advanced")
-     }else if(input$visitor.success.type == "all"){
+     }else if(input$visitor.success.type == "All"){
        shinyjs::hide(id = "advanced")
      }else(
        shinyjs::show(id = "advanced")
@@ -30,9 +30,9 @@ shinyServer(function(input, output) {
 
     # @connor I know this isn't properly functional, but it feels cleaner this way, can refactor if needed
     df = visitor.success.subset.timeseries()
-      
+    
     # Filter by dropdown
-    if (input$visitor.success.type %in% COL.SELECT.TYPES & input$visitor.success.type.selector != 'All') {
+    if (input$visitor.success.type %in% COL.SELECT.TYPES && input$visitor.success.type.selector != 'All') {
 
           filtered.df = dplyr::filter_(df , paste0(input$visitor.success.type," == '",input$visitor.success.type.selector,"'"))       
       
@@ -158,7 +158,7 @@ shinyServer(function(input, output) {
                     get.top.k = input$visitor.success.top.bottom,
                     filter.na = FALSE) %>%
           buildParetoChart(grouped.df = .,
-                       x.lab = 'Grouped',
+                       x.lab = '',
                        y.lab = 'Conversion Count',
                        title = "Successes",
                        cumul.line = TRUE,

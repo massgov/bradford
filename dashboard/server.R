@@ -194,7 +194,8 @@ shinyServer(function(input, output) {
                 makeGroupedTimeseries(df = .,
                                             x = CONVERSION.DATE,
                                             y = y.col,
-                                            fill = 'group_factor')
+                                            fill = 'group_factor',
+                                      percentage = input$visitor.success.units)
 
           } %>%
         printGGplotly(.)

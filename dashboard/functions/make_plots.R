@@ -135,7 +135,7 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
   }
 }
 
-makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", ylab = "") {
+makeGroupedTimeseries <- function(df, x, y, fill, percentage, plot.title = "", xlab = "", ylab = "") {
   # makes a grouped time series chart
   # Args:
   #   df = a data frame of counts, categorical values, and dates
@@ -150,7 +150,7 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
   if (nrow(df) == 0) {
     makeBlankPlot()
   } else {
-    df %>%
+    plt = df %>%
       ggplot(aes_string(x = x, y = y, color = fill, fill = fill)) +
       geom_line(group = 1) +
       geom_point() +
@@ -162,6 +162,11 @@ makeGroupedTimeseries <- function(df, x, y, fill, plot.title = "", xlab = "", yl
       labs(fill = "",
            color = "") +
       ggtitle(plot.title)
+    if (percentage) {
+      plt = plt +
+        scale_y_continuous(labels = scales::percent)
+    }
+    return(plt)
   }
 }
 
@@ -207,7 +212,7 @@ buildParetoChart <- function(grouped.df, group.col = 'group', data.col = 'total'
   }
 
   if (percent){
-    plt = plt + scale_y_continuous(labels=scales::percent)
+    plt = plt + scale_y_continuous(labels = scales::percent)
   }
   return(plt)
 }

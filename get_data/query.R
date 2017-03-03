@@ -3,8 +3,8 @@ library(DBI)
 library(RPostgreSQL)
 
 # Source creds
-source("db_connect.R")
-source("../functions/constants.R")
+source("get_data/db_connect.R")
+source("functions/constants.R")
 
 db.driver <- dbDriver("PostgreSQL")
 
@@ -30,7 +30,7 @@ paste("SELECT node_id,
           category,",
           REFERRER) %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  saveRDS(., "../data/ga_master_conversions.RDS")
+  saveRDS(., "data/ga_master_conversions.RDS")
 
 
 paste("SELECT parent.content_type, 
@@ -39,7 +39,7 @@ paste("SELECT parent.content_type,
       FROM drupal_node_descendants_new as d
       INNER JOIN drupal_nodes AS parent ON d.node_id = parent.node_id") %>%
       RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-      saveRDS(., "../data/drupal_node_descendants.RDS")
+      saveRDS(., "data/drupal_node_descendants.RDS")
       
 
 paste("SELECT title as topic_title,
@@ -50,7 +50,7 @@ paste("SELECT title as topic_title,
   WHERE parents.content_type = 'Topic' and c.category = 'Conversion'
   GROUP BY title") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  saveRDS(., "../data/topic_conversions.RDS")
+  saveRDS(., "data/topic_conversions.RDS")
 
 
   paste("SELECT parents.title as topic_title,
@@ -61,6 +61,6 @@ paste("SELECT title as topic_title,
           WHERE parents.content_type = 'Topic'
           GROUP BY parents.title") %>%
   RPostgreSQL::dbGetQuery(statement = ., conn = db.connection) %>%
-  saveRDS(., "../data/topic_sessions.RDS")
+  saveRDS(., "data/topic_sessions.RDS")
 
 

@@ -144,11 +144,21 @@ shinyServer(function(input, output) {
   # PLOTS
   #   Pareto
   output$visitor.success.grouped.pareto <- renderPlotly({
-    if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
+    if (is.null(input$visitor.success.group.by) | is.na(input$visitor.success.select.k)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
 
     } else {
+
+      if (input$visitor.success.units){
+
+        y.label = '% of Total Conversions'
+
+      }
+      else{
+
+        y.label = 'Conversion Count'
+      }
       visitor.success.aggregate.data() %>%
           groupAndOrder(.,
                     group.col = 'group_factor',
@@ -159,7 +169,7 @@ shinyServer(function(input, output) {
                     filter.na = FALSE) %>%
           buildParetoChart(grouped.df = .,
                        x.lab = '',
-                       y.lab = 'Conversion Count',
+                       y.lab = y.label,
                        title = "Successes",
                        cumul.line = TRUE,
                        percent = input$visitor.success.units)
@@ -171,7 +181,7 @@ shinyServer(function(input, output) {
 
   # grouped timeseries
   output$visitor.success.grouped.timeseries <- renderPlotly({
-    if (is.null(input$visitor.success.group.by)) {  # if we have nothing to group on return a blank plot
+    if (is.null(input$visitor.success.group.by) | is.na(input$visitor.success.select.k)) {  # if we have nothing to group on return a blank plot
       makeBlankPlot() %>%
         printGGplotly(.)
     } else {
@@ -186,7 +196,7 @@ shinyServer(function(input, output) {
               getTopOrBottomK(., 
                                 group.col = 'group_factor',
                                 data.col = 'conversions',
-                                k = as.numeric(input$visitor.success.select.k),
+                                k = min(as.numeric(input$visitor.success.select.k),5),
                                 get.top = input$visitor.success.top.bottom) %>%
                 dplyr::group_by_(paste(CONVERSION.DATE)) %>% 
                 dplyr::mutate(day_pct = conversions / sum(conversions)) %>%

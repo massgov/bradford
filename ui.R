@@ -3,6 +3,7 @@ library(shinydashboard)
 library(shinyURL)
 library(shinyjs)
 
+
 shinyUI(navbarPage(
   theme = "custom.css",
   # Application title
@@ -27,11 +28,11 @@ shinyUI(navbarPage(
               div(selectInput(
                 inputId = "visitor.success.type",
                 label =  "Filter C1s",
-                choices = c("All" = "all",
-                            "Page Type" = "page.type",
+                choices = c("All" = "All",
+                            "Page Type" = PAGE.TYPE,
                             "Service Type" = "service.type",
-                            "Event Type" = "event.type"),
-                selected = "all"
+                            "Event Type" = EVENT.TYPE),
+                selected = "All"
               ),
               br(),
               br()),
@@ -41,24 +42,25 @@ shinyUI(navbarPage(
             ),
             checkboxGroupInput(
               inputId = "visitor.success.group.by",
-            label = "Group By",
-              choices = c("Site Section Landing" = "site_section",
-                          "Topic" = "topic",
-                          "Sub-Topic" = "subtopic",
-                          "Event Type" = "event_action",
-                          "Referrer" = "source",
-                          "Page Type" = "content_type"),
-              selected = "site_section",
+
+              label = "Group by:",
+              choices = c("Site Section Landing" = SITE.SECTION,
+                          "Topic" = TOPIC,
+                          "Sub-Topic" = SUB.TOPIC,
+                          "Event Type" = EVENT.TYPE,
+                          "Referrer" = REFERRER,
+                          "Page Type" = PAGE.TYPE),
+              selected = SITE.SECTION,
               inline = F
             ),
             splitLayout(
               cellWidths = c("50%", "50%"),
               selectInput(
                 inputId = "visitor.success.top.bottom",
-              label = "Limit groups displayed to",
-                choices = c("Top" = "top",
-                            "Bottom" = "bottom"),
-                selected = "top"
+                label = "Limit groups displayed to",
+                choices = c("Top" = TRUE,
+                            "Bottom" = FALSE),
+                selected = TRUE
               ),
               numericInput(
                 inputId = "visitor.success.select.k",
@@ -71,9 +73,9 @@ shinyUI(navbarPage(
           radioButtons(
             inputId = "visitor.success.units",
             label = "Display Unit",
-            choices = c("Percent" = "percent",
-                        "Number" = "number"),
-            selected = "percent",
+            choices = c("Percent" = TRUE,
+                        "Number" = FALSE),
+            selected = TRUE,
             inline = T
           ),
             # URL generator
@@ -111,5 +113,12 @@ shinyUI(navbarPage(
                plotlyOutput("topic.sessions"),
                plotlyOutput("topic.conversions"))),
            br(),
-           plotlyOutput("topic.conversion.rate"))
-))))
+           plotlyOutput("topic.conversion.rate")))),
+  
+  #### FAQ ####
+  tabPanel(title = "FAQ and Help",
+           includeHTML("faq/test.html"))
+))
+
+
+

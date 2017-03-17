@@ -34,7 +34,6 @@ test_that("plotting functions pass empty plots if given df with no rows", {
   expect_equal(makeVolumeAreaPlot(df = data.frame()), blank.plt)
   expect_equal(makeVolumeBarPlot(df = data.frame()), blank.plt)
   expect_equal(makeAffirmativeBarPlot(df = data.frame()), blank.plt)
-  expect_equal(makeGroupedPareto(df = data.frame()), blank.plt)
   expect_equal(makeGroupedTimeseries(df = data.frame()), blank.plt)
   expect_equal(buildParetoChart(grouped.df = data.frame()), blank.plt)
 })

@@ -136,7 +136,7 @@ makeAffirmativeBarPlot <- function(df, x, y, plot.title = "", xlab = "", ylab = 
 }
 
 makeGroupedTimeseries <- function(df, x, y, fill, percentage, plot.title = "", xlab = "", ylab = "") {
-  # makes a grouped time series chart
+  # makes a grouped time series chart, only shows up to 5 groups
   # Args:
   #   df = a data frame of counts, categorical values, and dates
   #   x = the vector of dates to plot along the x axis
